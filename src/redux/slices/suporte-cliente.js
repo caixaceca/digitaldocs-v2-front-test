@@ -66,6 +66,10 @@ const slice = createSlice({
       if (index !== -1) state.tickets[index][prop] = assign ? value?.label : value?.id;
     },
 
+    changeCustomer(state, action) {
+      if (state.selectedItem) state.selectedItem.customer = action.payload;
+    },
+
     toogleItem(state, action) {
       const { id, item, active } = action.payload;
       if (item === 'prompts') state.prompts = state.prompts?.map((row) => ({ ...row, active: false }));
@@ -121,7 +125,6 @@ export function getInSuporte(item, params) {
 
         const dados = response.data?.payload;
         dispatch(slice.actions.getSuccess({ item: params?.item || item, dados }));
-
         if (params?.msg) doneSucess(params, dispatch, slice.actions.getSuccess);
       }
     } catch (error) {
@@ -180,6 +183,11 @@ export function updateInSuporte(item, body, params) {
       const accessToken = await getAccessToken();
       const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
 
+      if (item === 'core-validation') {
+        // const response = await axios.patch(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
+        body = JSON.stringify({ coreBankingAccountValidation: null, coreBankingEmailValition: null, ...body });
+      }
+
       const apiUrl =
         (item === 'faq' && `/api/v1/faqs/update/${params?.id}`) ||
         (item === 'slas' && `/api/v1/slas/update/${params?.id}`) ||
@@ -196,6 +204,7 @@ export function updateInSuporte(item, body, params) {
         (item === 'toggle-prompts' && `/api/v1/mail-scan-presets/toggle-active/${params?.id}`) ||
         // ticket
         (item === 'assign' && `/api/v1/tickets/assign/${params?.id}/${params?.value?.id}`) ||
+        (item === 'core-validation' && `/api/v1/customers/validate-core-bank/${params?.id}`) ||
         (item === 'change-department' && `/api/v1/tickets/change-department/${params?.id}/${params?.value?.id}`) ||
         (item === 'change-status' &&
           `/api/v1/tickets/change-status/${params?.id}/${params?.value?.id}?resolved=${!!params?.resolved}`) ||
@@ -207,6 +216,7 @@ export function updateInSuporte(item, body, params) {
 
         const dados = response.data?.payload;
         if (item?.includes('toggle-')) dispatch(slice.actions.toogleItem(params));
+        if (item === 'core-validation') dispatch(slice.actions.changeCustomer(dados));
         else if (params?.getItem) {
           dispatch(slice.actions.getSuccess({ item: params?.getItem, dados }));
           if (item === 'assign' || item === 'change-status') {
@@ -250,7 +260,6 @@ export function deleteInSuporte(item, params) {
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
         await axios.delete(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, options);
-
         dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);

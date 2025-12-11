@@ -42,9 +42,9 @@ export function Detalhes({ closeModal }) {
             {selectedItem ? (
               <>
                 <List>
-                  <TextItem title="Tipo de cartão:" text={selectedItem.tipo} />
+                  <TextItem title="Tipo de cartão:" text={selectedItem?.tipo} />
                   <TextItem title="Nº do cartão:" text={baralharString(selectedItem?.numero?.substring(9, 15))} />
-                  <TextItem title="Data de emissão:" text={ptDate(selectedItem.data_emissao)} />
+                  <TextItem title="Data de emissão:" text={ptDate(selectedItem?.data_emissao)} />
                   {bDomicilio && (
                     <TextItem title="Balcão de domicílio:" text={`${bDomicilio?.label} (${bDomicilio?.balcao})`} />
                   )}
@@ -64,8 +64,8 @@ export function Detalhes({ closeModal }) {
                       }
                     />
                   )}
-                  <TextItem title="Nº cliente:" text={baralharString(selectedItem.cliente)} />
-                  <TextItem title="Nome:" text={baralharString(selectedItem.nome)} />
+                  <TextItem title="Nº cliente:" text={baralharString(selectedItem?.cliente)} />
+                  <TextItem title="Nome:" text={baralharString(selectedItem?.nome)} />
                 </List>
                 <List>
                   <ListItem disableGutters divider sx={{ pb: 0.5 }}>
@@ -113,12 +113,14 @@ export function Detalhes({ closeModal }) {
                   <ListItem disableGutters divider sx={{ pb: 0.5 }}>
                     <Typography variant="subtitle1">Registo</Typography>
                   </ListItem>
-                  {selectedItem?.criado_em && <TextItem title="Criado em:" text={ptDateTime(selectedItem.criado_em)} />}
+                  {selectedItem?.criado_em && (
+                    <TextItem title="Criado em:" text={ptDateTime(selectedItem?.criado_em)} />
+                  )}
                   {selectedItem?.modificado_em && (
-                    <TextItem title="Modificado em:" text={ptDateTime(selectedItem.modificado_em)} />
+                    <TextItem title="Modificado em:" text={ptDateTime(selectedItem?.modificado_em)} />
                   )}
                   {selectedItem?.modificado_por && (
-                    <TextItem title="Modificado por:" text={selectedItem.modificado_por} />
+                    <TextItem title="Modificado por:" text={selectedItem?.modificado_por} />
                   )}
                 </List>
               </>

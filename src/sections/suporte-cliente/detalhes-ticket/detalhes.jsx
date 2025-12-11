@@ -17,7 +17,7 @@ import Mensagens from './mensagens';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export const Detalhes = React.memo(({ ticket }) => {
-  const { messages = [], description, attachments = [], customer = {}, ...res } = ticket || {};
+  const { status = '', messages = [], description, attachments = [], customer = {}, ...res } = ticket || {};
 
   const allMessages = useMemo(() => {
     const rootMessage = { content: description ?? '', sent_at: res?.created_at, from: 'Cliente', attachments };
@@ -28,7 +28,7 @@ export const Detalhes = React.memo(({ ticket }) => {
 
   return (
     <>
-      <Stack useFlexGap flexWrap="wrap" direction={{ xs: 'column', sm: 'row' }} spacing={5}>
+      <Stack useFlexGap flexWrap="wrap" direction="row" spacing={5}>
         <Stack spacing={1}>
           <ItemDesc label="Cliente da Caixa" value={<LabelSN val={customer?.is_cliente} />} />
           <ItemDesc label="Nome" value={customer?.fullname} />
@@ -45,18 +45,24 @@ export const Detalhes = React.memo(({ ticket }) => {
             <ItemDesc label="Número de conta" value={customer?.account_number} />
           </Stack>
         )}
-        {res?.created_by_email && (
-          <Label color="info" startIcon={<InfoOutlineIcon />}>
-            Criado a partir do email
-          </Label>
-        )}
+        {res?.created_by_email || (status !== 'DRAFT' && customer?.is_cliente && customer?.account_number) ? (
+          <Stack spacing={1}>
+            {res?.created_by_email && (
+              <Label color="info" startIcon={<InfoOutlineIcon />} children="Criado a partir do email" />
+            )}
+            {status !== 'DRAFT' && customer?.is_cliente && customer?.account_number && (
+              <CoreValidation
+                email={customer?.core_banking_email_valition}
+                account={customer?.core_banking_account_validation}
+              />
+            )}
+          </Stack>
+        ) : null}
       </Stack>
 
       <Divider sx={{ my: 3 }} />
 
-      <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
-        Histórico de mensagens
-      </Typography>
+      <Typography variant="subtitle1">Histórico de mensagens</Typography>
 
       <Mensagens messages={allMessages} />
 
@@ -65,12 +71,26 @@ export const Detalhes = React.memo(({ ticket }) => {
   );
 });
 
+// ---------------------------------------------------------------------------------------------------------------------
+
 function ItemDesc({ label, value }) {
   return value ? (
     <Typography variant="body2">
       <strong>{label}:</strong> {value}
     </Typography>
   ) : null;
+}
+
+function CoreValidation({ account, email }) {
+  const accountLabel = getAccountLabel(account);
+  const emailLabel = getEmailLabel(account, email);
+
+  return (
+    <>
+      <Label color={accountLabel.color} children={accountLabel.text} />
+      {emailLabel && <Label color={emailLabel.color} children={emailLabel.text} />}
+    </>
+  );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -105,3 +125,18 @@ function Avaliacao({ avaliacao }) {
     </>
   );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+const getAccountLabel = (value) => {
+  if (value === true) return { color: 'success', text: 'Nº de conta validada na banca' };
+  if (value === false) return { color: 'error', text: 'Nº de conta não existe na banca' };
+  return { color: 'default', text: 'Sem validação na banca' };
+};
+
+const getEmailLabel = (accountVal, emailVal) => {
+  if (accountVal !== true) return null;
+  if (emailVal === true) return { color: 'success', text: 'Email associado à conta' };
+  if (emailVal === false) return { color: 'warning', text: 'Email não associado à conta' };
+  return { color: 'default', text: 'Email por validar' };
+};

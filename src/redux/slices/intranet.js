@@ -191,9 +191,9 @@ export function getFromIntranet(item, params) {
           (item === 'frase' && `${INTRANET_V1_API_SERVER}/frase_semana/ativa`) ||
           (item === 'certificacoes' && `${INTRANET_V1_API_SERVER}/certificacao`) ||
           (item === 'links' && `${INTRANET_V1_API_SERVER}/aplicacao/links/uteis`) ||
+          (item === 'uos' && `${INTRANET_HUB_API_SERVER}/v2/portal/uos/load?ativo=true`) ||
           (item === 'perguntas' && `${INTRANET_V1_API_SERVER}/help/perguntas_frequentes`) ||
           (item === 'minhasAplicacoes' && `${INTRANET_V1_API_SERVER}/aplicacao/aplicacoes/me`) ||
-          (item === 'uos' && `${INTRANET_HUB_API_SERVER}/v2/portal/uos/load?ativo=true`) ||
           (item === 'documentosAjuda' && `${INTRANET_V1_API_SERVER}/atc?categoria=documentosAjuda`) ||
           (item === 'cc' && `${INTRANET_HUB_API_SERVER}/v2/portal/cls/detail?colaborador_id=${params?.id}`) ||
           (item === 'disposicao' && `${INTRANET_V1_API_SERVER}/disposicao/by_data/${params?.id}/${params?.data}`) ||

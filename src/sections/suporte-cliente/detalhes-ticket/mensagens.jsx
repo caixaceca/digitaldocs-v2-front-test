@@ -27,7 +27,7 @@ export default function Mensagens({ messages }) {
   const isDesktop = useResponsive('up', 'md');
 
   return (
-    <Timeline sx={{ px: 0 }}>
+    <Timeline sx={{ px: 0, mt: 1 }}>
       {messages.length === 0 ? (
         <SemRegisto message="Nenhuma mensagem encontrada..." />
       ) : (
