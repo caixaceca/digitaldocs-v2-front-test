@@ -34,7 +34,7 @@ export default function PageCreditoDetalhes() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { temPermissao, isGerente } = usePermissao();
-  const [currentTab, setCurrentTab] = useState('Info. gerais');
+  const [currentTab, setCurrentTab] = useState('Caracterização');
   const permissao = isGerente || temPermissao(['READ_CREDITO']);
 
   const { credito, previewFile, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving } = useSelector(
@@ -48,7 +48,7 @@ export default function PageCreditoDetalhes() {
   }, [dispatch, id, permissao]);
 
   const tabsList = [
-    { value: 'Info. gerais', component: <InfoCredito /> },
+    { value: 'Caracterização', component: <InfoCredito /> },
     {
       value: 'Metadados',
       component: credito?.metadados ? (
@@ -90,18 +90,18 @@ export default function PageCreditoDetalhes() {
 
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
-          heading={currentTab === 'Info. gerais' ? 'Detalhes do crédito' : currentTab}
+          heading={currentTab === 'Caracterização' ? 'Detalhes do crédito' : currentTab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'GAJ-i9', href: PATH_DIGITALDOCS.gaji9.gestao },
-            { name: currentTab === 'Info. gerais' ? 'Detalhes do crédito' : currentTab },
+            { name: currentTab === 'Caracterização' ? 'Detalhes do crédito' : currentTab },
           ]}
           action={
             credito?.ativo &&
             !credito?.contratado &&
             permissao && (
               <Stack direction="row" spacing={0.75} alignItems="center">
-                {currentTab === 'Info. gerais' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
+                {currentTab === 'Caracterização' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
                   <>
                     <DefaultAction small button label="Editar" onClick={() => openForm('form-credito')} />
                     <DefaultAction small button label="Eliminar" onClick={() => openForm('eliminar-credito')} />

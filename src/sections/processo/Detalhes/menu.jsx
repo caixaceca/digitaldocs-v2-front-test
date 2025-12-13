@@ -21,10 +21,8 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
   const { estado = null, credito = null, con = null } = processo || {};
   const { valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
   const { estados = [], htransicoes = [], pareceres_estado: pareceres = [], criado_em: data } = processo || {};
-  const modificar = useMemo(
-    () => estado?.preso && estado?.atribuidoAMim && !credito?.enviado_para_contratacao,
-    [credito?.enviado_para_contratacao, estado?.atribuidoAMim, estado?.preso]
-  );
+
+  const assunto = useMemo(() => `${fluxo ?? ''} - ${titular ?? ''}`, [fluxo, titular]);
 
   const tabsList = useMemo(() => {
     const tabs = [];
@@ -33,7 +31,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     if (credito)
       tabs.push({
         value: 'Info. crédito',
-        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em: data, modificar, estado }} />,
+        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em: data, estado }} />,
       });
 
     if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });
@@ -46,27 +44,21 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
         component: (
           <Pareceres
             id={id}
+            assunto={assunto}
             estado={estado?.estado}
             pareceres={estado.pareceres}
             estadoId={estado?.estado_id}
-            assunto={`${fluxo ?? ''} - ${titular ?? ''}`}
           />
         ),
       });
     }
 
     if (pareceres?.length > 0) {
-      tabs.push({
-        value: 'Pareceres',
-        component: <PareceresEstado pareceres={pareceres} assunto={`${fluxo ?? ''} - ${titular ?? ''}`} />,
-      });
+      tabs.push({ value: 'Pareceres', component: <PareceresEstado pareceres={pareceres} assunto={assunto} /> });
     }
 
     if (htransicoes?.length > 0) {
-      tabs.push({
-        value: 'Encaminhamentos',
-        component: <Transicoes transicoes={htransicoes} assunto={`${fluxo ?? ''} - ${titular ?? ''}`} />,
-      });
+      tabs.push({ value: 'Encaminhamentos', component: <Transicoes transicoes={htransicoes} assunto={assunto} /> });
     }
 
     if (titular) {
@@ -87,14 +79,13 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     id,
     con,
     data,
-    fluxo,
     valor,
     estado,
     numero,
+    assunto,
     titular,
     credito,
     isAdmin,
-    modificar,
     pareceres,
     htransicoes,
     isAuditoria,

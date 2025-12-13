@@ -114,10 +114,10 @@ export function GarantiasSeguros({ dados, seguro = false }) {
       )}
       {item?.modal === 'detail' && (
         <DetalhesGarantia
+          modificar={modificar}
           onClose={() => setItem(null)}
           dados={{
             ...item,
-            modificar,
             processoId,
             creditoId: dados?.creditoId,
             seguros: seguros?.filter((row) => row?.garantia_id === item?.id),
@@ -134,7 +134,7 @@ export function GarantiasSeguros({ dados, seguro = false }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function DetalhesGarantia({ dados, onClose }) {
+function DetalhesGarantia({ dados, modificar, onClose }) {
   const [currentTab, setCurrentTab] = useState('Info');
   const { processo } = useSelector((state) => state.digitaldocs);
   const garantia = useMemo(
@@ -157,7 +157,7 @@ function DetalhesGarantia({ dados, onClose }) {
       value: 'Metadados GAJ-i9',
       component: (
         <Info
-          modificar={dados?.modificar}
+          modificar={modificar}
           dados={garantia?.gaji9_metadados}
           ids={{ processoId: dados?.processoId, garantiaId: dados?.id }}
         />

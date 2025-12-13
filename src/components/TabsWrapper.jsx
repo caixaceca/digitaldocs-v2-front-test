@@ -94,8 +94,8 @@ export function TabCard({ tabs, tipo, item = '', setTipo }) {
       sx={{ px: 1.5, bgcolor: 'background.neutral' }}
       onChange={(event, newValue) => setItemValue(newValue, setTipo, item ? `tipo${item}` : '', false)}
     >
-      {tabs.map(({ value }) => (
-        <Tab disableRipple key={value} value={value} label={value} sx={{ py: 2, px: 1 }} />
+      {tabs.map(({ value, label }) => (
+        <Tab disableRipple key={value} value={value} label={label || value} sx={{ py: 2, px: 1 }} />
       ))}
     </Tabs>
   );

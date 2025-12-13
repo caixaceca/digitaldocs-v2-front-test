@@ -31,25 +31,27 @@ const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function InfoCredito({ dados }) {
-  const [currentTab, setCurrentTab] = useState('Info. gerais');
+  const [currentTab, setCurrentTab] = useState('Caracterização');
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const estadoInicial = processoEstadoInicial(meusAmbientes, dados?.estado?.estado_id);
 
+  const modificar = dados?.estado?.preso && dados?.estado?.atribuidoAMim;
+
   const tabsList = [
-    { value: 'Info. gerais', component: <DadosCredito dados={dados} /> },
+    { value: 'Caracterização', component: <DadosCredito dados={dados} modificar={modificar} /> },
     {
-      value: 'Metadados GAJ-i9',
+      value: 'Condições financeiras',
       component: (
         <MetadadosCredito
-          modificar={dados?.modificar}
+          modificar={modificar}
           dados={dados?.gaji9_metadados}
           ids={{ processoId: dados?.processoId, creditoId: dados?.id }}
         />
       ),
     },
-    { value: 'Garantias', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} /> },
-    { value: 'Seguros', component: <GarantiasSeguros dados={{ ...dados, creditoId: dados?.id }} seguro /> },
-    ...(dados?.modificar && estadoInicial ? [{ value: 'Ficha de análise', component: <FichaAnalise /> }] : []),
+    { value: 'Garantias', component: <GarantiasSeguros dados={{ ...dados, modificar, creditoId: dados?.id }} /> },
+    { value: 'Seguros', component: <GarantiasSeguros dados={{ ...dados, modificar, creditoId: dados?.id }} seguro /> },
+    ...(modificar && estadoInicial ? [{ value: 'Ficha de análise', component: <FichaAnalise /> }] : []),
     { value: 'Pareceres', component: <PareceresCredito infoCredito /> },
   ];
 
@@ -68,7 +70,7 @@ export default function InfoCredito({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function DadosCredito({ dados }) {
+function DadosCredito({ dados, modificar }) {
   const [openSituacao, setOpenSituacao] = useState('');
   const situacao = (dados?.situacao_final_mes || 'em análise').toLowerCase();
 
@@ -106,7 +108,7 @@ function DadosCredito({ dados }) {
                 {situacao}
               </Label>
             </Stack>
-            {dados?.modificar && (
+            {modificar && (
               <Stack direction="row" alignItems="center" spacing={1}>
                 {(situacao === 'em análise' || situacao === 'aprovado') && (
                   <DefaultAction button small label="EDITAR" onClick={() => setOpenSituacao('atualizar')} />
@@ -139,7 +141,7 @@ function DadosCredito({ dados }) {
         />
         <TextItem title="Garantia:" text={dados?.garantia} />
 
-        {situacao === 'aprovado' && dados?.modificar && <EnviarContratacao dados={dados} />}
+        {situacao === 'aprovado' && modificar && <EnviarContratacao dados={dados} />}
 
         {(dados?.nivel_decisao || dados?.enviado_para_contratacao) && (
           <Stack direction="row" justifyContent="center" spacing={2} useFlexGap flexWrap="wrap" sx={{ mt: 2 }}>
