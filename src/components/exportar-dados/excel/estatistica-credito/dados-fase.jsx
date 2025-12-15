@@ -2,6 +2,7 @@ import { sumBy } from 'lodash';
 // utils
 import { ptDate } from '../../../../utils/formatTime';
 import { fPercent } from '../../../../utils/formatNumber';
+import { formatPrazoAmortizacao } from '../../../../utils/formatText';
 import { categorias } from '../../../../sections/indicadores/estatistica-credito/table-situacao';
 //
 import { valorMoeda } from './formatacoes';
@@ -121,7 +122,7 @@ function dadosItem(dados, segmento, linha, tab, first, moeda) {
       ptDate(row?.data_contratacao),
       row?.setor_atividade || '',
       row?.finalidade || '',
-      `${row?.prazo_amortizacao ?? '--'}${row?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`,
+      formatPrazoAmortizacao(row?.prazo_amortizacao),
       fPercent(row?.taxa_juro),
       row?.garantia || '',
       row?.escalao_decisao || '',

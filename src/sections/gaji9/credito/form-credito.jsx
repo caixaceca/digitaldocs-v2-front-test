@@ -354,7 +354,7 @@ export function PropostaForm({ onClose }) {
           <Stack direction="row" spacing={3} sx={{ pt: 1 }}>
             <RHFNumberField noFormat label="Nº de proposta" name="proposta" />
             <Stack>
-              <RHFSwitch name="credibox" label="Credibox" />
+              <RHFSwitch name="credibox" label="Credibox" mt />
             </Stack>
           </Stack>
           <DialogButons isSaving={isLoading} onClose={onClose} label="Carregar" />

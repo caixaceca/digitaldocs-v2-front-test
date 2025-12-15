@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 // utils
 import { useSelector } from '../../../redux/store';
 import { ptDate } from '../../../utils/formatTime';
+import { formatPrazoAmortizacao } from '../../../utils/formatText';
 import { fPercent, fNumber, fConto } from '../../../utils/formatNumber';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -260,7 +261,7 @@ function DadosCell({ dados, from, index = 1, total }) {
       {from === 'entrada' && <TableCell align="right">{dados?.nproposta}</TableCell>}
       {from === 'contratado' && (
         <>
-          <TableCell align="right">{`${dados?.prazo_amortizacao ?? '--'}${dados?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`}</TableCell>
+          <TableCell align="right">{formatPrazoAmortizacao(dados?.prazo_amortizacao)}</TableCell>
           <TableCell align="right">{dados?.taxa_juro && fPercent(dados?.taxa_juro)}</TableCell>
           <TableCell>{dados?.garantia}</TableCell>
           <TableCell align="center">{dados?.escalao_decisao}</TableCell>

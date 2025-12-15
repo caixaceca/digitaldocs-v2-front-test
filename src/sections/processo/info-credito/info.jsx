@@ -12,6 +12,7 @@ import { useSelector } from '../../../redux/store';
 import { ptDate } from '../../../utils/formatTime';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
+import { formatPrazoAmortizacao } from '../../../utils/formatText';
 import { processoEstadoInicial } from '../../../utils/validarAcesso';
 // components
 import Label from '../../../components/Label';
@@ -135,10 +136,7 @@ function DadosCredito({ dados, modificar }) {
           <TextItem title="Decisor:" text={dados?.escalao_decisao} />
         )}
         {dados?.taxa_juro ? <TextItem title="Taxa de juro:" text={fPercent(dados?.taxa_juro)} /> : null}
-        <TextItem
-          title="Prazo de amortização:"
-          text={`${dados?.prazo_amortizacao ?? '--'}${dados?.prazo_amortizacao?.includes('meses') ? '' : ' meses'}`}
-        />
+        <TextItem title="Prazo de amortização:" text={formatPrazoAmortizacao(dados?.prazo_amortizacao)} />
         <TextItem title="Garantia:" text={dados?.garantia} />
 
         {situacao === 'aprovado' && modificar && <EnviarContratacao dados={dados} />}

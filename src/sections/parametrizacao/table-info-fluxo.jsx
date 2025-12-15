@@ -193,7 +193,6 @@ function headerTable(item) {
   const estados = [
     { id: 'nome', label: 'Nome' },
     { id: 'uo', label: 'U.O' },
-    { id: 'balcao', label: 'Nº de balcão' },
     { id: 'is_inicial', label: 'Inicial', align: 'center' },
     { id: 'is_final', label: 'Final', align: 'center' },
   ];

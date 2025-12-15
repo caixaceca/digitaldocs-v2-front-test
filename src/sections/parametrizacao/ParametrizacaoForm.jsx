@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
@@ -204,6 +205,7 @@ export function MotivoTransicaoForm({ onClose }) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
+  const readOnly = isEdit && selectedItem?.designacao === 'AGUARDA INFORMAÇÕES COMPLEMENTARES';
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
@@ -213,8 +215,17 @@ export function MotivoTransicaoForm({ onClose }) {
           <ItemComponent item={selectedItem} rows={3}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-                <RHFTextField name="designacao" label="Designação" />
-                <RHFTextField name="observacao" label="Observação" />
+                <Box sx={{ width: 1 }}>
+                  <RHFTextField name="designacao" label="Designação" InputProps={{ readOnly }} />
+                  {readOnly && (
+                    <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
+                      *A designação não pode ser alterada, está em uso para validações na aplicação
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ width: 1 }}>
+                  <RHFTextField name="observacao" label="Observação" />
+                </Box>
               </Stack>
               <Stack direction="row" spacing={3}>
                 <RHFSwitch name="imputavel" label="Imputável" />

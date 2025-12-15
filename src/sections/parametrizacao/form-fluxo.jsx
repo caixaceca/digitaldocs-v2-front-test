@@ -60,23 +60,17 @@ export function FluxoForm({ onClose }) {
       modelo: selectedItem?.modelo || null,
       is_con: selectedItem?.is_con || false,
       observacao: selectedItem?.observacao || '',
-      is_interno: selectedItem?.is_interno || false,
       is_credito: selectedItem?.is_credito || false,
       is_ativo: isEdit ? selectedItem?.is_ativo : true,
+      is_interno: isEdit ? selectedItem?.is_interno : true,
     }),
     [selectedItem, isEdit, perfilId]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem]);
-
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const msg = `Fluxo ${isEdit ? 'atualizado' : 'adicionado'}`;
       const params = { id: selectedItem?.id, msg, getItem: 'selectedItem', onClose };
@@ -97,7 +91,7 @@ export function FluxoForm({ onClose }) {
                 <RHFTextField name="assunto" label="Assunto" InputProps={{ readOnly }} />
                 {readOnly && (
                   <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
-                    *O nome do fluxo não pode ser alterado, está em uso para validações na aplicação.
+                    *O assunto não pode ser alterado, está em uso para validações na aplicação.
                   </Typography>
                 )}
               </GridItem>
@@ -105,8 +99,8 @@ export function FluxoForm({ onClose }) {
                 sm={6}
                 children={<RHFAutocompleteSmp name="modelo" label="Modelo" options={['Série', 'Paralelo']} />}
               />
-              <GridItem xs={6} sm={isEdit ? 3 : 6} children={<RHFSwitch name="is_interno" label="Interno" />} />
-              {isEdit && <GridItem xs={6} sm={3} children={<RHFSwitch name="is_ativo" label="Ativo" />} />}
+              <GridItem xs={6} sm={isEdit ? 3 : 6} children={<RHFSwitch name="is_interno" label="Interno" mt />} />
+              {isEdit && <GridItem xs={6} sm={3} children={<RHFSwitch name="is_ativo" label="Ativo" mt />} />}
               <GridItem xs={4} children={<RHFSwitch name="is_credito" label="Crédito" />} />
               <GridItem xs={4} children={<RHFSwitch name="limpo" label="Limpo" />} />
               <GridItem xs={4} children={<RHFSwitch name="is_con" label="CON" />} />

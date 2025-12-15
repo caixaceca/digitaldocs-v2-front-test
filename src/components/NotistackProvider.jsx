@@ -3,13 +3,12 @@ import { SnackbarProvider, MaterialDesignContent } from 'notistack';
 // @mui
 import Box from '@mui/material/Box';
 import InfoIcon from '@mui/icons-material/Info';
+import IconButton from '@mui/material/IconButton';
 import { alpha, styled } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import WarningOutlinedIcon from '@mui/icons-material/WarningOutlined';
-//
-import { IconButtonAnimate } from './animate';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -32,10 +31,10 @@ export default function NotistackProvider({ children }) {
 
   return (
     <SnackbarProvider
-      ref={notistackRef}
       maxSnack={5}
       preventDuplicate
       variant="success"
+      ref={notistackRef}
       autoHideDuration={5000}
       TransitionComponent={undefined}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -46,9 +45,9 @@ export default function NotistackProvider({ children }) {
         error: <SnackbarIcon icon={<ErrorOutlinedIcon />} color="error" />,
       }}
       action={(key) => (
-        <IconButtonAnimate size="small" onClick={onClose(key)} sx={{ p: 0.5 }}>
+        <IconButton size="small" onClick={onClose(key)} sx={{ p: 0.5 }}>
           <CloseOutlinedIcon sx={{ width: 20 }} />
-        </IconButtonAnimate>
+        </IconButton>
       )}
       Components={{
         info: StyledMaterialDesignContent,

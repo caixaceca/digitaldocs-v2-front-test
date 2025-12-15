@@ -6,7 +6,6 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { fPercent } from '../../utils/formatNumber';
@@ -21,7 +20,7 @@ import Scrollbar from '../../components/Scrollbar';
 import { ActionButton } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, ColaboradorInfo, DataLabel } from '../../components/Panel';
+import { CellChecked, ColaboradorInfo, DataLabel, CellUoBalcao } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import { applySortFilter } from './applySortFilter';
@@ -86,12 +85,7 @@ export default function TableInfoEstado({ item, dados }) {
                       </TableCell>
                       {(item === 'colaboradores' && (
                         <>
-                          <TableCell align="left">
-                            <Typography variant="subtitle2"> {row?.unidade_organica}</Typography>
-                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                              Balcão nº {row?.balcao}
-                            </Typography>
-                          </TableCell>
+                          <CellUoBalcao uo={row?.unidade_organica} balcao={row?.balcao} />
                           <TableCell>
                             <DataLabel data={row?.data_inicio || ''} />
                             <DataLabel data={row?.data_limite || ''} termino />

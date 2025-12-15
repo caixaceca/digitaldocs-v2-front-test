@@ -154,7 +154,7 @@ function DetalhesGarantia({ dados, modificar, onClose }) {
       ),
     },
     {
-      value: 'Metadados GAJ-i9',
+      value: 'Características',
       component: (
         <Info
           modificar={modificar}

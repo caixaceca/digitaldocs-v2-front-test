@@ -151,6 +151,7 @@ export function EncaminharEmSerie({ dados }) {
       !values?.estado?.label?.includes('Atendimento'),
     [gerencia, fluxo, entidade, acao, values?.estado]
   );
+
   const creditoSemMetadados = useMemo(
     () => decisor && processo?.is_credito && !processo?.credito?.gaji9_metadados,
     [decisor, processo?.credito?.gaji9_metadados, processo?.is_credito]
@@ -171,7 +172,7 @@ export function EncaminharEmSerie({ dados }) {
   }, [dispatch, values?.estado?.estado_final_id]);
 
   useEffect(() => {
-    if (fluxoId)
+    if (fluxoId && values?.estado?.id)
       dispatch(getFromParametrizacao('checklist', { fluxoId, transicaoId: values?.estado?.id, reset: { val: [] } }));
   }, [dispatch, fluxoId, values?.estado?.id]);
 
@@ -187,12 +188,12 @@ export function EncaminharEmSerie({ dados }) {
               <Alert severity="warning" sx={{ justifyContent: 'left' }}>
                 <AlertTitle sx={{ typography: 'subtitle2' }}>Processo incompleto</AlertTitle>
                 <Typography variant="body2">
-                  O processo não pode ser encaminhado para um estado decisor sem que os <b>metadados</b> tenham sido
-                  preenchidos.
+                  O processo não pode ser encaminhado para um estado decisor sem que as <b>condições financeiras</b>{' '}
+                  tenham sido preenchidos.
                 </Typography>
                 <Typography variant="body2">
                   Para inserir os dados necessários, aceda ao menu <b>Info. Crédito</b> e selecione o item{' '}
-                  <b>Metadados - GAJi9</b>.
+                  <b>Condições financeiras</b>.
                 </Typography>
               </Alert>
             ) : (

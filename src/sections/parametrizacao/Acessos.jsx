@@ -6,23 +6,19 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { normalizeText, nomeacaoBySexo } from '../../utils/formatText';
-// hooks
-import useTable, { getComparator, applySort } from '../../hooks/useTable';
-// redux
 import { useSelector } from '../../redux/store';
-// routes
 import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { normalizeText, nomeacaoBySexo } from '../../utils/formatText';
+import useTable, { getComparator, applySort } from '../../hooks/useTable';
 // Components
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { ColaboradorInfo, Criado, noDados } from '../../components/Panel';
 import { TableToolbarPerfilEstados } from '../../components/SearchToolbar';
+import { ColaboradorInfo, Criado, noDados, CellUoBalcao } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -89,12 +85,7 @@ export default function Acessos() {
                           label={nomeacaoBySexo(row.nomeacao_funcao, row?.sexo)}
                         />
                       </TableCell>
-                      <TableCell align="left">
-                        <Typography variant="subtitle2"> {row?.uo_label}</Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Balcão nº {row?.uo_balcao}
-                        </Typography>
-                      </TableCell>
+                      <CellUoBalcao uo={row?.uo_label} balcao={row?.uo_balcao} />
                       <TableCell>{row?.vinculo || noDados()}</TableCell>
                       <TableCell>
                         <Criado value={row?.email} />

@@ -23,8 +23,8 @@ import { openModal, getSuccess, closeModal, getFromParametrizacao } from '../../
 import Scrollbar from '../../components/Scrollbar';
 import { DefaultAction } from '../../components/Actions';
 import { SkeletonTable } from '../../components/skeleton';
-import { CellChecked, noDados } from '../../components/Panel';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
+import { CellChecked, CellUoBalcao, noDados } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
 import {
@@ -155,9 +155,9 @@ export default function TableParametrizacao({ item }) {
                     row={10}
                     column={
                       (item === 'linhas' && 4) ||
+                      (item === 'fluxos' && 6) ||
                       (item === 'origens' && 7) ||
-                      (item === 'documentos' && 5) ||
-                      ((item === 'fluxos' || item === 'estados') && 6) ||
+                      ((item === 'documentos' || item === 'estados') && 5) ||
                       3
                     }
                   />
@@ -268,8 +268,7 @@ export function EstadoDetail({ row = null }) {
   return (
     <>
       <TableCell>{row.nome}</TableCell>
-      <TableCell>{row.uo}</TableCell>
-      <TableCell>{row.balcao || noDados('(Não definido)')}</TableCell>
+      <CellUoBalcao uo={row?.uo} balcao={row?.balcao} />
       <CellChecked check={row.is_inicial} />
       <CellChecked check={row.is_final} />
     </>
@@ -335,7 +334,6 @@ function headerTable(item) {
       (item === 'estados' && [
         { id: 'nome', label: 'Nome' },
         { id: 'uo', label: 'Unidade orgânica' },
-        { id: 'balcao', label: 'Nº de balcão' },
         { id: 'is_inicial', label: 'Inicial', align: 'center' },
         { id: 'is_final', label: 'Final', align: 'center' },
       ]) ||

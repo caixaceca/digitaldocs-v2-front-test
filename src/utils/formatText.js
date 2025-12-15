@@ -116,6 +116,25 @@ export function numeroParaLetra(numero) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function formatPrazoAmortizacao(valor) {
+  if (valor === null || valor === undefined || valor === '') return '--';
+  if (typeof valor === 'string' && /^\d+$/.test(valor)) return `${valor} meses`;
+  if (typeof valor === 'number' && valor) return `${valor} meses`;
+  if (typeof valor !== 'string') return '--';
+
+  const texto = valor.toLowerCase().trim();
+  const matchNumero = texto.match(/\d+/);
+  if (!matchNumero) return '--';
+  const numero = parseInt(matchNumero[0], 10);
+
+  if (texto.includes('ano') || texto.includes('anos') || texto.match(/\b(a)\b/)) return `${numero * 12} meses`;
+  if (texto.includes('mes') || texto.includes('meses') || texto.match(/\b(m)\b/)) return `${numero} meses`;
+
+  return `${numero} meses`;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export const pdfInfo = {
   modificationDate: new Date(),
   producer: 'react-pdf/renderer',

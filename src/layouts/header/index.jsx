@@ -26,7 +26,6 @@ import { HEADER, NAVBAR } from '../../config';
 // components
 import Logo from '../../components/Logo';
 import Image from '../../components/Image';
-import { Felicitacoes } from '../../components/Panel';
 import SvgIconStyle from '../../components/SvgIconStyle';
 import { IconButtonAnimate } from '../../components/animate';
 import { Id, AjudaIcon, DenunciaIcon, LinksIcon, DefinicoesIcon, NotificacoesIcon } from '../../assets';
@@ -37,6 +36,7 @@ import Notificacoes from './Notificacoes';
 import ProcuraAvancada from './ProcuraAvancada';
 import AjudaDialog from '../../sections/home/Ajuda';
 import ConsultarDocumento from './ConsultarDocumento';
+import Felicitacoes from '../../sections/home/Felicitacoes';
 import { FormSugestao, DenunciaForm } from '../../sections/home/HomeForm';
 // guards
 import RoleBasedGuard from '../../guards/RoleBasedGuard';
