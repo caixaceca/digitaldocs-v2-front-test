@@ -16,7 +16,7 @@ export default function AcessoSuporte({ children }) {
   const { utilizador, isLoading } = useSelector((state) => state.suporte);
 
   useEffect(() => {
-    if (cc?.id) dispatch(getInSuporte('utilizador', { id: 1 }));
+    if (cc?.id) dispatch(getInSuporte('utilizador', { id: cc?.id }));
   }, [cc?.id, dispatch]);
 
   useEffect(() => {
