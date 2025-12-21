@@ -17,7 +17,6 @@ import {
 } from 'docx';
 // @mui
 import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
 // utils
 import { ptDate } from '../../../../utils/formatTime';
 import { fCurrency, fPercent } from '../../../../utils/formatNumber';
@@ -292,9 +291,9 @@ export default function CartaPropostaWord({ dados = {} }) {
         styles: stylesWord,
         sections: [
           {
-            properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '24mm', left: '24mm' } } },
-            headers: CabecalhoWord(true, logo, 'JRDC.FM.C.023.00'),
-            footers: RodapeWord(true, iso27001, iso9001),
+            properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '18mm', left: '18mm' } } },
+            headers: CabecalhoWord({ enabled: true, logo, codificacao: 'JRDC.FM.C.023.00', titulo: '' }),
+            footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
             children: [
               new Paragraph({
                 style: 'titulo',
@@ -361,11 +360,8 @@ export default function CartaPropostaWord({ dados = {} }) {
   };
 
   return (
-    <Stack>
-      <Divider textAlign="left" sx={{ mt: 1.5, mb: 0.5, typography: 'overline' }}>
-        Modelo de Carta Proposta
-      </Divider>
-      <DownloadModelo modelo="Modelo - CrediCaixa.docx" onClick={exportToWord} />
+    <Stack sx={{ mt: 1 }}>
+      <DownloadModelo modelo="Modelo de Carta Proposta - CrediCaixa.docx" onClick={exportToWord} />
     </Stack>
   );
 }

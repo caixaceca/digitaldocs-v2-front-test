@@ -130,6 +130,7 @@ export default function FormInfoCredito({ dados }) {
                   name="linha_id"
                   label="Linha de crédito"
                   disabled={!values?.tipo_titular_id}
+                  onChange={(event, newValue) => setValue('linha_id', newValue, vdt)}
                   options={applySort(
                     linhas
                       ?.filter(({ descricao }) => descricao === values?.tipo_titular_id?.segmento)

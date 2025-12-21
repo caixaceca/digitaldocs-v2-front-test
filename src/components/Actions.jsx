@@ -207,6 +207,20 @@ export function AddItem({ dados = {}, onClick = null }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function DeleteBox({ label = 'Eliminar', onClick }) {
+  return (
+    <Box>
+      <Tooltip title={label} arrow>
+        <IconButton onClick={onClick} color="error" sx={{ p: 0.64, width: 30, height: 30 }}>
+          <Eliminar />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export function Fechar({ button = false, large = false, onClick }) {
   return button ? (
     <Button

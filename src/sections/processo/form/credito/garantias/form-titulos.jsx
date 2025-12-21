@@ -1,0 +1,76 @@
+// form
+import { useFormContext, useFieldArray } from 'react-hook-form';
+// @mui
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+// utils
+import { tituloSchema } from './schemaFileds';
+// components
+import FormSeguros from './form-seguros';
+import GridItem from '../../../../../components/GridItem';
+import { SemDados } from '../../../../../components/Panel';
+import { AddItem, DefaultAction } from '../../../../../components/Actions';
+import { RHFTextField, RHFNumberField, RHFAutocompleteSmp } from '../../../../../components/hook-form';
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export default function FormTitulos() {
+  const { control } = useFormContext();
+  const { fields, append, remove } = useFieldArray({ control, name: 'titulos' });
+
+  return (
+    <Stack sx={{ flexGrow: 1, pt: 1 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
+        <Typography variant="overline">Título(s)</Typography>
+        <AddItem onClick={() => append(tituloSchema)} dados={{ label: 'Título', small: true }} />
+      </Stack>
+      <Divider sx={{ my: 1 }} />
+      <Stack spacing={3}>
+        <Titulos fields={fields} remove={remove} />
+      </Stack>
+    </Stack>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function Titulos({ fields = [], remove }) {
+  return fields?.length ? (
+    fields.map((item, index) => (
+      <Card key={item.id} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Grid container spacing={2} justifyContent="center">
+            <GridItem sm={6} md={4}>
+              <RHFAutocompleteSmp label="Tipo" name={`titulos[${index}].tipo`} options={['Ações', 'Obrigações']} />
+            </GridItem>
+            <GridItem sm={6} md={4}>
+              <RHFTextField name={`titulos[${index}].emissora`} label="Entidade emissora" />
+            </GridItem>
+            <GridItem sm={6} md={4}>
+              <RHFTextField name={`titulos[${index}].registo`} label="Entidade registradora" />
+            </GridItem>
+            <GridItem sm={6} md={3}>
+              <RHFNumberField name={`titulos[${index}].cliente`} label="Nº de cliente" noFormat />
+            </GridItem>
+            <GridItem sm={6} md={3}>
+              <RHFNumberField name={`titulos[${index}].quantidade`} label="Quantidade" />
+            </GridItem>
+            <GridItem sm={6} md={3}>
+              <RHFNumberField name={`titulos[${index}].valor`} label="Valor" tipo="CVE" />
+            </GridItem>
+            <GridItem sm={6} md={3}>
+              <RHFNumberField name={`titulos[${index}].cobertura`} label="Cobertura" tipo="%" />
+            </GridItem>
+            <GridItem children={<FormSeguros prefixo={`titulos[${index}].seguros`} tipo />} />
+          </Grid>
+          <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />
+        </Stack>
+      </Card>
+    ))
+  ) : (
+    <SemDados message="Nenhum título adicionado..." sx={{ p: 1.5 }} />
+  );
+}

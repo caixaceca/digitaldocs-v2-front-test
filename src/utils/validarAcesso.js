@@ -27,8 +27,10 @@ export function temNomeacao(colaborador) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function emailCheck(mail, emailCheck = 'vc.axiac@arove.ordnavi') {
-  return mail?.split('')?.reverse()?.join('')?.toLowerCase() === emailCheck?.toLowerCase();
+export function emailCheck(mail, check = 'vc.axiac@arove.ordnavi') {
+  if (typeof mail !== 'string') return false;
+  const reversedMail = mail.split('').reverse().join('').toLowerCase();
+  return reversedMail === check.toLowerCase();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

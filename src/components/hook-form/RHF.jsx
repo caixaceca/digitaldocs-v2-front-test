@@ -14,7 +14,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
+export function RHFNumberField({ name, tipo, small = false, noFormat = false, ...other }) {
   const { control } = useFormContext();
 
   const formatNumber = (value) => {
@@ -32,6 +32,7 @@ export function RHFNumberField({ name, tipo, noFormat = false, ...other }) {
           fullWidth
           error={!!error}
           helperText={error?.message}
+          size={small ? 'small' : 'medium'}
           value={noFormat ? value : formatNumber(value)}
           onChange={(e) => {
             const rawValue = e.target.value.replace(/\s/g, '');

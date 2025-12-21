@@ -13,7 +13,7 @@ import { ptDate } from '../../../utils/formatTime';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 import { formatPrazoAmortizacao } from '../../../utils/formatText';
-import { processoEstadoInicial } from '../../../utils/validarAcesso';
+import { processoEstadoInicial, emailCheck } from '../../../utils/validarAcesso';
 // components
 import Label from '../../../components/Label';
 import { TextItem } from '../Detalhes/detalhes';
@@ -21,11 +21,13 @@ import { DefaultAction } from '../../../components/Actions';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import { FormSituacao, EliminarDadosSituacao } from '../form/credito/situacao-form';
 //
+import Fincc from './fin/fincc';
 import PareceresCredito from './pareceres';
 import FichaAnalise from './ficha-parecer';
 import MetadadosCredito from './metadados-credito';
 import EnviarContratacao from './enviar-contratacao';
 import { GarantiasSeguros } from './garantias-seguros';
+import CartaPropostaWord from '../Detalhes/anexos/modelos-cartas-proposta';
 
 const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent' };
 
@@ -33,13 +35,15 @@ const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent
 
 export default function InfoCredito({ dados }) {
   const [currentTab, setCurrentTab] = useState('Caracterização');
+
+  const { mail } = useSelector((state) => state.intranet);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const estadoInicial = processoEstadoInicial(meusAmbientes, dados?.estado?.estado_id);
 
   const modificar = dados?.estado?.preso && dados?.estado?.atribuidoAMim;
 
   const tabsList = [
-    { value: 'Caracterização', component: <DadosCredito dados={dados} modificar={modificar} /> },
+    { value: 'Caracterização', component: <DadosCredito dados={dados} modificar={modificar} mail={mail} /> },
     {
       value: 'Condições financeiras',
       component: (
@@ -71,7 +75,7 @@ export default function InfoCredito({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function DadosCredito({ dados, modificar }) {
+function DadosCredito({ dados, modificar, mail }) {
   const [openSituacao, setOpenSituacao] = useState('');
   const situacao = (dados?.situacao_final_mes || 'em análise').toLowerCase();
 
@@ -156,6 +160,9 @@ function DadosCredito({ dados, modificar }) {
             {dados?.enviado_para_contratacao && <Label startIcon={<InfoOutlinedIcon />}>Enviado para GAJ-i9</Label>}
           </Stack>
         )}
+
+        {emailCheck(mail) && <Fincc dados={dados} />}
+        {emailCheck(mail) && <CartaPropostaWord dados={dados} />}
       </List>
 
       {openSituacao === 'atualizar' && <FormSituacao dados={dados} onClose={() => setOpenSituacao('')} />}

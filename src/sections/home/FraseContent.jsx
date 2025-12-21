@@ -14,7 +14,7 @@ import { newLineText } from '../../components/Panel';
 export default function FraseContent({ frase }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const sugeridoPor = colaboradores?.find(({ id }) => id === frase?.sugerido_por);
-  const isKPI = emailCheck(sugeridoPor?.email, '') && frase?.frase?.includes('KPI - Key Performance Indicator');
+  const isKPI = emailCheck(sugeridoPor?.email) && frase?.frase?.includes('KPI - Key Performance Indicator');
   return (
     <Stack sx={{ p: 2, flexGrow: 1, color: 'text.secondary' }}>
       <Typography gutterBottom variant="h6" sx={{ textAlign: 'center', color: 'success.main' }}>

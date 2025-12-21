@@ -105,7 +105,7 @@ export default function TableInfoEstado({ item, dados }) {
                         ))}
                       <TableCell align="center" width={50}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {(item === 'regrasEstado' || emailCheck(mail, '')) && (
+                          {(item === 'regrasEstado' || emailCheck(mail)) && (
                             <ActionButton options={{ fab: true, sm: true, item: 'eliminar-item', dados: row }} />
                           )}
                           <ActionButton options={{ fab: true, sm: true, label: 'EDITAR', item, dados: row }} />

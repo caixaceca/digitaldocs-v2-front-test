@@ -95,7 +95,7 @@ export default function Anexos({ anexos }) {
             </Stack>
           </Stack>
         ))}
-        {((emailCheck(mail, '') && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
+        {((emailCheck(mail) && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
           <ModelosRespostas />
         )}
       </Stack>

@@ -183,9 +183,9 @@ export function DataLabel({ data = '', termino = false }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SemDados({ message }) {
+export function SemDados({ message, sx = null }) {
   return (
-    <Box sx={{ p: 3, borderRadius: 1, bgcolor: 'background.neutral' }}>
+    <Box sx={{ p: 3, borderRadius: 1, bgcolor: 'background.neutral', ...sx }}>
       <Typography variant="body2" sx={{ fontStyle: 'italic', textAlign: 'center', color: 'text.secondary' }}>
         {message}
       </Typography>

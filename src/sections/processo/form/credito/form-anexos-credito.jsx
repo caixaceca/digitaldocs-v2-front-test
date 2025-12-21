@@ -59,22 +59,9 @@ export default function FormAnexosCredito({ dados }) {
       formData.append('montante_solicitado', dadosStepper.montante_solicitado);
       formData.append('data_entrada', format(dadosStepper.data_entrada, 'yyyy-MM-dd'));
 
-      const garantiasLabels = dadosStepper.garantias
-        .map((row) => row?.tipo_garantia_id?.label)
-        .filter(Boolean)
-        .join(', ');
-      formData.append('garantia', garantiasLabels ?? '');
-
       if (dadosStepper.obs) formData.append('obs', dadosStepper.obs);
       if (dadosStepper.cliente) formData.append('cliente', dadosStepper.cliente);
       if (dadosStepper?.numero_proposta) formData.append('numero_proposta', dadosStepper.numero_proposta);
-
-      dadosStepper.garantias.forEach((row, index) => {
-        formData.append(`garantias[${index}].tipo_garantia_id`, row?.tipo_garantia_id?.id);
-        if (row.valor_garantia) formData.append(`garantias[${index}].valor_garantia`, row.valor_garantia);
-        if (row.numero_entidade) formData.append(`garantias[${index}].numero_entidade`, row.numero_entidade);
-        if (row.numero_livranca) formData.append(`garantias[${index}].numero_livranca`, row.numero_livranca);
-      });
 
       appendAnexos(formData, values.anexos, outros, values.checklist);
       dispatch(createProcesso('processo', formData, { id, msg: 'Processo adicionado', onClose }));

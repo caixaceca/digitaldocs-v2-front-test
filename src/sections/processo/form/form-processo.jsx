@@ -113,10 +113,7 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
             steps={isEdit ? ['Operação', 'Depositante'] : ['Operação', 'Depositante', 'Anexos']}
           />
         )}
-        {!isEdit && !!fluxo?.iscredito && (
-          <Steps sx={{ mt: 1, mb: 0 }} activeStep={activeStep} steps={['Dados gerais', 'Garantias', 'Anexos']} />
-        )}
-        {!isEdit && fluxo && !fluxo?.iscon && !fluxo?.iscredito && (
+        {!isEdit && fluxo && !fluxo?.iscon && (
           <Steps sx={{ mt: 1, mb: 0 }} activeStep={activeStep} steps={['Dados gerais', 'Anexos']} />
         )}
         <Box sx={{ top: 15, right: 15, position: 'absolute' }}>

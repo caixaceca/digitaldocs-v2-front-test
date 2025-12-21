@@ -525,7 +525,7 @@ export function DocumentoForm({ onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           {isEdit &&
-          !emailCheck(mail, '') &&
+          !emailCheck(mail) &&
           (selectedItem?.designacao === 'OUTROS' || selectedItem?.designacao === 'ATA - PARECER DE CRÉDITO') ? (
             <Stack sx={{ pt: 3, pb: 1 }}>
               <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>

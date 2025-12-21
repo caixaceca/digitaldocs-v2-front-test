@@ -13,7 +13,6 @@ import { getAnexo, setModal } from '../../../../redux/slices/digitaldocs';
 //
 import ModelosRespostas from './modelos-resposta';
 import { AnexoItem } from './anexos-dados-gerais';
-import CartaPropostaWord from './modelos-cartas-proposta';
 import { SearchNotFound } from '../../../../components/table';
 import RoleBasedGuard from '../../../../guards/RoleBasedGuard';
 
@@ -51,10 +50,9 @@ export default function TodosAnexos() {
           <>
             {renderAnexos(anexosEntidades, 'Anexos das entidades')}
             {anexosList?.map(({ estado, anexos }) => renderAnexos(anexos, estado))}
-            {((emailCheck(mail, '') && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
+            {((emailCheck(mail) && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
               <ModelosRespostas />
             )}
-            {emailCheck(mail, '') && <CartaPropostaWord dados={processo} />}
           </>
         ) : (
           <SearchNotFound message="Nenhum anexo encontrado..." />

@@ -56,7 +56,10 @@ export function listaProdutos(componentes) {
 }
 
 export function listaGarantias(tiposGarantias) {
-  return tiposGarantias?.map(({ id, designacao, reais }) => ({ id, label: designacao, reais, subtipos: false }));
+  return applySort(
+    tiposGarantias?.map((row) => ({ ...row, label: row?.designacao || row?.tipo })),
+    getComparator('asc', 'label')
+  );
 }
 
 export function subTiposGarantia(subtipos) {

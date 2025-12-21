@@ -138,8 +138,8 @@ export default function ModelosRespostas() {
         sections: [
           {
             properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '25mm', left: '25mm' } } },
-            headers: CabecalhoWord(true, logo, 'MKTG.FM.U.001.02 | 2021.04.09'),
-            footers: RodapeWord(true, iso27001, iso9001),
+            headers: CabecalhoWord({ enabled: true, logo, codificacao: 'MKTG.FM.U.001.02 | 2021.04.09', titulo: '' }),
+            footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
             children: [
               createParagraph(
                 [

@@ -12,7 +12,6 @@ import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import useToggle from '../../../hooks/useToggle';
 import { fCurrency } from '../../../utils/formatNumber';
 import { deleteItem } from '../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../redux/store';
@@ -25,9 +24,9 @@ import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import { DialogConfirmar, DialogTitleAlt } from '../../../components/CustomDialog';
 //
 import MetadadosGarantia from './metadados-garantia';
-import MetadadosForm from '../form/credito/form-metadados-garantia';
+import { SeguroForm } from '../form/credito/form-garantias-credito';
 import { Resgisto, TableRowItem } from '../../parametrizacao/Detalhes';
-import { GarantiasSeparados, SeguroForm } from '../form/credito/form-garantias-credito';
+import FormGarantias from '../form/credito/garantias/form-garantias-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -114,7 +113,6 @@ export function GarantiasSeguros({ dados, seguro = false }) {
       )}
       {item?.modal === 'detail' && (
         <DetalhesGarantia
-          modificar={modificar}
           onClose={() => setItem(null)}
           dados={{
             ...item,
@@ -124,7 +122,7 @@ export function GarantiasSeguros({ dados, seguro = false }) {
           }}
         />
       )}
-      {item?.modal === 'add' && !seguro && <GarantiasSeparados processoId={processoId} onClose={() => setItem(null)} />}
+      {item?.modal === 'add' && !seguro && <FormGarantias processoId={processoId} onClose={() => setItem(null)} />}
       {(item?.modal === 'add' || item?.modal === 'editar') && seguro && (
         <SeguroForm ids={{ processoId, garantiaId, creditoId }} selectedItem={item} onClose={() => setItem(null)} />
       )}
@@ -134,7 +132,7 @@ export function GarantiasSeguros({ dados, seguro = false }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function DetalhesGarantia({ dados, modificar, onClose }) {
+function DetalhesGarantia({ dados, onClose }) {
   const [currentTab, setCurrentTab] = useState('Info');
   const { processo } = useSelector((state) => state.digitaldocs);
   const garantia = useMemo(
@@ -143,7 +141,7 @@ function DetalhesGarantia({ dados, modificar, onClose }) {
   );
 
   const tabsList = [
-    { value: 'Info', component: <Info dados={dados} info /> },
+    { value: 'Info', component: <InfoGarantia dados={dados} info /> },
     {
       value: 'Seguros',
       component: (
@@ -155,13 +153,7 @@ function DetalhesGarantia({ dados, modificar, onClose }) {
     },
     {
       value: 'Características',
-      component: (
-        <Info
-          modificar={modificar}
-          dados={garantia?.gaji9_metadados}
-          ids={{ processoId: dados?.processoId, garantiaId: dados?.id }}
-        />
-      ),
+      component: <InfoGarantia dados={garantia?.gaji9_metadados} />,
     },
   ];
 
@@ -184,9 +176,7 @@ function DetalhesGarantia({ dados, modificar, onClose }) {
   );
 }
 
-function Info({ dados, info = false, modificar = false, ids = null }) {
-  const { toggle: open, onOpen, onClose } = useToggle();
-
+function InfoGarantia({ dados, info = false }) {
   return (
     <List sx={{ width: 1 }}>
       {dados ? (
@@ -223,13 +213,6 @@ function Info({ dados, info = false, modificar = false, ids = null }) {
       ) : (
         <SearchNotFoundSmall message="Nenhuma informação disponível..." />
       )}
-
-      {modificar && (
-        <Stack direction="row" justifyContent="center" sx={{ mt: dados ? 0 : 1 }}>
-          <DefaultAction small button label={dados ? 'Editar' : 'Adicionar'} onClick={onOpen} />
-        </Stack>
-      )}
-      {open && <MetadadosForm onClose={onClose} dados={dados} ids={ids} />}
     </List>
   );
 }

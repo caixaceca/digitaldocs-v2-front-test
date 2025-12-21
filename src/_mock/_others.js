@@ -141,6 +141,76 @@ export const freguesiasConcelhos = [
   { concelho: 'Brava', freguesia: 'Nossa Senhora do Monte' },
 ];
 
+export const listaFreguesias = [
+  // Santo Antão
+  { id: 1, ilha: 'Santo Antão', concelho: 'Ribeira Grande', freguesia: 'Nossa Senhora do Rosário', duplicada: true },
+  {
+    id: 2,
+    ilha: 'Santo Antão',
+    concelho: 'Ribeira Grande',
+    freguesia: 'Nossa Senhora do Livramento',
+    duplicada: false,
+  },
+  { id: 3, ilha: 'Santo Antão', concelho: 'Ribeira Grande', freguesia: 'Santo Crucifixo', duplicada: false },
+  { id: 4, ilha: 'Santo Antão', concelho: 'Ribeira Grande', freguesia: 'São Pedro Apóstolo', duplicada: false },
+  { id: 5, ilha: 'Santo Antão', concelho: 'Paul', freguesia: 'Santo António das Pombas', duplicada: false },
+  { id: 6, ilha: 'Santo Antão', concelho: 'Porto Novo', freguesia: 'São João Baptista', duplicada: true },
+  { id: 7, ilha: 'Santo Antão', concelho: 'Porto Novo', freguesia: 'Santo André', duplicada: false },
+
+  // São Vicente
+  { id: 8, ilha: 'São Vicente', concelho: 'São Vicente', freguesia: 'Nossa Senhora da Luz', duplicada: true },
+
+  // São Nicolau
+  { id: 9, ilha: 'São Nicolau', concelho: 'Ribeira Brava', freguesia: 'Nossa Senhora da Lapa', duplicada: false },
+  { id: 10, ilha: 'São Nicolau', concelho: 'Ribeira Brava', freguesia: 'Nossa Senhora do Rosário', duplicada: true },
+  { id: 11, ilha: 'São Nicolau', concelho: 'Tarrafal de São Nicolau', freguesia: 'São Francisco', duplicada: false },
+
+  // Sal
+  { id: 12, ilha: 'Sal', concelho: 'Sal', freguesia: 'Nossa Senhora das Dores', duplicada: false },
+
+  // Boa Vista
+  { id: 13, ilha: 'Boa Vista', concelho: 'Boa Vista', freguesia: 'Santa Isabel', duplicada: false },
+  { id: 14, ilha: 'Boa Vista', concelho: 'Boa Vista', freguesia: 'São João Baptista', duplicada: true },
+
+  // Maio
+  { id: 15, ilha: 'Maio', concelho: 'Maio', freguesia: 'Nossa Senhora da Luz', duplicada: true },
+
+  // Santiago
+  { id: 16, ilha: 'Santiago', concelho: 'Praia', freguesia: 'Nossa Senhora da Graça', duplicada: false },
+  { id: 17, ilha: 'Santiago', concelho: 'São Domingos', freguesia: 'Nossa Senhora da Luz', duplicada: true },
+  { id: 18, ilha: 'Santiago', concelho: 'São Domingos', freguesia: 'São Nicolau Tolentino', duplicada: false },
+  { id: 19, ilha: 'Santiago', concelho: 'Santa Catarina', freguesia: 'Santa Catarina', duplicada: false },
+  { id: 20, ilha: 'Santiago', concelho: 'São Salvador do Mundo', freguesia: 'São Salvador do Mundo', duplicada: false },
+  { id: 21, ilha: 'Santiago', concelho: 'Santa Cruz', freguesia: 'Santiago Maior', duplicada: false },
+  {
+    id: 22,
+    ilha: 'Santiago',
+    concelho: 'São Lourenço dos Órgãos',
+    freguesia: 'São Lourenço dos Órgãos',
+    duplicada: false,
+  },
+  {
+    id: 23,
+    ilha: 'Santiago',
+    concelho: 'Ribeira Grande de Santiago',
+    freguesia: 'Santíssimo Nome de Jesus',
+    duplicada: false,
+  },
+  { id: 24, ilha: 'Santiago', concelho: 'Ribeira Grande de Santiago', freguesia: 'São João Baptista', duplicada: true },
+  { id: 25, ilha: 'Santiago', concelho: 'São Miguel', freguesia: 'São Miguel Arcanjo', duplicada: false },
+  { id: 26, ilha: 'Santiago', concelho: 'Tarrafal', freguesia: 'Santo Amaro Abade', duplicada: false },
+
+  // Fogo
+  { id: 27, ilha: 'Fogo', concelho: 'São Filipe', freguesia: 'São Lourenço', duplicada: false },
+  { id: 28, ilha: 'Fogo', concelho: 'São Filipe', freguesia: 'Nossa Senhora da Conceição', duplicada: false },
+  { id: 29, ilha: 'Fogo', concelho: 'Santa Catarina do Fogo', freguesia: 'Santa Catarina do Fogo', duplicada: false },
+  { id: 30, ilha: 'Fogo', concelho: 'Mosteiros', freguesia: 'Nossa Senhora da Ajuda', duplicada: false },
+
+  // Brava
+  { id: 31, ilha: 'Brava', concelho: 'Brava', freguesia: 'São João Baptista', duplicada: true },
+  { id: 32, ilha: 'Brava', concelho: 'Brava', freguesia: 'Nossa Senhora do Monte', duplicada: false },
+];
+
 export const sitClausulas = [
   { id: 'RASCUNHO', label: 'RASCUNHO' },
   { id: 'EM REVISÃO', label: 'EM REVISÃO' },

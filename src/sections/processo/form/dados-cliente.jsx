@@ -8,7 +8,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { fluxosGmkt, bancaDigital } from '../../../utils/validarAcesso';
 // components
 import GridItem from '../../../components/GridItem';
-import { AddItem, DefaultAction } from '../../../components/Actions';
+import { AddItem, DeleteBox } from '../../../components/Actions';
 import { RHFTextField, RHFNumberField, RHFDataEntrada } from '../../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ export function Entidades({ fields = [], append, remove }) {
               type: 'number',
               endAdornment: (
                 <InputAdornment position="end">
-                  <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />
+                  <DeleteBox onClick={() => remove(index)} />
                 </InputAdornment>
               ),
             }}

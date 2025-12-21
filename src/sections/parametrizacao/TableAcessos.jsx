@@ -158,9 +158,9 @@ export default function TableAcessos({ tab }) {
                           </>
                         )}
                         <TableCell align="center" width={10}>
-                          {(emailCheck(mail, '') || dataVal(row?.datalimite || row?.data_limite)) && (
+                          {(emailCheck(mail) || dataVal(row?.datalimite || row?.data_limite)) && (
                             <Stack direction="row" spacing={0.5} justifyContent="right">
-                              {emailCheck(mail, '') && (
+                              {emailCheck(mail) && (
                                 <DefaultAction
                                   small
                                   label="ELIMINAR"
