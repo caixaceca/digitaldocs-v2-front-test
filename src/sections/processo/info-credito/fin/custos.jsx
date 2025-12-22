@@ -1,0 +1,156 @@
+// utils
+import { gerarTabela } from './gerar-tabela';
+import { fCurrency, fPercent } from '../../../../utils/formatNumber';
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export const custos = (dados) =>
+  gerarTabela({
+    columns: 2,
+    title: 'C. CUSTOS DO CRÉDITO',
+    rows: [
+      { label: '1. Taxa de juro anual nominal (TAN)' },
+      { cells: 2, level: 2, label: '1.1. Taxa de juro nominal', value: dados?.tan ?? '--' },
+      { cells: 2, level: 2, label: '1.2. Regime  de taxa de juro', value: dados?.regime_taxa_juro ?? '--' },
+      { cells: 2, level: 2, label: '1.3. Taxa de juro nominal fixa', value: dados?.taxa_juro_nominal_fixa ?? '--' },
+      { cells: 2, level: 3, label: '1.3.1. Taxa base (se aplicável)', value: dados?.taxa_base ?? '--' },
+      { cells: 2, level: 3, label: '1.3.2. Spread inicial (se aplicável)', value: dados?.spread_inicial ?? '--' },
+      {
+        cells: 2,
+        level: 3,
+        label: '1.3.3. Taxa de juro fixa contratada (se aplicável)',
+        value: dados?.taxa_juro_fixa_contratada ?? '--',
+      },
+      { cells: 2, level: 3, label: '1.3.4. Alteração da taxa (se aplicável)', value: dados?.alteracao_taxa ?? '--' },
+      {
+        cells: 2,
+        level: 2,
+        label: '1.4. Taxa de juro nominal variável (se aplicável)',
+        value: dados?.taxa_juro_nominal_variável ?? '--',
+      },
+      { cells: 2, level: 3, label: '1.4.1. Indexante', value: dados?.indexante ?? '--' },
+      { cells: 2, level: 3, label: '1.4.2. Spread', value: dados?.spread ?? '--' },
+      { cells: 2, level: 3, label: '1.4.3. Spread contratado', value: dados?.spread_contratado ?? '--' },
+      { cells: 2, level: 3, label: '1.4.2. Alteração da taxa (se aplicável)', value: dados?.alteracao_taxa ?? '--' },
+      {
+        cells: 2,
+        level: 2,
+        label: '1.5. Periodicidade de revisão da taxa',
+        value: dados?.periodicidade_revisao_taxa ?? '--',
+      },
+      { cells: 2, level: 2, label: '1.6. Outros componentes', value: dados?.outros_componentes ?? '--' },
+      { label: '2. Taxa anual de encargos efetiva global (TAEG)' },
+      { cells: 2, level: 2, label: '2.1. TAEG', value: fPercent(dados?.taeg ?? 0) },
+      {
+        cells: 2,
+        level: 2,
+        label: '2.2. Valor total dos encargos',
+        value: fCurrency(dados?.valor_total_encargos_iniciais ?? 0),
+      },
+      {
+        cells: 2,
+        level: 2,
+        label: '2.3. Vendas associadas facultativas',
+        value: dados?.vendas_associadas_facultativas ?? '--',
+      },
+      {
+        cells: 2,
+        level: 3,
+        label: '2.3.1. Descrição do produto ou serviço financeiro adquirido',
+        value: dados?.produto_servico ?? '--',
+      },
+      { level: 2, label: '2.4. Condições promocionais' },
+      {
+        cells: 2,
+        level: 3,
+        label: '2.4.1. Descrição das condições promocionais',
+        value: dados?.condicoes_promocionais ?? '--',
+      },
+      { cells: 2, level: 3, label: '2.4.2. TAEG com condições promocionais', value: dados?.taeg_promocionais ?? '--' },
+      {
+        cells: 2,
+        level: 3,
+        label: '2.4.3. TAEG sem condições promocionais',
+        value: dados?.taeg_sem_promocionais ?? '--',
+      },
+      {
+        cells: 2,
+        level: 3,
+        label: '2.4.4. TAEG após condições promocionais',
+        value: dados?.taeg_apos_promocionais ?? '--',
+      },
+      { level: 2, label: '2.5. Condições incluídas na TAEG' },
+      { cells: 2, level: 3, label: '2.5.1. Comissões iniciais', value: dados?.comissoes_iniciais ?? '--' },
+      {
+        cells: 2,
+        level: 3,
+        label: '2.5.2. Comissões de processamento de prestações (se aplicável)',
+        value: dados?.comissoes_processamento ?? '--',
+      },
+      { cells: 2, level: 2, label: '2.6. Anuidades (se aplicável)', value: dados?.anuidades ?? '--' },
+      { cells: 2, level: 2, label: '2.7. Seguros exigidos (se aplicável)', value: dados?.seguros ?? '--' },
+      { level: 2, label: '2.8. Imposto de selo (se aplicável)' },
+      { cells: 2, level: 3, label: 'Capital', value: dados?.capital ?? '--' },
+      { cells: 2, level: 3, label: 'Juros', value: dados?.juros ?? '--' },
+      { cells: 2, level: 3, label: 'Comissões', value: dados?.comissoes ?? '--' },
+      {
+        cells: 2,
+        level: 2,
+        label: '2.9. Abertura de conta depósito a ordem (DO)',
+        value: dados?.abertura_conta_do ?? '--',
+      },
+      { cells: 2, level: 2, label: '2.10. Custos com conta DO', value: dados?.custos_conta_do ?? '--' },
+      {
+        cells: 2,
+        level: 2,
+        label: '2.11. Custos com meios de pagamentos',
+        value: dados?.custos_meios_pagamento ?? '--',
+      },
+      { cells: 2, level: 2, label: '2.12. Custos notariais (se aplicável)', value: dados?.custos_notariais ?? '--' },
+      { cells: 2, level: 3, label: 'Procuração irrevogável', value: dados?.procuracao_irrevogavel ?? '--' },
+      { cells: 2, level: 3, label: 'Reconhecimento de assinatura', value: dados?.reconhecimento_assinatura ?? '--' },
+      { cells: 2, level: 3, label: 'Termo de autenticação', value: dados?.termo_autenticaçao ?? '--' },
+      { cells: 2, level: 3, label: 'Custo de escritura', value: dados?.custo_escritura ?? '--' },
+      { cells: 2, level: 3, label: 'Custo de registo', value: dados?.custo_registo ?? '--' },
+      {
+        cells: 2,
+        level: 3,
+        label: 'Custo de emissão de certidão predial',
+        value: dados?.custo_certidao_predial ?? '--',
+      },
+      { cells: 2, level: 3, label: 'Custo de emissão do CIP', value: dados?.custo_cip ?? '--' },
+      { cells: 2, level: 3, label: 'Custo do IUP de Transição', value: dados?.custo_iup_transicao ?? '--' },
+      { cells: 2, level: 3, label: '2.12.1. Outros custos', value: dados?.outros_custos ?? '--' },
+      {
+        cells: 2,
+        level: 3,
+        label: '2.12.2. Condições de alteração dos custo (se aplicável)',
+        value: dados?.alteracao_custos ?? '--',
+      },
+
+      { label: '3. Outros custos e despesas' },
+      {
+        cells: 2,
+        level: 2,
+        label: '3.1. Comissão de contrato de hipoteca/escritura',
+        value: dados?.comissao_contrato ?? '--',
+      },
+      { cells: 2, level: 2, label: '3.2. Comissão de desistência', value: dados?.comissao_desistencia ?? '--' },
+      { label: '4. Montante total imputado ao consumidor (se aplicável)' },
+      { label: '5. Custos por falta de pagamento' },
+      { cells: 2, level: 2, label: '5.1. Taxa de juro de mora', value: dados?.taxa_mora ?? '--' },
+      {
+        level: 2,
+        label: '5.2. Regras de aplicação da taxa de juro de mora',
+        value:
+          'A sobretaxa de mora será aplicada, agravando a taxa de juros, sempre que o Mutuário não faça o pagamento de qualquer prestação de reembolso na data do seu vencimento. A aplicação da sobretaxa de mora durará enquanto durar a mora.',
+      },
+      {
+        level: 2,
+        label: '5.3. Implicações de não cumprimento do contrato (falta de pagamento do crédito)',
+        value:
+          'A falta de cumprimento do contrato poderá acarretar:\n• Resolução do contrato por parte do banco;\n• Inclusão do Mutuário e Garantes na Central de Risco de Crédito;\n• Execução judicial;\n• Perda do património pessoal/do bem dado em garantia',
+      },
+      { level: 2, label: '5.4. Outros encargos', value: dados?.outros_encargos ?? '--' },
+    ],
+  });

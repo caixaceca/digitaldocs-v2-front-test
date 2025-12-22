@@ -16,7 +16,6 @@ export const shapePercentagem = (label) =>
   Yup.number()
     .transform((value, originalValue) => (originalValue === '' ? undefined : value))
     .positive()
-    .max(100)
     .required()
     .label(label);
 

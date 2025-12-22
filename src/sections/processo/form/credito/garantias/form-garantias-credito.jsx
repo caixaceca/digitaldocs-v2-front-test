@@ -65,7 +65,7 @@ export default function FormGarantias({ processoId, onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2} sx={{ flexGrow: 1, pt: 1 }}>
-            <GridItem sm={subtipos.length > 0 ? 6 : 12} md={subtipos.length > 0 ? 4 : 7}>
+            <GridItem md={subtipos.length > 0 ? 5 : 9}>
               <RHFAutocompleteObj
                 dc
                 label="Garantia"
@@ -79,7 +79,7 @@ export default function FormGarantias({ processoId, onClose }) {
             </GridItem>
 
             {subtipos.length > 0 ? (
-              <GridItem sm={6} md={3}>
+              <GridItem sm={8} md={4}>
                 <RHFAutocompleteObj
                   dc
                   label="Subtipo"
@@ -89,8 +89,7 @@ export default function FormGarantias({ processoId, onClose }) {
                 />
               </GridItem>
             ) : null}
-            <GridItem sm={6} md={3} children={<RHFNumberField label="Valor" name="valor" tipo="CVE" />} />
-            <GridItem sm={6} md={2} children={<RHFNumberField label="Cobertura" name="cobertura" tipo="%" />} />
+            <GridItem sm={4} md={3} children={<RHFNumberField label="Cobertura" name="cobertura" tipo="%" />} />
             {chaveMeta === 'fiadores' && <GridItem children={<FormEntidades label="Fiador" name="fiadores" />} />}
             {chaveMeta === 'livrancas' && <GridItem children={<FormLivrancas />} />}
             {chaveMeta === 'contas' && <GridItem children={<FormDps />} />}
@@ -118,5 +117,5 @@ function extrairChaveMeta(tipoSelecionado, subtipoSelecionado) {
     return tipoSelecionado?.chave_meta ?? null;
   }
   if (!subtipoSelecionado) return null;
-  return subtipoSelecionado?.chave_meta ?? null;
+  return subtipoSelecionado?.chave_meta ?? tipoSelecionado?.chave_meta ?? null;
 }

@@ -6,7 +6,6 @@ import { validacao, shapeNumberStd, shapePercentagem } from '../../../../../comp
 
 export const shapeGarantia = () =>
   Yup.object({
-    valor: shapeNumberStd('Valor'),
     cobertura: shapePercentagem('Cobertura'),
     tipo_garantia: Yup.mixed().required().label('Garantia'),
     subtipo_garantia: Yup.mixed().when('tipo_garantia', {

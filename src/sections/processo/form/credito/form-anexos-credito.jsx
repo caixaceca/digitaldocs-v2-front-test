@@ -43,6 +43,7 @@ export default function FormAnexosCredito({ dados }) {
   const onSubmit = async () => {
     try {
       const formData = new FormData();
+      formData.append('garantias', []);
       formData.append('agendado', false);
       formData.append('uo_origem_id', estado?.uo_id);
       formData.append('estado_atual_id', estado?.id);

@@ -20,19 +20,15 @@ const assinaturaBanco = (agencia, nomeGerente) =>
   gerarTabela({
     title: 'ASSINATURA DO BANCO',
     rows: [
-      [
-        1,
-        1,
-        '',
-        [
+      {
+        value: [
           new Paragraph({
-            spacing: { after: 200 },
             alignment: AlignmentType.CENTER,
             children: [new TextRun({ text: `A Gerência da Agência ${agencia}`, break: 1 })],
           }),
           assinatura(nomeGerente),
         ],
-      ],
+      },
     ],
   });
 
@@ -42,11 +38,8 @@ const assinaturaProponente = (nomeProponente) =>
   gerarTabela({
     title: 'DECLARAÇÃO DO PROPONENTE',
     rows: [
-      [
-        1,
-        1,
-        '',
-        [
+      {
+        value: [
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
             children: [
@@ -61,22 +54,18 @@ const assinaturaProponente = (nomeProponente) =>
           }),
           assinatura(nomeProponente),
         ],
-      ],
+      },
     ],
   });
 
 // ---------------------------------------------------------------------------------------------------------------------
-// Assinatura dos Fiadores
 
 const assinaturaFiadores = (fiadores = []) =>
   gerarTabela({
     title: 'DECLARAÇÃO DO(S) FIADOR(ES)',
     rows: [
-      [
-        1,
-        1,
-        '',
-        [
+      {
+        value: [
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
             children: [
@@ -87,7 +76,7 @@ const assinaturaFiadores = (fiadores = []) =>
           }),
           ...fiadores.map((f) => assinatura(f.nome)),
         ],
-      ],
+      },
     ],
   });
 

@@ -10,8 +10,10 @@ import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/
 import { assinaturas } from './assinaturas';
 import DownloadModelo from '../../Detalhes/anexos/download-modelo';
 //
-import { planoFinanceiroTable, informacaoGeralTable } from './parte_2_3';
-import { identificacaoTable, principaisCaracteristicasTable, custosTable } from './parte_1';
+import { custos } from './custos';
+import { identificacao } from './identificacao';
+import { principaisCaracteristicas } from './caracteristicas';
+import { planoFinanceiro, informacaoGeral } from './informacao-geral';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -72,15 +74,15 @@ export default function Fincc({ dados = {} }) {
             }),
             footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
             children: [
-              identificacaoTable(defaulted),
-              principaisCaracteristicasTable(defaulted),
-              custosTable(defaulted),
+              identificacao(defaulted),
+              principaisCaracteristicas(defaulted),
+              custos(defaulted),
 
               new Paragraph({ text: '', break: 1 }),
-              planoFinanceiroTable(defaulted),
+              planoFinanceiro(defaulted),
 
               new Paragraph({ text: '', break: 1 }),
-              informacaoGeralTable(defaulted),
+              informacaoGeral(defaulted),
 
               ...assinaturas(agencia, nomeGerente, nomeProponente, fiadores),
             ],

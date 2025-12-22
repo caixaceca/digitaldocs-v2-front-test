@@ -31,8 +31,17 @@ const calcLeftMarginByLevel = (level = 1) => {
   return BASE_LEFT_MARGIN + (level - 1) * LEVEL_INDENT_PT * PT_TO_TWIPS;
 };
 
-const normalizeChildren = (value, bold = false) =>
-  Array.isArray(value) ? value : [new TextRun({ text: String(value ?? ''), bold })];
+const normalizeChildren = (value, bold = false) => {
+  if (typeof value === 'string' || typeof value === 'number') {
+    return [new TextRun({ text: String(value), bold })];
+  }
+
+  if (Array.isArray(value) && value.every((v) => v instanceof TextRun)) {
+    return value;
+  }
+
+  return [new TextRun({ text: 'Não identificado' })];
+};
 
 const createCell = ({ size, shading, children, level = 1, columnSpan, bold = false }) => {
   const justified = !bold && !Array.isArray(children);
@@ -113,7 +122,7 @@ export const gerarTabela = ({ columns = 1, title = '', rows = [], section = '', 
     throw new Error('rows deve ser um array');
   }
 
-  const body = rows.flatMap(([cells, level = 1, label, value]) => {
+  const body = rows.flatMap(({ cells = 1, level = 1, label = '', value = null }) => {
     if (cells === 2) {
       return buildTwoColumnRows({ level, label, value, columnsWidth });
     }

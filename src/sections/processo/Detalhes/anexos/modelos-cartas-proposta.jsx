@@ -83,40 +83,44 @@ export default function CartaPropostaWord({ dados = {} }) {
         columnsWidth: [40, 60],
         title: 'CONDIÇÕES GERAIS',
         rows: [
-          [2, 1, 'Modalidade', 'Mútuo, na modalidade de CrediCaixa'],
-          [
-            2,
-            1,
-            `Montante aprovado`,
-            `${fCurrency(montante ?? 0)} CVE, corresponde a 16 meses de vencimento do proponente.`,
-          ],
-          [
-            2,
-            1,
-            `Desembolso`,
-            `Numa única tranche no prazo máximo de ${prazoEntregaContrato} dias úteis após entrega do contrato com as assinaturas reconhecidas perante o Notário.`,
-          ],
-          [2, 1, `Forma de utilização`, 'Imediata, na data de disponibilização do crédito.'],
-          [2, 1, `Prazo de amortização`, `${prazoAmortizacao} meses, a contar da data de assinatura do contrato.`],
-          [
-            2,
-            1,
-            `Taxa de juro anual nominal (TAN)`,
-            [
+          { cells: 2, label: 'Modalidade', value: 'Mútuo, na modalidade de CrediCaixa' },
+          {
+            cells: 2,
+            label: `Montante aprovado`,
+            value: `${fCurrency(montante ?? 0)} CVE, corresponde a 16 meses de vencimento do proponente.`,
+          },
+          {
+            cells: 2,
+            label: `Desembolso`,
+            value: `Numa única tranche no prazo máximo de ${prazoEntregaContrato} dias úteis após entrega do contrato com as assinaturas reconhecidas perante o Notário.`,
+          },
+          { cells: 2, label: `Forma de utilização`, value: 'Imediata, na data de disponibilização do crédito.' },
+          {
+            cells: 2,
+            label: `Prazo de amortização`,
+            value: `${prazoAmortizacao} meses, a contar da data de assinatura do contrato.`,
+          },
+          {
+            cells: 2,
+            label: `Taxa de juro anual nominal (TAN)`,
+            value: [
               new TextRun({ text: `${fPercent(tan)} ao ano, sujeito às alterações do preçário da Caixa` }),
               new TextRun({
                 text: 'Os juros serão contados sobre o capital utilizado e efetivamente em dívida e serão incluídos nas prestações de reembolso.',
                 break: 2,
               }),
             ],
-          ],
-          [2, 1, `TAEG`, `${fPercent(taeg)} conforme cálculo efetuado nos termos legais.`],
-          [2, 1, `Taxa de juro de mora`, `${fPercent(taxaMora)} a.a. que acresce à TAN, em caso de mora.`],
-          [
-            2,
-            1,
-            `Garantia`,
-            [
+          },
+          { cells: 2, label: `TAEG`, value: `${fPercent(taeg)} conforme cálculo efetuado nos termos legais.` },
+          {
+            cells: 2,
+            label: `Taxa de juro de mora`,
+            value: `${fPercent(taxaMora)} a.a. que acresce à TAN, em caso de mora.`,
+          },
+          {
+            cells: 2,
+            label: `Garantia`,
+            value: [
               new TextRun({ text: 'Fiança solidária sem benefício de excussão prévia, prestada por:' }),
               ...fiadores.map(
                 (f) =>
@@ -126,13 +130,12 @@ export default function CartaPropostaWord({ dados = {} }) {
                   })
               ),
             ],
-          ],
-          [
-            2,
-            1,
-            `Reembolso`,
-            `Em ${prazoAmortizacao} prestações mensais e consecutivas de ${fCurrency(Math.round((montante || 0) / prazoAmortizacao))} CVE cada, acrescido de imposto de selo sobre os juros.`,
-          ],
+          },
+          {
+            cells: 2,
+            label: `Reembolso`,
+            value: `Em ${prazoAmortizacao} prestações mensais e consecutivas de ${fCurrency(Math.round((montante || 0) / prazoAmortizacao))} CVE cada, acrescido de imposto de selo sobre os juros.`,
+          },
         ],
       });
 
@@ -141,30 +144,26 @@ export default function CartaPropostaWord({ dados = {} }) {
         columnsWidth: [40, 60],
         title: 'ENCARGOS INICIAIS',
         rows: [
-          [
-            2,
-            1,
-            'Comissão de abertura',
-            `À taxa de ${comissaoAbertura}. No montante de ${fCurrency(valorComissaoAbertura ?? 0)}.`,
-          ],
-          [
-            2,
-            1,
-            'Imposto de selo sobre crédito',
-            `À taxa de ${fPercent(impostoSelo)}. No montante de ${fCurrency(valorImpostoSelo ?? 0)}.`,
-          ],
-          [
-            2,
-            1,
-            'Imposto de selo sobre comissão',
-            `À taxa de 3,5%. No montante de ${fCurrency(valorImpostoSeloComissao ?? 0)}.`,
-          ],
-          [
-            2,
-            1,
-            'Total de encargos iniciais',
-            `${fCurrency(encargosIniciais ?? 0)}. Todos os pagamentos serão efetuados por débito na conta nº ${contaPagamento} do proponente.`,
-          ],
+          {
+            cells: 2,
+            label: 'Comissão de abertura',
+            value: `À taxa de ${comissaoAbertura}. No montante de ${fCurrency(valorComissaoAbertura ?? 0)}.`,
+          },
+          {
+            cells: 2,
+            label: 'Imposto de selo sobre crédito',
+            value: `À taxa de ${fPercent(impostoSelo)}. No montante de ${fCurrency(valorImpostoSelo ?? 0)}.`,
+          },
+          {
+            cells: 2,
+            label: 'Imposto de selo sobre comissão',
+            value: `À taxa de 3,5%. No montante de ${fCurrency(valorImpostoSeloComissao ?? 0)}.`,
+          },
+          {
+            cells: 2,
+            label: 'Total de encargos iniciais',
+            value: `${fCurrency(encargosIniciais ?? 0)}. Todos os pagamentos serão efetuados por débito na conta nº ${contaPagamento} do proponente.`,
+          },
         ],
       });
 
@@ -172,18 +171,15 @@ export default function CartaPropostaWord({ dados = {} }) {
         columnsWidth: [40, 60],
         title: 'OUTRAS OBRIGAÇÕES',
         rows: [
-          [
-            1,
-            1,
-            'Domiciliação de salário',
-            'Em caso de contratualização, o Proponente e Fiadores obrigam-se a manter o salário/pensão/outros rendimentos domiciliados na Caixa enquanto perdurarem as obrigações contratuais.',
-          ],
-          [
-            1,
-            1,
-            'Contratualização',
-            `O contrato deverá ser assinado e devolvido no prazo máximo de ${prazoEntregaContrato} dias úteis, sob pena da proposta ser considerada sem efeito.`,
-          ],
+          {
+            label: 'Domiciliação de salário',
+            value:
+              'Em caso de contratualização, o Proponente e Fiadores obrigam-se a manter o salário/pensão/outros rendimentos domiciliados na Caixa enquanto perdurarem as obrigações contratuais.',
+          },
+          {
+            label: 'Contratualização',
+            value: `O contrato deverá ser assinado e devolvido no prazo máximo de ${prazoEntregaContrato} dias úteis, sob pena da proposta ser considerada sem efeito.`,
+          },
         ],
       });
 

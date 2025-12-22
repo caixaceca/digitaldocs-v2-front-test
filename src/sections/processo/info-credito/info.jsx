@@ -160,8 +160,8 @@ function DadosCredito({ dados, modificar, mail }) {
           </Stack>
         )}
 
-        {emailCheck(mail) && <Fincc dados={dados} />}
-        {emailCheck(mail) && <CartaPropostaWord dados={dados} />}
+        {situacao === 'em análise' && emailCheck(mail) && <Fincc dados={dados} />}
+        {situacao === 'aprovado' && emailCheck(mail) && <CartaPropostaWord dados={dados} />}
       </List>
 
       {openSituacao === 'atualizar' && <FormSituacao dados={dados} onClose={() => setOpenSituacao('')} />}
