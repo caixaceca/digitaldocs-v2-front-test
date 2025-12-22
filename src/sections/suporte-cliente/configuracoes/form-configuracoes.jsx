@@ -219,6 +219,71 @@ export function SlaForm({ onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function SlaUoForm({ onClose }) {
+  const dispatch = useDispatch();
+  const { isEdit, assuntos, departamentos, isSaving, selectedItem } = useSelector((state) => state.suporte);
+
+  const assuntosList = useMemo(() => assuntos?.map(({ id, name }) => ({ id, label: name })), [assuntos]);
+  const departsList = useMemo(() => departamentos?.map(({ id, name }) => ({ id, label: name })), [departamentos]);
+
+  const formSchema = Yup.object().shape({
+    name: Yup.string().required().label('Nome'),
+    assunto: Yup.mixed().required().label('Assunto'),
+    departamento: Yup.mixed().required().label('Departamento'),
+    resolution_time_mn: Yup.number().positive().required().label('Tempo de resolução'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({
+      name: selectedItem?.name ?? '',
+      resolution_time_mn: selectedItem?.resolution_time_mn ?? 0,
+      assunto: assuntosList?.find(({ id }) => id === selectedItem?.subject_id) ?? null,
+      departamento: departsList?.find(({ id }) => id === selectedItem?.department_id) ?? null,
+    }),
+    [selectedItem, assuntosList, departsList]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { reset, handleSubmit } = methods;
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem]);
+
+  const onSubmit = async (values) => {
+    const params = { id: selectedItem?.id, msg: `SLA ${isEdit ? 'atualizado' : 'adicionado'}` };
+    const formData = {
+      name: values?.name,
+      subject_id: values?.assunto?.id,
+      department_id: values?.departamento?.id,
+      resolution_time_mn: values?.resolution_time_mn,
+    };
+    dispatch((isEdit ? updateInSuporte : createInSuporte)('slasUo', JSON.stringify(formData), { ...params, onClose }));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{isEdit ? 'Editar SLA' : 'Adicionar SLA'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={1}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFTextField name="name" label="Nome" />
+              <RHFAutocompleteObj name="departamento" label="Departamento" options={departsList} />
+              <RHFAutocompleteObj name="assunto" label="Assunto" options={assuntosList} />
+              <RHFNumberField name="resolution_time_mn" label="Tempo de resolução" tipo="min" />
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export function DepartamentoForm({ onClose }) {
   const dispatch = useDispatch();
   const { uos } = useSelector((state) => state.intranet);

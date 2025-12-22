@@ -55,7 +55,6 @@ export default function InfoCredito({ dados }) {
       ),
     },
     { value: 'Garantias', component: <GarantiasSeguros dados={{ ...dados, modificar, creditoId: dados?.id }} /> },
-    { value: 'Seguros', component: <GarantiasSeguros dados={{ ...dados, modificar, creditoId: dados?.id }} seguro /> },
     ...(modificar && estadoInicial ? [{ value: 'Ficha de análise', component: <FichaAnalise /> }] : []),
     { value: 'Pareceres', component: <PareceresCredito infoCredito /> },
   ];

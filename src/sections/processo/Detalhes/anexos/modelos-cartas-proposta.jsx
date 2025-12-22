@@ -1,28 +1,17 @@
 import { saveAs } from 'file-saver';
 import { useSnackbar } from 'notistack';
 // docx
-import {
-  Table,
-  Packer,
-  TextRun,
-  Document,
-  TableRow,
-  Paragraph,
-  TableCell,
-  WidthType,
-  BorderStyle,
-  ShadingType,
-  VerticalAlign,
-  AlignmentType,
-} from 'docx';
+import { Packer, TextRun, Document, Paragraph, AlignmentType } from 'docx';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
 import { ptDate } from '../../../../utils/formatTime';
 import { fCurrency, fPercent } from '../../../../utils/formatNumber';
-import { CabecalhoWord, RodapeWord, stylesWord } from '../../../../components/exportar-dados/word';
+import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
 //
 import DownloadModelo from './download-modelo';
+import { assinaturas } from '../../info-credito/fin/assinaturas';
+import { gerarTabela } from '../../info-credito/fin/gerar-tabela';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -55,88 +44,6 @@ export default function CartaPropostaWord({ dados = {} }) {
     agencia_localizacao: 'Plateau',
     ...dados,
   };
-
-  const fCVE = (v) => fCurrency(v || 0);
-
-  const gerarTabela = (titulo, linhas, cells) => {
-    const borderConf = {
-      top: { style: BorderStyle.SINGLE, size: 1, color: 'd9d9d9' },
-      left: { style: BorderStyle.SINGLE, size: 1, color: 'd9d9d9' },
-      right: { style: BorderStyle.SINGLE, size: 1, color: 'd9d9d9' },
-      bottom: { style: BorderStyle.SINGLE, size: 1, color: 'd9d9d9' },
-    };
-
-    const header = new TableRow({
-      children: [
-        new TableCell({
-          columnSpan: cells,
-          borders: borderConf,
-          verticalAlign: VerticalAlign.CENTER,
-          shading: { fill: 'f2f2f2', type: ShadingType.CLEAR },
-          margins: { top: 100, bottom: 100, left: 150, right: 150 },
-          children: [
-            new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: titulo, bold: true })] }),
-          ],
-        }),
-      ],
-    });
-
-    const rows =
-      cells === 2
-        ? linhas.map(
-            ([campo, valor]) =>
-              new TableRow({
-                children: [
-                  new TableCell({
-                    borders: borderConf,
-                    width: { size: 35, type: WidthType.PERCENTAGE },
-                    margins: { top: 100, bottom: 50, left: 120, right: 120 },
-                    children: [
-                      new Paragraph({
-                        alignment: AlignmentType.LEFT,
-                        children: [new TextRun({ text: campo, bold: true })],
-                      }),
-                    ],
-                  }),
-                  new TableCell({
-                    borders: borderConf,
-                    width: { size: 65, type: WidthType.PERCENTAGE },
-                    margins: { top: 100, bottom: 50, left: 120, right: 120 },
-                    children: [
-                      new Paragraph({
-                        spacing: { line: 300 },
-                        alignment: AlignmentType.JUSTIFIED,
-                        children: valor instanceof Array ? valor : [new TextRun({ text: valor })],
-                      }),
-                    ],
-                  }),
-                ],
-              })
-          )
-        : [
-            new TableRow({
-              children: [
-                new TableCell({
-                  borders: borderConf,
-                  width: { size: 100, type: WidthType.PERCENTAGE },
-                  margins: { top: 100, bottom: 200, left: 120, right: 120 },
-                  children: linhas,
-                }),
-              ],
-            }),
-          ];
-
-    return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [header, ...rows] });
-  };
-
-  const assinatura = (nome) =>
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [
-        new TextRun({ text: '__________________________________________', break: 2 }),
-        new TextRun({ text: nome, break: 1 }),
-      ],
-    });
 
   const exportToWord = async (setLoading) => {
     try {
@@ -171,19 +78,30 @@ export default function CartaPropostaWord({ dados = {} }) {
         valor_imposto_selo_comissao: valorImpostoSeloComissao,
       } = defaulted;
 
-      const condicoesGerais = gerarTabela(
-        'CONDIÇÕES GERAIS',
-        [
-          ['Modalidade', 'Mútuo, na modalidade de CrediCaixa'],
-          ['Montante aprovado', `${fCVE(montante)} CVE, corresponde a 16 meses de vencimento do proponente.`],
+      const condicoesGerais = gerarTabela({
+        columns: 2,
+        columnsWidth: [40, 60],
+        title: 'CONDIÇÕES GERAIS',
+        rows: [
+          [2, 1, 'Modalidade', 'Mútuo, na modalidade de CrediCaixa'],
           [
-            'Desembolso',
+            2,
+            1,
+            `Montante aprovado`,
+            `${fCurrency(montante ?? 0)} CVE, corresponde a 16 meses de vencimento do proponente.`,
+          ],
+          [
+            2,
+            1,
+            `Desembolso`,
             `Numa única tranche no prazo máximo de ${prazoEntregaContrato} dias úteis após entrega do contrato com as assinaturas reconhecidas perante o Notário.`,
           ],
-          ['Forma de utilização', 'Imediata, na data de disponibilização do crédito.'],
-          ['Prazo de amortização', `${prazoAmortizacao} meses, a contar da data de assinatura do contrato.`],
+          [2, 1, `Forma de utilização`, 'Imediata, na data de disponibilização do crédito.'],
+          [2, 1, `Prazo de amortização`, `${prazoAmortizacao} meses, a contar da data de assinatura do contrato.`],
           [
-            'Taxa de juro anual nominal (TAN)',
+            2,
+            1,
+            `Taxa de juro anual nominal (TAN)`,
             [
               new TextRun({ text: `${fPercent(tan)} ao ano, sujeito às alterações do preçário da Caixa` }),
               new TextRun({
@@ -192,10 +110,12 @@ export default function CartaPropostaWord({ dados = {} }) {
               }),
             ],
           ],
-          ['TAEG', `${fPercent(taeg)} conforme cálculo efetuado nos termos legais.`],
-          ['Taxa de juro de mora', `${fPercent(taxaMora)} a.a. que acresce à TAN, em caso de mora.`],
+          [2, 1, `TAEG`, `${fPercent(taeg)} conforme cálculo efetuado nos termos legais.`],
+          [2, 1, `Taxa de juro de mora`, `${fPercent(taxaMora)} a.a. que acresce à TAN, em caso de mora.`],
           [
-            'Garantia',
+            2,
+            1,
+            `Garantia`,
             [
               new TextRun({ text: 'Fiança solidária sem benefício de excussão prévia, prestada por:' }),
               ...fiadores.map(
@@ -208,90 +128,72 @@ export default function CartaPropostaWord({ dados = {} }) {
             ],
           ],
           [
-            'Reembolso',
-            `Em ${prazoAmortizacao} prestações mensais e consecutivas de ${fCVE(Math.round((montante || 0) / prazoAmortizacao))} CVE cada, acrescido de imposto de selo sobre os juros.`,
+            2,
+            1,
+            `Reembolso`,
+            `Em ${prazoAmortizacao} prestações mensais e consecutivas de ${fCurrency(Math.round((montante || 0) / prazoAmortizacao))} CVE cada, acrescido de imposto de selo sobre os juros.`,
           ],
         ],
-        2
-      );
+      });
 
-      const encargos = gerarTabela(
-        'ENCARGOS',
-        [
-          ['Comissão de abertura', `À taxa de ${comissaoAbertura}. No montante de ${fCVE(valorComissaoAbertura)}.`],
+      const encargos = gerarTabela({
+        columns: 2,
+        columnsWidth: [40, 60],
+        title: 'ENCARGOS INICIAIS',
+        rows: [
           [
+            2,
+            1,
+            'Comissão de abertura',
+            `À taxa de ${comissaoAbertura}. No montante de ${fCurrency(valorComissaoAbertura ?? 0)}.`,
+          ],
+          [
+            2,
+            1,
             'Imposto de selo sobre crédito',
-            `À taxa de ${fPercent(impostoSelo)}. No montante de ${fCVE(valorImpostoSelo)}.`,
+            `À taxa de ${fPercent(impostoSelo)}. No montante de ${fCurrency(valorImpostoSelo ?? 0)}.`,
           ],
-          ['Imposto de selo sobre comissão', `À taxa de 3,5%. No montante de ${fCVE(valorImpostoSeloComissao)}.`],
           [
+            2,
+            1,
+            'Imposto de selo sobre comissão',
+            `À taxa de 3,5%. No montante de ${fCurrency(valorImpostoSeloComissao ?? 0)}.`,
+          ],
+          [
+            2,
+            1,
             'Total de encargos iniciais',
-            `${fCVE(encargosIniciais)}. Todos os pagamentos serão efetuados por débito na conta nº ${contaPagamento} do proponente.`,
+            `${fCurrency(encargosIniciais ?? 0)}. Todos os pagamentos serão efetuados por débito na conta nº ${contaPagamento} do proponente.`,
           ],
         ],
-        2
-      );
+      });
 
-      const obrigacoes = gerarTabela(
-        'OUTRAS OBRIGAÇÕES',
-        [
+      const obrigacoes = gerarTabela({
+        columnsWidth: [40, 60],
+        title: 'OUTRAS OBRIGAÇÕES',
+        rows: [
           [
+            1,
+            1,
             'Domiciliação de salário',
             'Em caso de contratualização, o Proponente e Fiadores obrigam-se a manter o salário/pensão/outros rendimentos domiciliados na Caixa enquanto perdurarem as obrigações contratuais.',
           ],
           [
+            1,
+            1,
             'Contratualização',
             `O contrato deverá ser assinado e devolvido no prazo máximo de ${prazoEntregaContrato} dias úteis, sob pena da proposta ser considerada sem efeito.`,
           ],
         ],
-        2
-      );
-
-      const declaracaoProponente = gerarTabela(
-        'DECLARAÇÃO DO PROPONENTE',
-        [
-          new Paragraph({
-            spacing: { line: 300 },
-            alignment: AlignmentType.LEFT,
-            children: [
-              new TextRun({
-                text: 'Declaro que tomei conhecimento e estou ciente das condições da presente carta-proposta de crédito. E declaro que:',
-              }),
-              new TextRun({
-                text: '☐ Aceito as condições da proposta.\t☐ Não aceito as condições da proposta.',
-                break: 2,
-              }),
-            ],
-          }),
-          ...[assinatura(nomeProponente)],
-        ],
-        1
-      );
-
-      const declaracaoFiadores = gerarTabela(
-        'DECLARAÇÃO DOS FIADORES',
-        [
-          new Paragraph({
-            spacing: { line: 300 },
-            alignment: AlignmentType.LEFT,
-            children: [
-              new TextRun({
-                text: 'Declaramos que tomamos conhecimento das condições da presente proposta e estamos cientes das nossas responsabilidades na qualidade de fiadores e principais pagadores.',
-              }),
-            ],
-          }),
-          ...fiadores?.map((f) => assinatura(f.nome)),
-        ],
-        1
-      );
+      });
 
       const doc = new Document({
         creator: 'Intranet - Caixa Económica de Cabo Verde',
         title: `Carta Proposta - ${nomeProponente}`,
-        styles: stylesWord,
+        styles: createStyles('10pt'),
         sections: [
           {
-            properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '18mm', left: '18mm' } } },
+            properties: { page: { margin: { top: '58mm', right: '18mm', left: '18mm' } } },
             headers: CabecalhoWord({ enabled: true, logo, codificacao: 'JRDC.FM.C.023.00', titulo: '' }),
             footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
             children: [
@@ -323,26 +225,7 @@ export default function CartaPropostaWord({ dados = {} }) {
               encargos,
               new Paragraph({ text: '', break: 1 }),
               obrigacoes,
-
-              new Paragraph({
-                alignment: AlignmentType.LEFT,
-                children: [
-                  new TextRun({ text: 'Sem outro assunto, apresentamos os nossos melhores cumprimentos', break: 1 }),
-                ],
-              }),
-
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [new TextRun({ text: `A Gerência da Agência ${agencia}`, break: 2 })],
-              }),
-              new Paragraph({ text: '', break: 1 }),
-              new Paragraph({ text: '', break: 1 }),
-              ...[assinatura(nomeGerente)],
-
-              new Paragraph({ text: '', break: 2 }),
-              declaracaoProponente,
-              new Paragraph({ text: '', break: 1 }),
-              declaracaoFiadores,
+              ...assinaturas(agencia, nomeGerente, nomeProponente, fiadores),
             ],
           },
         ],

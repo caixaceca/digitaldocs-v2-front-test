@@ -29,6 +29,7 @@ const initialState = {
   selectedItem: null,
   faq: [],
   slas: [],
+  slasUo: [],
   tickets: [],
   prompts: [],
   pesquisa: [],
@@ -105,6 +106,7 @@ export function getInSuporte(item, params) {
         (item === 'slas' && `/api/v1/slas/all`) ||
         (item === 'assuntos' && `/api/subjects/all`) ||
         (item === 'utilizadores' && `/api/v1/users/all`) ||
+        (item === 'slasUo' && `/api/v1/department-sla/all`) ||
         (item === 'departamentos' && `/api/v1/departments/all`) ||
         (item === 'categorias' && `/api/v1/faq-categories/all`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/all`) ||
@@ -151,6 +153,7 @@ export function createInSuporte(item, body, params) {
         (item === 'slas' && `/api/v1/slas/create`) ||
         (item === 'assuntos' && `/api/subjects/create`) ||
         (item === 'utilizadores' && `/api/v1/users/register`) ||
+        (item === 'slasUo' && `/api/v1/department-sla/create`) ||
         (item === 'departamentos' && `/api/v1/departments/new`) ||
         (item === 'categorias' && `/api/v1/faq-categories/create`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/create`) ||
@@ -193,10 +196,11 @@ export function updateInSuporte(item, body, params) {
         (item === 'slas' && `/api/v1/slas/update/${params?.id}`) ||
         (item === 'assuntos' && `/api/subjects/update/${params?.id}`) ||
         (item === 'utilizadores' && `/api/v1/users/update/${params?.id}`) ||
+        (item === 'slasUo' && `/api/v1/department-sla/update/${params?.id}`) ||
         (item === 'departamentos' && `/api/v1/departments/update/${params?.id}`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/update/${params?.id}`) ||
+        (item === 'categorias' && `/api/v1/faq-categories/update/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/update/${params?.id}`) ||
-        (item === 'categorias' && `/api/v1/faq-categories/update/{id}?id=${params?.id}`) ||
         // toggle
         (item === 'toggle-faq' && `/api/v1/faqs/toggle/${params?.id}`) ||
         (item === 'toggle-utilizadores' && `/api/v1/users/toggle/${params?.id}`) ||
@@ -251,6 +255,7 @@ export function deleteInSuporte(item, params) {
         (item === 'slas' && `/api/v1/slas/delete/${params?.id}`) ||
         (item === 'assuntos' && `/api/v1/subjects/delete/${params?.id}`) ||
         (item === 'utilizadores' && `/api/v1/users/delete/${params?.id}`) ||
+        (item === 'slasUo' && `/api/v1/department-sla/delete/${params?.id}`) ||
         (item === 'departamentos' && `/api/v1/departments/delete/${params?.id}`) ||
         (item === 'categorias' && `/api/v1/faq-categories/delete/${params?.id}`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/delete/${params?.id}`) ||

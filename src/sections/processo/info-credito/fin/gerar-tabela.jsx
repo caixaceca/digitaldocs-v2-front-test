@@ -31,8 +31,8 @@ const calcLeftMarginByLevel = (level = 1) => {
   return BASE_LEFT_MARGIN + (level - 1) * LEVEL_INDENT_PT * PT_TO_TWIPS;
 };
 
-const normalizeChildren = (value, bold = false, fontSize = 20) =>
-  Array.isArray(value) ? value : [new TextRun({ text: String(value ?? ''), bold, size: fontSize })];
+const normalizeChildren = (value, bold = false) =>
+  Array.isArray(value) ? value : [new TextRun({ text: String(value ?? ''), bold })];
 
 const createCell = ({ size, shading, children, level = 1, columnSpan, bold = false }) => {
   const justified = !bold && !Array.isArray(children);
@@ -62,23 +62,23 @@ const createRow = (cells) => new TableRow({ children: cells });
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const header = (title, colspan) =>
+export const header = (title, columns) =>
   createRow([
     createCell({
       size: 100,
       bold: true,
       children: title,
-      columnSpan: colspan,
+      columnSpan: columns,
       shading: { fill: 'DCDCDC', type: ShadingType.CLEAR },
     }),
   ]);
 
-export const headerSection = (section, colspan) =>
+export const headerSection = (section, columns) =>
   createRow([
     createCell({
       size: 100,
       bold: true,
-      columnSpan: colspan,
+      columnSpan: columns,
       shading: { fill: '5AAA28', type: ShadingType.CLEAR },
       children: [new TextRun({ text: section, color: 'FFFFFF', bold: true })],
     }),
@@ -86,39 +86,42 @@ export const headerSection = (section, colspan) =>
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const buildOneColumnRows = (level, label, value, colspan) => {
+const buildOneColumnRows = ({ level, label, value }) => {
   const rows = [];
 
   if (label !== undefined && label !== null && label !== '') {
-    rows.push(createRow([createCell({ level, bold: true, children: label, columnSpan: colspan, size: 100 })]));
+    rows.push(createRow([createCell({ level, bold: true, children: label, size: 100 })]));
   }
   if (value !== undefined && value !== null && value !== '') {
-    rows.push(createRow([createCell({ level, children: value, columnSpan: colspan, size: 100 })]));
+    rows.push(createRow([createCell({ level, children: value, size: 100 })]));
   }
 
   return rows;
 };
 
-const buildTwoColumnRows = (level, label, value) => [
-  createRow([createCell({ children: label, bold: true, level, size: 45 }), createCell({ children: value, size: 55 })]),
+const buildTwoColumnRows = ({ level, label, value, columnsWidth }) => [
+  createRow([
+    createCell({ children: label, bold: true, level, size: columnsWidth[0] }),
+    createCell({ children: value, size: columnsWidth[1] }),
+  ]),
 ];
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const gerarTabela = (colspan, title, rows = [], section = '') => {
+export const gerarTabela = ({ columns = 1, title = '', rows = [], section = '', columnsWidth = [45, 55] }) => {
   if (!Array.isArray(rows)) {
     throw new Error('rows deve ser um array');
   }
 
-  const body = rows.flatMap(([columns, level = 1, label, value]) => {
-    if (columns === 2) {
-      return buildTwoColumnRows(level, label, value);
+  const body = rows.flatMap(([cells, level = 1, label, value]) => {
+    if (cells === 2) {
+      return buildTwoColumnRows({ level, label, value, columnsWidth });
     }
-    return buildOneColumnRows(level, label, value, colspan);
+    return buildOneColumnRows({ level, label, value });
   });
 
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: [...(section ? [headerSection(section, colspan)] : []), ...(title ? [header(title, colspan)] : []), ...body],
+    rows: [...(section ? [headerSection(section, columns)] : []), ...(title ? [header(title, columns)] : []), ...body],
   });
 };

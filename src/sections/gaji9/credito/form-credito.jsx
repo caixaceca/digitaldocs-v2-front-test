@@ -281,57 +281,6 @@ export function DataContrato({ creditoId, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SeguroGarantiaForm({ creditoId, garantiaId, selectedItem, onClose }) {
-  const dispatch = useDispatch();
-  const isEdit = selectedItem?.action === 'editar';
-  const { tiposSeguros, isSaving } = useSelector((state) => state.gaji9);
-  const tipos = useMemo(() => tiposSeguros?.map(({ id, designacao }) => ({ id, label: designacao })), [tiposSeguros]);
-
-  useEffect(() => {
-    dispatch(getFromGaji9('tiposSeguros', { notLoading: true }));
-  }, [dispatch]);
-
-  const formSchema = Yup.object().shape({
-    valor: Yup.number().label('Valor do prémio'),
-    tipo: Yup.mixed().required().label('Tipo de seguro'),
-  });
-  const defaultValues = useMemo(
-    () => ({
-      valor: selectedItem?.valor_premio_seguro ?? '',
-      tipo: tipos?.find(({ id }) => id === selectedItem?.tipo_seguro_id) ?? null,
-    }),
-    [selectedItem, tipos]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
-
-  const onSubmit = async () => {
-    const msg = `Seguro ${isEdit ? 'atualizado' : 'adicionado'}`;
-    const dados = { tipo_seguro_id: values?.tipo?.id, premio_seguro: values?.valor ?? 0 };
-    const params = { id: selectedItem?.id, garantiaId, creditoId, getItem: 'credito', msg, onClose };
-    dispatch((isEdit ? updateItem : createItem)('seguro-garantia', JSON.stringify(isEdit ? dados : [dados]), params));
-  };
-
-  return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitleAlt title={isEdit ? 'Atualizar seguro' : 'Adicionar seguro'} onClose={onClose} />
-      <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3} sx={{ pt: 3 }}>
-            <RHFAutocompleteObj dc name="tipo" label="Tipo de seguro" options={tipos} />
-            <RHFNumberField label="Valor do prémio" name="valor" tipo="CVE" />
-          </Stack>
-          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function PropostaForm({ onClose }) {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.gaji9);

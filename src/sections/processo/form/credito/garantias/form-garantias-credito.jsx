@@ -40,7 +40,7 @@ export default function FormGarantias({ processoId, onClose }) {
 
   useEffect(() => {
     dispatch(getFromGaji9('tiposSeguros'));
-    dispatch(getFromGaji9('tiposGarantias'));
+    dispatch(getFromGaji9('garantias-selecionaveis', { item: 'tiposGarantias' }));
   }, [dispatch]);
 
   const formSchema = shapeGarantia();
@@ -56,7 +56,7 @@ export default function FormGarantias({ processoId, onClose }) {
 
   const onSubmit = async (values) => {
     const params = { fillCredito: true, processoId, msg: 'Garantia adicionada', onClose };
-    dispatch(createItem('garantias', JSON.stringify([composeGarantiaPayload(values)]), params));
+    dispatch(createItem('garantias', JSON.stringify([composeGarantiaPayload(values, chaveMeta)]), params));
   };
 
   return (

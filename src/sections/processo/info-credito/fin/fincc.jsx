@@ -5,7 +5,7 @@ import { Packer, Document, Paragraph } from 'docx';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
-import { CabecalhoWord, RodapeWord, stylesWord } from '../../../../components/exportar-dados/word';
+import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
 //
 import { assinaturas } from './assinaturas';
 import DownloadModelo from '../../Detalhes/anexos/download-modelo';
@@ -60,13 +60,13 @@ export default function Fincc({ dados = {} }) {
       const doc = new Document({
         creator: 'Intranet - Caixa Económica de Cabo Verde',
         title: `FINCC - Simulação - ${nomeProponente}`,
-        styles: stylesWord,
+        styles: createStyles('10pt'),
         sections: [
           {
-            properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '18mm', left: '18mm' } } },
+            properties: { page: { margin: { top: '58mm', right: '18mm', left: '18mm' } } },
             headers: CabecalhoWord({
-              enabled: true,
               logo,
+              enabled: true,
               codificacao: 'JRDC.FM.C.023.00',
               titulo: 'Ficha de Informação Normalizada de Crédito Consumo - Simulação',
             }),

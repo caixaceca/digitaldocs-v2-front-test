@@ -66,12 +66,6 @@ function DetalhesTab({ id, item, dados, participantes = [], onClose }) {
           ]
         : []),
       {
-        value: 'Seguros',
-        component: (
-          <SegurosEntidades ativo={dados?.ativo} garantiaId={dados?.id} creditoId={id} dados={dados?.seguros} seguros />
-        ),
-      },
-      {
         value: 'Metadados',
         component: <MetadadosGarantia dados={dados?.metadados} />,
       },

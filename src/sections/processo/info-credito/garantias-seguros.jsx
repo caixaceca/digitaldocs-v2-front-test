@@ -24,7 +24,6 @@ import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import { DialogConfirmar, DialogTitleAlt } from '../../../components/CustomDialog';
 //
 import MetadadosGarantia from './metadados-garantia';
-import { SeguroForm } from '../form/credito/form-garantias-credito';
 import { Resgisto, TableRowItem } from '../../parametrizacao/Detalhes';
 import FormGarantias from '../form/credito/garantias/form-garantias-credito';
 
@@ -123,9 +122,6 @@ export function GarantiasSeguros({ dados, seguro = false }) {
         />
       )}
       {item?.modal === 'add' && !seguro && <FormGarantias processoId={processoId} onClose={() => setItem(null)} />}
-      {(item?.modal === 'add' || item?.modal === 'editar') && seguro && (
-        <SeguroForm ids={{ processoId, garantiaId, creditoId }} selectedItem={item} onClose={() => setItem(null)} />
-      )}
     </>
   );
 }

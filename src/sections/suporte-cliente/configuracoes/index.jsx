@@ -25,9 +25,10 @@ export default function Configuracoes() {
       { value: 'Utilizadores', component: <TableConfiguracoes item="utilizadores" /> },
       { value: 'Departamentos', component: <TableConfiguracoes item="departamentos" /> },
       { value: 'Respostas', component: <TableConfiguracoes item="respostas" /> },
-      { value: 'SLA', component: <TableConfiguracoes item="slas" /> },
       { value: 'FAQ', component: <TableConfiguracoes item="faq" /> },
       { value: 'Prompt email', component: <TableConfiguracoes item="prompts" /> },
+      { value: 'SLA Global', component: <TableConfiguracoes item="slas" /> },
+      { value: 'SLA U.O', component: <TableConfiguracoes item="slasUo" /> },
     ],
     []
   );

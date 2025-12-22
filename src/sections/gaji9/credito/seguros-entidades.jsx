@@ -13,10 +13,10 @@ import { useSelector, useDispatch } from '../../../redux/store';
 import { applySort, getComparator } from '../../../hooks/useTable';
 // components
 import { SemDados } from '../sub-items';
+import { IntervenienteForm } from './form-credito';
 import { CellChecked } from '../../../components/Panel';
 import { DefaultAction } from '../../../components/Actions';
 import { DialogConfirmar } from '../../../components/CustomDialog';
-import { SeguroGarantiaForm, IntervenienteForm } from './form-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -70,15 +70,6 @@ export default function SegurosEntidades({ garantiaId, ativo, creditoId, dados =
           {(!dados || dados?.length === 0) && <SemDados colSpan={seguros ? 4 : 3} />}
         </TableBody>
       </Table>
-
-      {(item?.action === 'add' || item?.action === 'editar') && (
-        <SeguroGarantiaForm
-          selectedItem={item}
-          creditoId={creditoId}
-          garantiaId={garantiaId}
-          onClose={() => setItem(null)}
-        />
-      )}
 
       {item?.action === 'eliminar' && (
         <DialogConfirmar

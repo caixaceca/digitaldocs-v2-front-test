@@ -161,6 +161,7 @@ export function getFromGaji9(item, params) {
         (item === 'freguesias' && `/v1/divisoes/lista?ativo=${!params?.inativos}`) ||
         (item === 'variaveis' && `/v1/variaveis/lista?ativo=${!params?.inativos}`) ||
         (item === 'contratos' && `/v1/contratos/credito?credito_id=${params?.id}`) ||
+        (item === 'garantias-selecionaveis' && `/v1/tipos_garantias/selecionaveis`) ||
         (item === 'componentes' && `/v1/produtos/lista?ativo=${!params?.inativos}`) ||
         (item === 'tiposSeguros' && `/v1/tipos_seguros?ativo=${!params?.inativos}`) ||
         (item === 'marcadores' && `/v1/marcadores/lista?ativo=${!params?.inativos}`) ||

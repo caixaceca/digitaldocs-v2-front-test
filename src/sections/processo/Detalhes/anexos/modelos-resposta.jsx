@@ -12,7 +12,7 @@ import { valorPorExtenso } from '../../../../utils/formatText';
 //
 import DownloadModelo from './download-modelo';
 import { useSelector } from '../../../../redux/store';
-import { CabecalhoWord, RodapeWord, stylesWord } from '../../../../components/exportar-dados/word';
+import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ export default function ModelosRespostas() {
         creator: 'Intranet - Caixa Económica de Cabo Verde',
         description: 'Modelo de resposta gerado automaticamente na Intranet para Processos Judiciais e Fiscais',
         title: `Modelo de resposta - ${id}`,
-        styles: stylesWord,
+        styles: createStyles('11pt'),
         sections: [
           {
             properties: { page: { margin: { top: '60mm', bottom: '40mm', right: '25mm', left: '25mm' } } },

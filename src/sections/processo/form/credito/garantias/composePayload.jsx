@@ -1,31 +1,54 @@
-export default function composeGarantiaPayload(form) {
+export default function composeGarantiaPayload(form, chaveMeta) {
+  const metadados = chaveMeta && metaBuilders[chaveMeta] ? metaBuilders[chaveMeta](form) : {};
+
   return {
     valor_garantia: String(form?.valor ?? ''),
     tipo_garantia_id: form?.tipo_garantia?.id ?? null,
     percentagem_cobertura: String(form?.cobertura ?? ''),
     subtipo_garantia_id: form?.subtipo_garantia?.id ?? null,
-
-    metadados: {
-      fiadores: (form?.fiadores ?? []).map(mapFiador),
-      livrancas: (form?.livrancas ?? []).map(mapLivranca),
-      seguros: (form?.seguros ?? []).map(mapSeguro),
-      contas: (form?.dps ?? []).map(mapContas),
-
-      imoveis: [
-        {
-          predios: (form?.predios ?? []).map(mapPredio),
-          terrenos: (form?.terrenos ?? []).map(mapTerreno),
-          veiculos: (form?.veiculos ?? []).map(mapVeiculo),
-          apartamentos: (form?.apartamentos ?? []).map(mapApartamento),
-        },
-      ],
-
-      titulos: (form?.titulos ?? []).map(mapTitulo),
-    },
+    metadados,
   };
 }
 
-// Mapeadores principais ---------------------------------------------------------------------------------------------------------------------
+const metaBuilders = {
+  fiadores: (form) => ({
+    fiadores: (form?.fiadores ?? []).map(mapFiador),
+  }),
+
+  livrancas: (form) => ({
+    livrancas: (form?.livrancas ?? []).map(mapLivranca),
+  }),
+
+  seguros: (form) => ({
+    seguros: (form?.seguros ?? []).map(mapSeguro),
+  }),
+
+  contas: (form) => ({
+    contas: (form?.dps ?? []).map(mapContas),
+  }),
+
+  titulos: (form) => ({
+    titulos: (form?.titulos ?? []).map(mapTitulo),
+  }),
+
+  predios: (form) => ({
+    imoveis: { predios: (form?.predios ?? []).map(mapPredio) },
+  }),
+
+  terrenos: (form) => ({
+    imoveis: { terrenos: (form?.terrenos ?? []).map(mapTerreno) },
+  }),
+
+  veiculos: (form) => ({
+    imoveis: { veiculos: (form?.veiculos ?? []).map(mapVeiculo) },
+  }),
+
+  apartamentos: (form) => ({
+    imoveis: { apartamentos: (form?.apartamentos ?? []).map(mapApartamento) },
+  }),
+};
+
+// Mapeadores principais -----------------------------------------------------------------------------------------------
 
 function mapFiador(fiador) {
   return { numero_entidade: fiador?.numero ?? '', nome_entidade: fiador?.nome ?? '' };
@@ -63,7 +86,7 @@ function mapContas(dps) {
   };
 }
 
-// Veículos ---------------------------------------------------------------------------------------------------------------------
+// Veículos ------------------------------------------------------------------------------------------------------------
 
 function mapVeiculo(veiculo) {
   return {
@@ -80,7 +103,7 @@ function mapVeiculo(veiculo) {
   };
 }
 
-// Imóveis ---------------------------------------------------------------------------------------------------------------------
+// Imóveis -------------------------------------------------------------------------------------------------------------
 
 function mapPredio(predio) {
   return {
@@ -127,7 +150,7 @@ function mapTerreno(terreno) {
   };
 }
 
-// Títulos ---------------------------------------------------------------------------------------------------------------------
+// Títulos -------------------------------------------------------------------------------------------------------------
 
 function mapTitulo(ttitulo) {
   return {
@@ -144,7 +167,7 @@ function mapTitulo(ttitulo) {
   };
 }
 
-// Utilitários ---------------------------------------------------------------------------------------------------------------------
+// Utilitários ---------------------------------------------------------------------------------------------------------
 
 function mapMorada(morada) {
   return {

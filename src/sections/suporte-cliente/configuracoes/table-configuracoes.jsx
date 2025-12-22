@@ -23,11 +23,19 @@ import { SearchToolbarSimple } from '../../../components/SearchToolbar';
 import { CellChecked, Colaborador, newLineText, noDados } from '../../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
 //
+import {
+  FaqForm,
+  SlaForm,
+  SlaUoForm,
+  AssuntoForm,
+  RespostaForm,
+  UtilizadorForm,
+  DepartamentoForm,
+} from './form-configuracoes';
 import Categorias from './categorias';
 import DetalhesPrompt from './detalhes';
 import FormPrompt, { Eliminar } from './form-prompt';
 import { getApllyLabel, getRolesLabel, getPhasesLabel, getDepartTypeLabel, LabelApply } from '../utils';
-import { FaqForm, SlaForm, AssuntoForm, UtilizadorForm, RespostaForm, DepartamentoForm } from './form-configuracoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -50,9 +58,8 @@ export default function TableConfiguracoes({ item }) {
   } = useTable();
 
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { assuntos, utilizadores, slas, faq, departamentos, respostas, prompts, isLoading, modalSuporte } = useSelector(
-    (state) => state.suporte
-  );
+  const { assuntos, utilizadores, slas, slasUo, faq, departamentos, respostas, prompts, isLoading, modalSuporte } =
+    useSelector((state) => state.suporte);
 
   useEffect(() => {
     setFilter(localStorage.getItem(`filter${item}`) || '');
@@ -74,6 +81,7 @@ export default function TableConfiguracoes({ item }) {
     dados:
       (item === 'faq' && faq) ||
       (item === 'slas' && slas) ||
+      (item === 'slasUo' && slasUo) ||
       (item === 'prompts' && prompts) ||
       (item === 'assuntos' && assuntos) ||
       (item === 'respostas' && respostas) ||
@@ -146,8 +154,10 @@ export default function TableConfiguracoes({ item }) {
 
                       {/* SLA */}
                       {item === 'slas' && <TableCell>{newLineText(row?.description)}</TableCell>}
+                      {item === 'slasUo' && <TableCell>{row?.department_name}</TableCell>}
+                      {item === 'slasUo' && <TableCell>{row?.subject_name}</TableCell>}
                       {item === 'slas' && <TableCell>{row?.response_time_mn} min</TableCell>}
-                      {item === 'slas' && <TableCell>{row?.resolution_time_mn} min</TableCell>}
+                      {(item === 'slas' || item === 'slasUo') && <TableCell>{row?.resolution_time_mn} min</TableCell>}
 
                       {/* RESPOSTAS */}
                       {item === 'respostas' && <TableCell>{newLineText(row?.content)}</TableCell>}
@@ -209,6 +219,7 @@ export default function TableConfiguracoes({ item }) {
         <>
           {item === 'faq' && <FaqForm onClose={onClose} />}
           {item === 'slas' && <SlaForm onClose={onClose} />}
+          {item === 'slasUo' && <SlaUoForm onClose={onClose} />}
           {item === 'prompts' && <FormPrompt onClose={onClose} />}
           {item === 'assuntos' && <AssuntoForm onClose={onClose} />}
           {item === 'respostas' && <RespostaForm onClose={onClose} />}
@@ -228,11 +239,13 @@ export function applySortFilter({ dados, filter, comparator }) {
   if (filter) {
     const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
-      ({ name, subject, question, response, description }) =>
+      ({ name, subject, subject_name: subject1, department_name: department, question, response, description }) =>
         (name && normalizeText(name).indexOf(normalizedFilter) !== -1) ||
         (subject && normalizeText(subject).indexOf(normalizedFilter) !== -1) ||
+        (subject1 && normalizeText(subject1).indexOf(normalizedFilter) !== -1) ||
         (question && normalizeText(question).indexOf(normalizedFilter) !== -1) ||
         (response && normalizeText(response).indexOf(normalizedFilter) !== -1) ||
+        (department && normalizeText(department).indexOf(normalizedFilter) !== -1) ||
         (description && normalizeText(description).indexOf(normalizedFilter) !== -1)
     );
   }
@@ -266,6 +279,12 @@ function headerTable(item) {
         { id: 'tempo_resposta', label: 'Resposta' },
         { id: 'tempo_resolucao', label: 'Resolução' },
       ]) ||
+      (item === 'slasUo' && [
+        { id: 'nome', label: 'Nome' },
+        { id: 'department_name', label: 'Departamento' },
+        { id: 'subject_name', label: 'Assunto' },
+        { id: 'tempo_resolucao', label: 'Resolução' },
+      ]) ||
       (item === 'respostas' && [
         { id: 'subject', label: 'Assunto' },
         { id: 'content', label: 'Conteúdo' },
@@ -280,7 +299,7 @@ function headerTable(item) {
       ]) ||
       (item === 'prompts' && [{ id: 'preset_name', label: 'Nome' }]) ||
       []),
-    ...(item !== 'assuntos' && item !== 'departamentos' && item !== 'slas'
+    ...(item !== 'assuntos' && item !== 'departamentos' && item !== 'slas' && item !== 'slasUo'
       ? [{ id: 'active', label: 'Estado', align: 'center' }]
       : []),
     { id: '', width: 10 },
