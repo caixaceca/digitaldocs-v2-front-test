@@ -86,14 +86,14 @@ export const headerSection = (section, columns) =>
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const buildOneColumnRows = ({ level, label, value }) => {
+const buildOneColumnRows = ({ level, label, value, columns }) => {
   const rows = [];
 
   if (label !== undefined && label !== null && label !== '') {
-    rows.push(createRow([createCell({ level, bold: true, children: label, size: 100 })]));
+    rows.push(createRow([createCell({ level, bold: true, children: label, columnSpan: columns, size: 100 })]));
   }
   if (value !== undefined && value !== null && value !== '') {
-    rows.push(createRow([createCell({ level, children: value, size: 100 })]));
+    rows.push(createRow([createCell({ level, children: value, columnSpan: columns, size: 100 })]));
   }
 
   return rows;
@@ -117,7 +117,7 @@ export const gerarTabela = ({ columns = 1, title = '', rows = [], section = '', 
     if (cells === 2) {
       return buildTwoColumnRows({ level, label, value, columnsWidth });
     }
-    return buildOneColumnRows({ level, label, value });
+    return buildOneColumnRows({ level, label, value, columns });
   });
 
   return new Table({
