@@ -77,7 +77,7 @@ function Seguros({ fields = [], remove, prefixo, tipo = false }) {
               <RHFTextField name={`${prefixo}[${index}].periodicidade`} label="Periodicidade" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFNumberField name={`${prefixo}[${index}].cobertura`} label="Cobertura" tipo="%" />
+              <RHFNumberField name={`${prefixo}[${index}].percentagem_cobertura`} label="Cobertura" tipo="%" />
             </GridItem>
           </Grid>
           <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />

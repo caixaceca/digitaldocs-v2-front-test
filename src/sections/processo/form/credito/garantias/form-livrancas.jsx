@@ -22,7 +22,7 @@ export default function FormLivrancas() {
     <Stack sx={{ flexGrow: 1, pt: 1 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
         <Typography variant="overline">Livrança(s)</Typography>
-        <AddItem onClick={() => append({ numero: '' })} dados={{ label: 'Livrança', small: true }} />
+        <AddItem onClick={() => append({ numero_livranca: '' })} dados={{ label: 'Livrança', small: true }} />
       </Stack>
       <Divider sx={{ my: 1 }} />
       <Grid container spacing={2} justifyContent="center">
@@ -40,7 +40,7 @@ function Livrancas({ fields = [], remove, prefixo }) {
       <GridItem sm={6} md={4} lg={3} key={item.id}>
         <RHFTextField
           label="Nº da livrança"
-          name={`${prefixo}[${index}].numero`}
+          name={`${prefixo}[${index}].numero_livranca`}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

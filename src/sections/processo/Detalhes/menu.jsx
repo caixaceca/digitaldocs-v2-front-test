@@ -26,7 +26,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
 
   const tabsList = useMemo(() => {
     const tabs = [];
-    tabs.push({ value: 'Dados gerais', component: <DadosGerais /> });
+    tabs.push({ value: 'Dados gerais', component: <DadosGerais processo={processo} /> });
 
     if (credito)
       tabs.push({
@@ -86,6 +86,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     titular,
     credito,
     isAdmin,
+    processo,
     pareceres,
     htransicoes,
     isAuditoria,

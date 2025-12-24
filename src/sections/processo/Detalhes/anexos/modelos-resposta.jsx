@@ -6,12 +6,12 @@ import { Packer, TextRun, Document, Paragraph, AlignmentType } from 'docx';
 import { Stack } from '@mui/material';
 import Divider from '@mui/material/Divider';
 // utils
+import { useSelector } from '../../../../redux/store';
 import { formatDate } from '../../../../utils/formatTime';
 import { fCurrency } from '../../../../utils/formatNumber';
 import { valorPorExtenso } from '../../../../utils/formatText';
 //
-import DownloadModelo from './download-modelo';
-import { useSelector } from '../../../../redux/store';
+import DownloadModeloDoc from '../../../../components/Actions';
 import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -187,8 +187,8 @@ export default function ModelosRespostas() {
       <Stack spacing={1}>
         {(operacao === 'Pedido de Informação' && (
           <>
-            <DownloadModelo modelo="1: Entidade cliente.docx" onClick={exportToWord} tipo="Cliente" />
-            <DownloadModelo
+            <DownloadModeloDoc modelo="1: Entidade cliente.docx" onClick={exportToWord} tipo="Cliente" />
+            <DownloadModeloDoc
               tipo="Entidade não é cliente"
               modelo="2: Entidade não cliente.docx"
               onClick={exportToWord}
@@ -196,7 +196,7 @@ export default function ModelosRespostas() {
           </>
         )) ||
           (operacao === 'Cancelamento/Levantamento de Cativo/Penhora' && (
-            <DownloadModelo
+            <DownloadModeloDoc
               onClick={exportToWord}
               tipo="Cancelamento/Levantamento de Cativo/Penhora"
               modelo="1: Cancelamento/Levantamento de Cativo/Penhora.docx"
@@ -204,24 +204,24 @@ export default function ModelosRespostas() {
           )) ||
           (operacao === 'Cativo/Penhora' && (
             <>
-              <DownloadModelo
+              <DownloadModeloDoc
                 onClick={exportToWord}
                 tipo="Entidade não é cliente"
                 modelo="1: Entidade não é cliente.docx"
               />
-              <DownloadModelo modelo="2: Cliente sem saldo.docx" tipo="Cliente sem saldo" onClick={exportToWord} />
-              <DownloadModelo
+              <DownloadModeloDoc modelo="2: Cliente sem saldo.docx" tipo="Cliente sem saldo" onClick={exportToWord} />
+              <DownloadModeloDoc
                 onClick={exportToWord}
                 tipo="Cliente sem saldo suficiente"
                 modelo="3: Cliente sem saldo suficiente.docx"
               />
-              <DownloadModelo
+              <DownloadModeloDoc
                 onClick={exportToWord}
                 tipo="Cliente com valor total"
                 modelo="4: Cliente com valor total.docx"
               />
             </>
-          )) || <DownloadModelo modelo="1: Modelo de nota.docx" tipo="Modelo de nota" onClick={exportToWord} />}
+          )) || <DownloadModeloDoc modelo="1: Modelo de nota.docx" tipo="Modelo de nota" onClick={exportToWord} />}
       </Stack>
     </Stack>
   );

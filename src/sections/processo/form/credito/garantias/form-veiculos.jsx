@@ -63,10 +63,10 @@ function Veiculos({ fields = [], remove }) {
               <RHFNumberField name={`veiculos[${index}].valor`} label="Valor" tipo="CVE" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFNumberField name={`veiculos[${index}].pvt`} label="Valor PVT" tipo="CVE" />
+              <RHFNumberField name={`veiculos[${index}].valor_pvt`} label="Valor PVT" tipo="CVE" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFNumberField name={`veiculos[${index}].cobertura`} label="Cobertura" tipo="%" />
+              <RHFNumberField name={`veiculos[${index}].percentagem_cobertura`} label="Cobertura" tipo="%" />
             </GridItem>
             <GridItem children={<FormEntidades label="Dono" name={`veiculos[${index}].donos`} />} />
             <GridItem children={<FormSeguros prefixo={`veiculos[${index}].seguros`} tipo />} />

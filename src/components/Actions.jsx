@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
 import Fab from '@mui/material/Fab';
@@ -351,5 +352,24 @@ export function Voltar({ fab }) {
       onClick={() => navigate(-1)}
       sx={{ color: !fab && 'common.white' }}
     />
+  );
+}
+// ---------------------------------------------------------------------------------------------------------------------
+
+export default function DownloadModeloDoc({ modelo = 'Modelo.docx', tipo = '', onClick }) {
+  const [loading, setLoading] = useState(false);
+
+  return (
+    <Button
+      fullWidth
+      variant="soft"
+      color="inherit"
+      loading={loading}
+      onClick={() => onClick(setLoading, tipo)}
+      startIcon={getFileThumb(false, null, 'file.docx')}
+      sx={{ justifyContent: 'left', textAlign: 'left', boxShadow: 'none' }}
+    >
+      {modelo}
+    </Button>
   );
 }

@@ -71,7 +71,7 @@ function Imoveis({ fields = [], remove, prefixo, tipo }) {
               </GridItem>
             )}
             <GridItem sm={6} md={isAp ? 3 : 4}>
-              <RHFTextField name={`${prefixo}[${index}].predial`} label="Nº descrição predial" />
+              <RHFTextField name={`${prefixo}[${index}].numero_descricao_predial`} label="Nº descrição predial" />
             </GridItem>
             <GridItem sm={6} md={isAp || isTerreno ? 3 : 4}>
               <RHFTextField name={`${prefixo}[${index}].nip`} label="NIP" />
@@ -79,7 +79,7 @@ function Imoveis({ fields = [], remove, prefixo, tipo }) {
             {isAp && (
               <>
                 <GridItem sm={6} md={3}>
-                  <RHFTextField name={`${prefixo}[${index}].fracao`} label="Identificação fração" />
+                  <RHFTextField name={`${prefixo}[${index}].identificacao_fracao`} label="Identificação fração" />
                 </GridItem>
                 <GridItem sm={6} md={3}>
                   <RHFTextField name={`${prefixo}[${index}].numero_andar`} label="Nº de andar" />
@@ -90,10 +90,10 @@ function Imoveis({ fields = [], remove, prefixo, tipo }) {
               <GridItem sm={6} md={3} children={<RHFTextField name={`${prefixo}[${index}].area`} label="Área" />} />
             )}
             <GridItem sm={6} md={isAp || isTerreno ? 3 : 4}>
-              <RHFNumberField name={`${prefixo}[${index}].pvt`} label="Valor PVT" tipo="CVE" />
+              <RHFNumberField name={`${prefixo}[${index}].valor_pvt`} label="Valor PVT" tipo="CVE" />
             </GridItem>
             <GridItem sm={6} md={isAp || isTerreno ? 3 : 4}>
-              <RHFNumberField name={`${prefixo}[${index}].cobertura`} label="Cobertura" tipo="%" />
+              <RHFNumberField name={`${prefixo}[${index}].percentagem_cobertura`} label="Cobertura" tipo="%" />
             </GridItem>
             <GridItem>
               <Typography variant="overline">Localização</Typography>
@@ -115,7 +115,7 @@ function Imoveis({ fields = [], remove, prefixo, tipo }) {
                 <GridItem sm={6} children={<RHFTextField name={`${prefixo}[${index}].zona`} label="Zona" />} />
                 <GridItem sm={6} md={3} children={<RHFTextField name={`${prefixo}[${index}].rua`} label="Rua" />} />
                 <GridItem sm={6} md={3}>
-                  <RHFTextField name={`${prefixo}[${index}].porta`} label="Nº da porta" />
+                  <RHFTextField name={`${prefixo}[${index}].numero_porta`} label="Nº da porta" />
                 </GridItem>
                 <GridItem sm={6}>
                   <RHFTextField name={`${prefixo}[${index}].descritivo`} label="Descritivo" />

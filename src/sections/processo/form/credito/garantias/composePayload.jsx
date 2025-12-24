@@ -2,10 +2,9 @@ export default function composeGarantiaPayload(form, chaveMeta) {
   const metadados = chaveMeta && metaBuilders[chaveMeta] ? metaBuilders[chaveMeta](form) : {};
 
   return {
-    valor_garantia: String(form?.valor ?? ''),
     tipo_garantia_id: form?.tipo_garantia?.id ?? null,
-    percentagem_cobertura: String(form?.cobertura ?? ''),
     subtipo_garantia_id: form?.subtipo_garantia?.id ?? null,
+    percentagem_cobertura: String(form?.percentagem_cobertura ?? ''),
     metadados,
   };
 }
@@ -24,7 +23,7 @@ const metaBuilders = {
   }),
 
   contas: (form) => ({
-    contas: (form?.dps ?? []).map(mapContas),
+    contas: (form?.contas ?? []).map(mapContas),
   }),
 
   titulos: (form) => ({
@@ -51,11 +50,11 @@ const metaBuilders = {
 // Mapeadores principais -----------------------------------------------------------------------------------------------
 
 function mapFiador(fiador) {
-  return { numero_entidade: fiador?.numero ?? '', nome_entidade: fiador?.nome ?? '' };
+  return { numero_entidade: fiador?.numero_entidade ?? '' };
 }
 
 function mapLivranca(livranca) {
-  return { numero_livranca: livranca?.numero ?? '' };
+  return { numero_livranca: livranca?.numero_livranca ?? '' };
 }
 
 function mapSeguro(seguro) {
@@ -64,25 +63,16 @@ function mapSeguro(seguro) {
     valor: String(seguro?.valor ?? ''),
     seguradora: seguro?.seguradora ?? '',
     premio: String(seguro?.premio ?? ''),
-    tipo_seguro: seguro?.tipo?.label ?? '',
     tipo_seguro_id: seguro?.tipo?.id ?? null,
     periodicidade: seguro?.periodicidade ?? '',
-    percentagem_cobertura: String(seguro?.cobertura ?? ''),
+    percentagem_cobertura: String(seguro?.percentagem_cobertura ?? ''),
   };
 }
 
-function mapContas(dps) {
+function mapContas(contas) {
   return {
-    saldo: '',
-    moeda: '',
-    prazo: null,
-    balcao: null,
-    data_inicio: '',
-    data_vencimento: '',
-    data_constituicao: '',
-    numero_conta: dps?.numero ?? '',
-    percentagem_cobertura: String(dps?.cobertura ?? ''),
-    donos: [],
+    numero_conta: contas?.numero_conta ?? '',
+    percentagem_cobertura: String(contas?.percentagem_cobertura ?? ''),
   };
 }
 
@@ -95,11 +85,11 @@ function mapVeiculo(veiculo) {
     modelo: veiculo?.modelo,
     matricula: veiculo?.matricula,
     valor: String(veiculo?.valor ?? ''),
-    valor_pvt: String(veiculo?.pvt ?? ''),
     ano_fabrico: String(veiculo?.ano_fabrico),
-    percentagem_cobertura: String(veiculo?.cobertura ?? ''),
-    seguros: (veiculo?.seguros ?? []).map(mapSeguro),
+    valor_pvt: String(veiculo?.valor_pvt ?? ''),
     donos: (veiculo?.donos ?? []).map(mapDono),
+    seguros: (veiculo?.seguros ?? []).map(mapSeguro),
+    percentagem_cobertura: String(veiculo?.percentagem_cobertura ?? ''),
   };
 }
 
@@ -108,14 +98,14 @@ function mapVeiculo(veiculo) {
 function mapPredio(predio) {
   return {
     nip: predio?.nip ?? '',
-    valor_pvt: String(predio?.pvt ?? ''),
     tipo_matriz: predio?.tipo_matriz ?? '',
+    valor_pvt: String(predio?.valor_pvt ?? ''),
     numero_matriz: predio?.numero_matriz ?? '',
-    numero_descricao_predial: predio?.predial ?? '',
-    percentagem_cobertura: String(predio?.cobertura ?? ''),
+    numero_descricao_predial: predio?.numero_descricao_predial ?? '',
+    percentagem_cobertura: String(predio?.percentagem_cobertura ?? ''),
     morada: mapMorada(predio),
-    seguros: (predio?.seguros ?? []).map(mapSeguro),
     donos: (predio?.donos ?? []).map(mapDono),
+    seguros: (predio?.seguros ?? []).map(mapSeguro),
   };
 }
 
@@ -124,11 +114,11 @@ function mapApartamento(ap) {
     nip: ap?.nip ?? '',
     tipo_matriz: ap?.tipo_matriz ?? '',
     numero_andar: ap?.numero_andar ?? '',
-    identificacao_fracao: ap?.fracao ?? '',
+    valor_pvt: String(ap?.valor_pvt ?? ''),
     matriz_predial: ap?.matriz_predial ?? '',
-    numero_descricao_predial: ap?.predial ?? '',
-    percentagem_cobertura: String(ap?.cobertura ?? ''),
-    valor_pvt: String(ap?.pvt ?? ''),
+    identificacao_fracao: ap?.identificacao_fracao ?? '',
+    numero_descricao_predial: ap?.numero_descricao_predial ?? '',
+    percentagem_cobertura: String(ap?.percentagem_cobertura ?? ''),
     morada: mapMorada(ap),
     seguros: (ap?.seguros ?? []).map(mapSeguro),
     donos: (ap?.donos ?? []).map(mapDono),
@@ -139,31 +129,30 @@ function mapTerreno(terreno) {
   return {
     nip: terreno?.nip ?? '',
     area: terreno?.area ?? '',
-    valor_pvt: String(terreno?.pvt ?? ''),
     tipo_matriz: terreno?.tipo_matriz ?? '',
     numero_matriz: terreno?.numero_matriz ?? '',
-    numero_descricao_predial: terreno?.predial ?? '',
-    percentagem_cobertura: String(terreno?.cobertura ?? ''),
+    valor_pvt: String(terreno?.valor_pvt ?? ''),
+    numero_descricao_predial: terreno?.numero_descricao_predial ?? '',
+    percentagem_cobertura: String(terreno?.percentagem_cobertura ?? ''),
     morada: mapMorada(terreno),
-    seguros: (terreno?.seguros ?? []).map(mapSeguro),
     donos: (terreno?.donos ?? []).map(mapDono),
+    seguros: (terreno?.seguros ?? []).map(mapSeguro),
   };
 }
 
 // Títulos -------------------------------------------------------------------------------------------------------------
 
-function mapTitulo(ttitulo) {
+function mapTitulo(titulo) {
   return {
     tipo_titulo_id: 0,
-    tipo_titulo: ttitulo?.tipo ?? '',
-    numero_cliente: ttitulo?.cliente ?? '',
-    valor_titulo: String(ttitulo?.valor ?? ''),
-    nome_entidade_emissora: ttitulo?.emissora ?? '',
-    nome_instituicao_registo: ttitulo?.registo ?? '',
-    numero_titulos: String(ttitulo?.quantidade ?? ''),
-    percentagem_cobertura: String(ttitulo?.cobertura ?? ''),
-    seguros: (ttitulo?.seguros ?? []).map(mapSeguro),
-    donos: [],
+    tipo_titulo: titulo?.tipo_titulo ?? '',
+    numero_cliente: titulo?.numero_cliente ?? '',
+    valor_titulo: String(titulo?.valor_titulo ?? ''),
+    numero_titulos: String(titulo?.numero_titulos ?? ''),
+    nome_entidade_emissora: titulo?.nome_entidade_emissora ?? '',
+    nome_instituicao_registo: titulo?.nome_instituicao_registo ?? '',
+    percentagem_cobertura: String(titulo?.percentagem_cobertura ?? ''),
+    seguros: (titulo?.seguros ?? []).map(mapSeguro),
   };
 }
 
@@ -173,14 +162,14 @@ function mapMorada(morada) {
   return {
     rua: morada?.rua ?? '',
     zona: morada?.zona ?? '',
-    numero_porta: morada?.porta ?? '',
     ilha: morada?.freguesia?.ilha ?? '',
     descritivo: morada?.descritivo ?? '',
+    numero_porta: morada?.numero_porta ?? '',
     concelho: morada?.freguesia?.concelho ?? '',
     freguesia: morada?.freguesia?.freguesia ?? '',
   };
 }
 
 function mapDono(dono) {
-  return { numero: dono?.numero ?? '', nome: dono?.nome ?? '' };
+  return { numero: dono?.numero_entidade ?? '' };
 }

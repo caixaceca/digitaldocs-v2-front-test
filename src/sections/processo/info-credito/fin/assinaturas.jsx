@@ -24,7 +24,7 @@ const assinaturaBanco = (agencia, nomeGerente) =>
         value: [
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            children: [new TextRun({ text: `A Gerência da Agência ${agencia}`, break: 1 })],
+            children: [new TextRun({ text: `A Gerência da ${agencia}`, break: 1 })],
           }),
           assinatura(nomeGerente),
         ],
@@ -89,6 +89,5 @@ export const assinaturas = (agencia, nomeGerente, nomeProponente, fiadores) => [
   new Paragraph({ spacing: { after: 100 } }),
   assinaturaProponente(nomeProponente),
 
-  new Paragraph({ spacing: { after: 100 } }),
-  assinaturaFiadores(fiadores),
+  ...(fiadores?.length ? [new Paragraph({ spacing: { after: 100 } }), assinaturaFiadores(fiadores)] : []),
 ];

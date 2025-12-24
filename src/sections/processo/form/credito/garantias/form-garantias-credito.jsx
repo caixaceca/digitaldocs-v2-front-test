@@ -7,20 +7,20 @@ import Grid from '@mui/material/Grid';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { garantiaSchema } from './schemaFileds';
 import { shapeGarantia } from './validationFields';
 import composeGarantiaPayload from './composePayload';
 import { vdt } from '../../../../../utils/formatObject';
+import { construirSchemaImoveis } from './schemaFileds';
 import { getFromGaji9 } from '../../../../../redux/slices/gaji9';
-import { createItem } from '../../../../../redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '../../../../../redux/store';
+import { createItem, updateItem } from '../../../../../redux/slices/digitaldocs';
 // components
-import { FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../../../../components/hook-form';
 import GridItem from '../../../../../components/GridItem';
 import { DialogButons } from '../../../../../components/Actions';
 import { DialogTitleAlt } from '../../../../../components/CustomDialog';
+import { FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../../../../components/hook-form';
 //
-import FormDps from './form-dps';
+import FormContas from './form-contas';
 import FormImoveis from './form-imoveis';
 import FormTitulos from './form-titulos';
 import FormSeguros from './form-seguros';
@@ -31,12 +31,17 @@ import { listaGarantias } from '../../../../gaji9/applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function FormGarantias({ processoId, onClose }) {
+export default function FormGarantias({ dados, processoId, onClose }) {
   const dispatch = useDispatch();
   const { tiposGarantias } = useSelector((state) => state.gaji9);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
+  const isEdit = dados?.modal === 'update';
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
+  const tipoGarantia = useMemo(
+    () => garantiasList?.find(({ id }) => id === dados?.tipo_garantia_id) || null,
+    [dados?.tipo_garantia_id, garantiasList]
+  );
 
   useEffect(() => {
     dispatch(getFromGaji9('tiposSeguros'));
@@ -44,10 +49,31 @@ export default function FormGarantias({ processoId, onClose }) {
   }, [dispatch]);
 
   const formSchema = shapeGarantia();
-  const defaultValues = useMemo(() => garantiaSchema, []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const defaultValues = useMemo(
+    () => ({
+      contas: dados?.metadados?.contas || [],
+      titulos: dados?.metadados?.titulos || [],
+      seguros: dados?.metadados?.seguros || [],
+      fiadores: dados?.metadados?.fiadores || [],
+      livrancas: dados?.metadados?.livrancas || [],
+      percentagem_cobertura: dados?.percentagem_cobertura || '',
+      predios: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.predios || []),
+      terrenos: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.terrenos || []),
+      veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.veiculos || []),
+      apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.apartamentos || []),
+      subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
+      tipo_garantia: tipoGarantia,
+    }),
+    [dados, tipoGarantia]
+  );
 
-  const { handleSubmit, watch, setValue } = methods;
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { handleSubmit, watch, reset, setValue } = methods;
+
+  useEffect(() => {
+    reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dados]);
 
   const tipo = watch('tipo_garantia');
   const subtipo = watch('subtipo_garantia');
@@ -55,13 +81,15 @@ export default function FormGarantias({ processoId, onClose }) {
   const chaveMeta = useMemo(() => extrairChaveMeta(tipo, subtipo) ?? null, [tipo, subtipo]);
 
   const onSubmit = async (values) => {
-    const params = { fillCredito: true, processoId, msg: 'Garantia adicionada', onClose };
-    dispatch(createItem('garantias', JSON.stringify([composeGarantiaPayload(values, chaveMeta)]), params));
+    const formData = composeGarantiaPayload(values, chaveMeta);
+    const msg = isEdit ? 'Garantia atualizada' : 'Garantia adicionada';
+    const params = { fillCredito: true, processoId, msg, creditoId: dados?.id ?? '', put: true };
+    dispatch((isEdit ? updateItem : createItem)('garantias', JSON.stringify([formData]), { ...params, onClose }));
   };
 
   return (
     <Dialog open fullWidth maxWidth="lg">
-      <DialogTitleAlt title="Adicionar garantia" onClose={onClose} sx={{ pb: 2 }} />
+      <DialogTitleAlt title={isEdit ? 'Editar garantia' : 'Adicionar garantia'} onClose={onClose} sx={{ pb: 2 }} />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2} sx={{ flexGrow: 1, pt: 1 }}>
@@ -83,16 +111,18 @@ export default function FormGarantias({ processoId, onClose }) {
                 <RHFAutocompleteObj
                   dc
                   label="Subtipo"
+                  options={subtipos}
                   name="subtipo_garantia"
-                  options={subtipos.map((row) => ({ ...row, label: row?.subtipo }))}
                   onChange={(_, newValue) => setValue('subtipo_garantia', newValue, vdt)}
                 />
               </GridItem>
             ) : null}
-            <GridItem sm={4} md={3} children={<RHFNumberField label="Cobertura" name="cobertura" tipo="%" />} />
+            <GridItem sm={4} md={3}>
+              <RHFNumberField label="Cobertura" name="percentagem_cobertura" tipo="%" />
+            </GridItem>
             {chaveMeta === 'fiadores' && <GridItem children={<FormEntidades label="Fiador" name="fiadores" />} />}
             {chaveMeta === 'livrancas' && <GridItem children={<FormLivrancas />} />}
-            {chaveMeta === 'contas' && <GridItem children={<FormDps />} />}
+            {chaveMeta === 'contas' && <GridItem children={<FormContas />} />}
             {chaveMeta === 'seguros' && <GridItem children={<FormSeguros prefixo="seguros" />} />}
             {chaveMeta === 'titulos' && <GridItem children={<FormTitulos />} />}
             {chaveMeta === 'terrenos' && <GridItem children={<FormImoveis tipo="Terreno" name="terrenos" />} />}
@@ -102,7 +132,7 @@ export default function FormGarantias({ processoId, onClose }) {
             )}
             {chaveMeta === 'veiculos' && <GridItem children={<FormVeiculos />} />}
           </Grid>
-          <DialogButons onClose={onClose} isSaving={isSaving} />
+          <DialogButons onClose={onClose} isSaving={isSaving} edit={isEdit} />
         </FormProvider>
       </DialogContent>
     </Dialog>

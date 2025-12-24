@@ -26,8 +26,8 @@ import PareceresCredito from './pareceres';
 import FichaAnalise from './ficha-parecer';
 import MetadadosCredito from './metadados-credito';
 import EnviarContratacao from './enviar-contratacao';
-import { GarantiasSeguros } from './garantias-seguros';
-import CartaPropostaWord from '../Detalhes/anexos/modelos-cartas-proposta';
+import TableGarantias from './garantias/table-garantias';
+import ModeloCartaProposta from './carta-proposta/modelos-cartas-proposta';
 
 const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent' };
 
@@ -54,7 +54,15 @@ export default function InfoCredito({ dados }) {
         />
       ),
     },
-    { value: 'Garantias', component: <GarantiasSeguros dados={{ ...dados, modificar, creditoId: dados?.id }} /> },
+    {
+      value: 'Garantias',
+      component: (
+        <TableGarantias
+          dados={dados?.garantias ?? []}
+          outros={{ modificar, creditoId: dados?.id, processoId: dados?.processoId }}
+        />
+      ),
+    },
     ...(modificar && estadoInicial ? [{ value: 'Ficha de análise', component: <FichaAnalise /> }] : []),
     { value: 'Pareceres', component: <PareceresCredito infoCredito /> },
   ];
@@ -160,8 +168,8 @@ function DadosCredito({ dados, modificar, mail }) {
           </Stack>
         )}
 
-        {situacao === 'em análise' && emailCheck(mail) && <Fincc dados={dados} />}
-        {situacao === 'aprovado' && emailCheck(mail) && <CartaPropostaWord dados={dados} />}
+        {situacao === 'em análise' && emailCheck(mail) && <Fincc />}
+        {situacao === 'aprovado' && emailCheck(mail) && <ModeloCartaProposta />}
       </List>
 
       {openSituacao === 'atualizar' && <FormSituacao dados={dados} onClose={() => setOpenSituacao('')} />}

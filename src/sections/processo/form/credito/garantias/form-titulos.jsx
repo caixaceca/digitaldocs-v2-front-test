@@ -44,25 +44,29 @@ function Titulos({ fields = [], remove }) {
         <Stack direction="row" alignItems="center" spacing={2}>
           <Grid container spacing={2} justifyContent="center">
             <GridItem sm={6} md={4}>
-              <RHFAutocompleteSmp label="Tipo" name={`titulos[${index}].tipo`} options={['Ações', 'Obrigações']} />
+              <RHFAutocompleteSmp
+                label="Tipo"
+                options={['Ações', 'Obrigações']}
+                name={`titulos[${index}].tipo_titulo`}
+              />
             </GridItem>
             <GridItem sm={6} md={4}>
-              <RHFTextField name={`titulos[${index}].emissora`} label="Entidade emissora" />
+              <RHFTextField name={`titulos[${index}].nome_entidade_emissora`} label="Entidade emissora" />
             </GridItem>
             <GridItem sm={6} md={4}>
-              <RHFTextField name={`titulos[${index}].registo`} label="Entidade registradora" />
+              <RHFTextField name={`titulos[${index}].nome_instituicao_registo`} label="Entidade registradora" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFNumberField name={`titulos[${index}].cliente`} label="Nº de cliente" noFormat />
+              <RHFNumberField name={`titulos[${index}].numero_cliente`} label="Nº de cliente" noFormat />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFNumberField name={`titulos[${index}].quantidade`} label="Quantidade" />
+              <RHFNumberField name={`titulos[${index}].numero_titulos`} label="Nº de títulos" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFNumberField name={`titulos[${index}].valor`} label="Valor" tipo="CVE" />
+              <RHFNumberField name={`titulos[${index}].valor_titulo`} label="Valor" tipo="CVE" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFNumberField name={`titulos[${index}].cobertura`} label="Cobertura" tipo="%" />
+              <RHFNumberField name={`titulos[${index}].percentagem_cobertura`} label="Cobertura" tipo="%" />
             </GridItem>
             <GridItem children={<FormSeguros prefixo={`titulos[${index}].seguros`} tipo />} />
           </Grid>

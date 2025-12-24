@@ -14,15 +14,18 @@ import { RHFTextField, RHFNumberField } from '../../../../../components/hook-for
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function FormDps() {
+export default function FormContas() {
   const { control } = useFormContext();
-  const { fields, append, remove } = useFieldArray({ control, name: 'dps' });
+  const { fields, append, remove } = useFieldArray({ control, name: 'contas' });
 
   return (
     <Stack sx={{ flexGrow: 1, pt: 1 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
         <Typography variant="overline">Conta(s) DP</Typography>
-        <AddItem onClick={() => append({ numero: '', cobertura: '' })} dados={{ label: 'Conta', small: true }} />
+        <AddItem
+          dados={{ label: 'Conta', small: true }}
+          onClick={() => append({ numero_conta: '', percentagem_cobertura: '' })}
+        />
       </Stack>
       <Divider sx={{ my: 1 }} />
       <Grid container spacing={2} justifyContent="center">
@@ -41,8 +44,13 @@ function Contas({ fields = [], remove }) {
         <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-              <RHFTextField InputProps={{ type: 'number' }} name={`dps[${index}].numero`} label="Nº de conta" />
-              <RHFNumberField name={`dps[${index}].cobertura`} label="Cobertura" tipo="%" sx={{ maxWidth: 130 }} />
+              <RHFTextField label="Nº de conta" name={`contas[${index}].numero_conta`} />
+              <RHFNumberField
+                tipo="%"
+                label="Cobertura"
+                sx={{ maxWidth: 130 }}
+                name={`contas[${index}].percentagem_cobertura`}
+              />
             </Stack>
             <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />
           </Stack>

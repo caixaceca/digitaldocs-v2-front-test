@@ -20,9 +20,8 @@ import { fNumber2, fCurrency } from '../../../utils/formatNumber';
 import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
 import { entidadesParse, baralharString, valorPorExtenso } from '../../../utils/formatText';
 // redux
-import { useSelector } from '../../../redux/store';
-// hooks
 import useToggle from '../../../hooks/useToggle';
+import { useSelector } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import { DefaultAction } from '../../../components/Actions';
@@ -39,21 +38,16 @@ const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor
 
 export default function DetalhesProcesso({ isPS = false, processo, versoes = false }) {
   const { origens } = useSelector((state) => state.parametrizacao);
-  const { colaboradores, uos } = useSelector((state) => state.intranet);
+  const { colaboradores } = useSelector((state) => state.intranet);
 
   const { estados = [], htransicoes = [], estado = null } = processo;
-  const { balcao_domicilio: balcao = '', origem_id: origemId = '', fluxo = '' } = processo;
+  const { domicilio, origem_id: origemId = '', fluxo = '', uo } = processo;
   const { entidade = '', cliente = '', conta = '', titular = '', email = '', observacao = '' } = processo;
   const { doc_idp: docIdP = '', tipo_doc_idp: tipoIdP, doc_ids: docIdS, tipo_doc_ids: tipoIdS } = processo;
 
   const entidadesList = useMemo(() => entidadesParse(entidade), [entidade]);
   const devolvido = useMemo(() => htransicoes?.[0]?.modo === 'Devolução', [htransicoes]);
   const origem = useMemo(() => origens?.find(({ id }) => id === origemId), [origens, origemId]);
-  const bd = useMemo(
-    () => uos?.find(({ balcao: balcaoUo }) => Number(balcaoUo) === Number(balcao))?.label,
-    [balcao, uos]
-  );
-  const uo = useMemo(() => uos?.find(({ id }) => id === Number(processo?.uo_origem_id)), [processo?.uo_origem_id, uos]);
 
   return (
     <>
@@ -64,7 +58,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
             <Typography variant="subtitle1">Processo</Typography>
           </ListItem>
           <TextItem title="Nº de entrada:" text={processo?.numero_entrada} />
-          <TextItem title="Agência/U.O:" text={uo?.tipo === 'Agências' ? `Agência ${uo?.label}` : uo?.label} />
+          <TextItem title="Agência/U.O:" text={uo?.nome} />
           <TextItem title="Assunto:" text={fluxo} />
           {!isPS && !!processo?.data_entrada && (
             <TextItem
@@ -184,7 +178,10 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
             title="Segmento:"
             text={(processo?.segmento === 'P' && 'Particular') || (processo?.segmento === 'E' && 'Empresa') || ''}
           />
-          <TextItem title="Balcão de domicílio:" text={`${balcao || ''}${bd ? ` - ${bd}` : ''}`} />
+          <TextItem
+            title="Balcão de domicílio:"
+            text={`${domicilio?.balcao || ''}${domicilio?.label ? ` - ${domicilio?.label}` : ''}`}
+          />
         </List>
       )}
 

@@ -52,7 +52,7 @@ export default function PageProcesso() {
   const dispatch = useDispatch();
   const [params] = useSearchParams();
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useState('dados-gerais');
+  const [currentTab, setCurrentTab] = useState('Dados gerais');
 
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin, colaboradoresEstado: colabEstado } = useSelector((state) => state.parametrizacao);

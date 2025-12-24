@@ -91,8 +91,8 @@ export function RHFAutocompleteObj({ name, label, small = false, ...other }) {
           fullWidth
           disableClearable={!!dc}
           size={small ? 'small' : 'medium'}
-          getOptionLabel={(option) => option?.label}
           onChange={(event, newValue) => field.onChange(newValue)}
+          getOptionLabel={(option) => option?.label || option?.subtipo}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           renderInput={(params) => <TextField {...params} label={label} error={!!error} helperText={error?.message} />}
           {...rest}
@@ -101,6 +101,7 @@ export function RHFAutocompleteObj({ name, label, small = false, ...other }) {
     />
   );
 }
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFRadioGroup({ name, label, options = [], row = false, ...other }) {

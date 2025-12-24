@@ -104,7 +104,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { setModal, getSuccess, resetProcesso, alterarBalcaopSuccess } = slice.actions;
+export const { setModal, getSuccess, resetProcesso, addItemProcesso, alterarBalcaopSuccess } = slice.actions;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -511,6 +511,8 @@ export function updateItem(item, dados, params) {
           `/v2/processos/abandonar/${params?.perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}`) ||
         (item === 'confidencialidade' &&
           `/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
+        (item === 'garantias' &&
+          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&garantia_id=${params?.garantiaId}`) ||
         (item === 'cancelar' &&
           `/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`) ||
         (item === 'encaminhar paralelo' &&

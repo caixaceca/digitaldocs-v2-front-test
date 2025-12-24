@@ -19,8 +19,8 @@ import GridItem from '../../../components/GridItem';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function DadosGerais() {
-  const { isLoadingP, processo } = useSelector((state) => state.digitaldocs);
+export default function DadosGerais({ processo }) {
+  const { isLoadingP } = useSelector((state) => state.digitaldocs);
   const anexosAtivos = useMemo(() => processo?.anexos?.filter(({ ativo }) => ativo) || [], [processo?.anexos]);
   const isPS = useMemo(
     () => fluxosGmkt(processo?.fluxo) || processo?.fluxo === 'Diário' || processo?.fluxo === 'Receção de Cartões - DOP',

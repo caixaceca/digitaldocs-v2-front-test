@@ -22,7 +22,7 @@ export default function FormEntidades({ label, name }) {
     <Stack sx={{ flexGrow: 1, pt: 1 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
         <Typography variant="overline">{label}(s)</Typography>
-        <AddItem onClick={() => append({ numero: '' })} dados={{ label, small: true }} />
+        <AddItem onClick={() => append({ numero_entidade: '' })} dados={{ label, small: true }} />
       </Stack>
       <Divider sx={{ my: 1 }} />
       <Grid container spacing={2} justifyContent="center">
@@ -40,7 +40,7 @@ export function Entidades({ fields = [], remove, prefixo }) {
       <GridItem sm={6} md={4} lg={3} key={item.id}>
         <RHFTextField
           label="Nº de entidade"
-          name={`${prefixo}[${index}].numero`}
+          name={`${prefixo}[${index}].numero_entidade`}
           InputProps={{
             type: 'number',
             endAdornment: (

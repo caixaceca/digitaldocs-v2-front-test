@@ -1,25 +1,26 @@
 import { saveAs } from 'file-saver';
 import { useSnackbar } from 'notistack';
 // docx
-import { Packer, Document, Paragraph } from 'docx';
+import { Packer, Document, Paragraph, AlignmentType } from 'docx';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
 import { useSelector } from '../../../../redux/store';
+import { ptDate } from '../../../../utils/formatTime';
 import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
-// components
-import { custos } from './custos';
-import { assinaturas } from './assinaturas';
-import { identificacao } from './identificacao';
-import { principaisCaracteristicas } from './caracteristicas';
+//
+import { assinaturas } from '../fin/assinaturas';
+import { mapDadosPoposta } from './dados-mapper';
 import DownloadModeloDoc from '../../../../components/Actions';
-import { planoFinanceiro, informacaoGeral } from './informacao-geral';
+import { condicoesGerais, encargos, obrigacoes } from './sections';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Fincc() {
+export default function ModeloCartaProposta() {
   const { enqueueSnackbar } = useSnackbar();
   const processo = useSelector((state) => state.digitaldocs.processo);
+  const dados = mapDadosPoposta(processo);
+  const nomeProponente = dados.condicoes?.nome_proponente || 'Nome do Proponente';
 
   const defaulted = {
     proponente_nome: processo?.titular ?? 'Nome do proponente',
@@ -58,44 +59,47 @@ export default function Fincc() {
         fetch('/assets/iso9001.png').then((r) => r.arrayBuffer()),
       ]);
 
-      const { agencia, fiadores, gerente_nome: nomeGerente, proponente_nome: nomeProponente } = defaulted;
+      const { gerente_nome: nomeGerente } = defaulted;
 
       const doc = new Document({
         creator: 'Intranet - Caixa Económica de Cabo Verde',
-        title: `FINCC - Simulação - ${nomeProponente}`,
+        title: `Carta Proposta - ${nomeProponente}`,
         styles: createStyles('10pt'),
         sections: [
           {
             properties: { page: { margin: { top: '58mm', right: '18mm', left: '18mm' } } },
-            headers: CabecalhoWord({
-              logo,
-              enabled: true,
-              codificacao: 'JRDC.FM.C.023.00',
-              titulo: 'Ficha de Informação Normalizada de Crédito Consumo - Simulação',
-            }),
+            headers: CabecalhoWord({ enabled: true, logo, codificacao: 'JRDC.FM.C.023.00', titulo: '' }),
             footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
             children: [
-              identificacao(defaulted),
-              principaisCaracteristicas(defaulted),
-              custos(defaulted),
+              new Paragraph({
+                spacing: { after: 300 },
+                style: 'titulo',
+                alignment: AlignmentType.CENTER,
+                text: 'Carta Proposta',
+              }),
+              new Paragraph({ spacing: { after: 150 }, text: `Exmo. Sr(a). ${nomeProponente}` }),
+              new Paragraph({
+                spacing: { after: 300 },
+                text: `Comunicamos que o crédito solicitado em ${ptDate(dados.condicoes?.data_entrada) || 'DD/MM/YYYY'} foi aprovado nas seguintes condições:`,
+              }),
 
-              new Paragraph({ text: '', break: 1 }),
-              planoFinanceiro(defaulted),
-
-              new Paragraph({ text: '', break: 1 }),
-              informacaoGeral(defaulted),
-
-              ...assinaturas(agencia, nomeGerente, nomeProponente, fiadores),
+              condicoesGerais(dados.condicoes),
+              new Paragraph({ spacing: { after: 100 } }),
+              encargos(dados.encargos),
+              new Paragraph({ spacing: { after: 100 } }),
+              obrigacoes(dados.obrigacoes),
+              ...assinaturas(dados.condicoes?.agencia, nomeGerente, nomeProponente, dados.condicoes?.fiadores),
             ],
           },
         ],
       });
 
       Packer.toBlob(doc).then((blob) => {
-        saveAs(blob, `FINCC - Simulação - ${nomeProponente || 'Proponente'}.docx`);
+        saveAs(blob, `Carta Proposta - ${nomeProponente || 'Proponente'}.docx`);
       });
     } catch (error) {
-      enqueueSnackbar('Erro ao gerar FINCC', { variant: 'error' });
+      console.error(error);
+      enqueueSnackbar('Erro ao gerar Carta Proposta', { variant: 'error' });
     } finally {
       setLoading(false);
     }
@@ -103,7 +107,7 @@ export default function Fincc() {
 
   return (
     <Stack sx={{ mt: 2 }}>
-      <DownloadModeloDoc modelo="FINCC - Simulação.docx" onClick={exportToWord} />
+      <DownloadModeloDoc modelo="Modelo de Carta Proposta - CrediCaixa.docx" onClick={exportToWord} />
     </Stack>
   );
 }
