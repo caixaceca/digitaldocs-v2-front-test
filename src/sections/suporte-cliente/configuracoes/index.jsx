@@ -28,7 +28,7 @@ export default function Configuracoes() {
       { value: 'FAQ', component: <TableConfiguracoes item="faq" /> },
       { value: 'Prompt email', component: <TableConfiguracoes item="prompts" /> },
       { value: 'SLA Global', component: <TableConfiguracoes item="slas" /> },
-      { value: 'SLA U.O', component: <TableConfiguracoes item="slasUo" /> },
+      { value: 'SLA Departamental', component: <TableConfiguracoes item="slasUo" /> },
     ],
     []
   );

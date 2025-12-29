@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import CardHeader from '@mui/material/CardHeader';
 // utils
-import { mesesAbr } from '../../../_mock/_others';
+import { meses } from '../../../_mock';
 import { fNumber, fPercent } from '../../../utils/formatNumber';
 // components
 import { SearchNotFoundSmall } from '../../../components/table';
@@ -78,7 +78,7 @@ export function PorDepartamento({ dados }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function Evolucao({ dados, periodo }) {
-  const categories = periodo === 'Mensal' ? dados.map((i) => i.day) : dados.map((i) => mesesAbr[i.month - 1].label);
+  const categories = periodo === 'Mensal' ? dados.map((i) => i.day) : dados.map((i) => meses[i.month - 1].abrev);
 
   const series = [
     { name: 'Abertos', data: dados.map((i) => i.opened) },

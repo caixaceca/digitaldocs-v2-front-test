@@ -31,7 +31,7 @@ import {
 import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
 //
 import { ItemComponent } from './form-gaji9';
-import { freguesiasConcelhos } from '../../_mock';
+import { listaFreguesias } from '../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -563,12 +563,12 @@ export function RepresentanteForm({ onClose }) {
                 <RHFAutocompleteSmp
                   name="concelho"
                   label="Concelho"
-                  options={[...new Set(freguesiasConcelhos?.map(({ concelho }) => concelho))]?.sort()}
+                  options={[...new Set(listaFreguesias?.map(({ concelho }) => concelho))]?.sort()}
                 />
                 <RHFAutocompleteSmp
                   name="freguesia"
                   label="Freguesia"
-                  options={freguesiasConcelhos
+                  options={listaFreguesias
                     ?.filter(({ concelho }) => concelho === values?.concelho)
                     ?.map(({ freguesia }) => freguesia)}
                 />

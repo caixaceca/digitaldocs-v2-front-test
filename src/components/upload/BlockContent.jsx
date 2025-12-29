@@ -33,7 +33,7 @@ export default function BlockContent({ multiple = false, small = false, permitid
 
         {permitidos && (
           <Typography sx={{ color: 'text.disabled', typography: 'caption' }}>
-            <Box component="span" sx={{ color: 'error.main', fontWeight: 600 }}>
+            <Box component="span" sx={{ color: 'warning.main', fontWeight: 600 }}>
               *{' '}
             </Box>
             Formatos permitidos: {permitidos}

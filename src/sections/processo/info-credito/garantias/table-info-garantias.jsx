@@ -23,10 +23,10 @@ export default function TableInfoGarantias({ dados, item = '', garantia = false 
               {!garantia && <TableCell>Seguro</TableCell>}
               <TableCell>Apólice</TableCell>
               <TableCell>Seguradora</TableCell>
-              <TableCell align="center">Period.</TableCell>
               <TableCell align="right">Cobertura</TableCell>
               <TableCell align="right">Valor</TableCell>
               <TableCell align="right">Prêmio</TableCell>
+              <TableCell align="center">Period.</TableCell>
             </TableRow>
           )}
           {item === 'fiadores' && (
@@ -44,12 +44,12 @@ export default function TableInfoGarantias({ dados, item = '', garantia = false 
                   {!garantia && <TableCell>{row?.tipo_seguro || noDados('(Não definido...)')}</TableCell>}
                   <TableCell>{row?.apolice}</TableCell>
                   <TableCell>{row?.seguradora}</TableCell>
-                  <TableCell align="center">{row?.periodicidade}</TableCell>
                   <TableCell align="right">
                     {fPercent(row?.percentagem_cobertura) || noDados('(Não definido...)')}
                   </TableCell>
                   <TableCell align="right">{fCurrency(row?.valor) || noDados('(Não definido...)')}</TableCell>
                   <TableCell align="right">{fCurrency(row?.premio) || noDados('(Não definido...)')}</TableCell>
+                  <TableCell align="center">{row?.periodicidade}</TableCell>
                 </>
               )}
               {item === 'fiadores' && (

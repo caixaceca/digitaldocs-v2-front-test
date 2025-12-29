@@ -20,7 +20,7 @@ import { SemDados } from '../../../../../components/Panel';
 import { AddItem, DefaultAction } from '../../../../../components/Actions';
 //
 import { imovelSchema } from './schemaFileds';
-import { listaFreguesias } from '../../../../../_mock/_others';
+import { listaFreguesias } from '../../../../../_mock';
 import { applySort, getComparator } from '../../../../../hooks/useTable';
 
 // ---------------------------------------------------------------------------------------------------------------------

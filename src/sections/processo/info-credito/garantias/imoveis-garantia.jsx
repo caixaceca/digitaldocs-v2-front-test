@@ -11,10 +11,10 @@ import { noDados } from '../../../../components/Panel';
 
 const LABEL_MAP = {
   contas: 'DP',
-  veiculos: 'veículo',
+  predios: 'prédio',
   titulos: 'título',
   terrenos: 'terreno',
-  predios: 'prédio',
+  veiculos: 'veículo',
   apartamentos: 'apartamento',
 };
 
@@ -42,7 +42,6 @@ export default function ImoveisGarantia({ dados = [], item }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function renderColumns(item, row) {
-  // Configuração de campos para manter o renderColumns limpo e extensível
   const specs = {
     contas: {
       kpis: [
@@ -55,7 +54,7 @@ function renderColumns(item, row) {
         ['Constituição', ptDate(row?.data_constituicao)],
         ['Início', ptDate(row?.data_inicio)],
         ['Vencimento', ptDate(row?.data_vencimento)],
-        ['Prazo', row?.prazo],
+        ['Prazo', row?.prazo ? `${row?.prazo} dias` : ''],
         ['Balcão', row?.balcao],
       ],
     },
@@ -76,10 +75,11 @@ function renderColumns(item, row) {
     imoveis: {
       kpis: [
         ['Cobertura', fPercent(row?.percentagem_cobertura)],
+        ['Valor', fCurrency(row?.valor)],
         ['Valor PVT', fCurrency(row?.valor_pvt)],
-        ['Área', row?.area],
       ],
       details: [
+        ['Área', row?.area],
         ['Tipo de matriz', row?.tipo_matriz],
         ['Matriz predial', row?.matriz_predial],
         ['Nº de matriz', row?.numero_matriz],
@@ -101,11 +101,12 @@ function renderColumns(item, row) {
     titulos: {
       kpis: [
         ['Cobertura', fPercent(row?.percentagem_cobertura)],
-        ['Valor', fCurrency(row?.valor_titulo)],
-        ['Nº de títulos', fNumber(row?.numero_titulos)],
+        ['Valor', fCurrency(row?.valor)],
+        ['Valor do título', fCurrency(row?.valor_titulo)],
       ],
       details: [
-        ['Tipo', row?.tipo_titulo],
+        ['Nº de títulos', fNumber(row?.numero_titulos)],
+        ['Tipo de título', row?.tipo_titulo],
         ['Entidade emissora', row?.nome_entidade_emissora],
         ['Entidade registadora', row?.nome_instituicao_registo],
         ['Cliente', row?.numero_cliente],
@@ -121,7 +122,7 @@ function renderColumns(item, row) {
   return (
     <Grid container spacing={4}>
       <Grid item xs={12}>
-        <Stack spacing={2}>
+        <Stack spacing={1.5}>
           {current.kpis.map(([label, value]) =>
             label && value ? (
               <Box key={label}>

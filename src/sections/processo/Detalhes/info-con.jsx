@@ -10,7 +10,7 @@ import { fCurrency } from '../../../utils/formatNumber';
 import { TextItem } from './detalhes';
 import { newLineText } from '../../../components/Panel';
 // _mock
-import { dis, estadosCivis } from '../../../_mock';
+import { tiposDocumentos, estadosCivis } from '../../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ export default function InfoCon({ dados }) {
         <TextItem title="NIF:" text={dados?.nif} />
         <TextItem
           title="Doc. identificação:"
-          text={`${dados?.docid}${dados?.tipo_docid ? ` (${dis?.find(({ id }) => id === dados?.tipo_docid)?.label || dados?.tipo_docid})` : ''}`}
+          text={`${dados?.docid}${dados?.tipo_docid ? ` (${tiposDocumentos?.find(({ id }) => id === dados?.tipo_docid)?.label || dados?.tipo_docid})` : ''}`}
         />
         <TextItem
           title="Filiação:"

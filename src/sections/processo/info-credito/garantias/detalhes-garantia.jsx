@@ -51,22 +51,22 @@ export default function DetalhesGarantia({ dados, onClose }) {
     ...(titulos?.length > 0
       ? [{ value: 'Títulos', component: <ImoveisGarantia item="titulos" dados={titulos ?? []} /> }]
       : []),
-    ...(imoveis?.[0]?.veiculos?.length > 0
-      ? [{ value: 'Veículos', component: <ImoveisGarantia item="veiculos" dados={imoveis?.[0]?.veiculos ?? []} /> }]
+    ...(imoveis?.veiculos?.length > 0
+      ? [{ value: 'Veículos', component: <ImoveisGarantia item="veiculos" dados={imoveis?.veiculos ?? []} /> }]
       : []),
-    ...(imoveis?.[0]?.terrenos?.length > 0
-      ? [{ value: 'Terrenos', component: <ImoveisGarantia item="terrenos" dados={imoveis?.[0]?.terrenos ?? []} /> }]
+    ...(imoveis?.terrenos?.length > 0
+      ? [{ value: 'Terrenos', component: <ImoveisGarantia item="terrenos" dados={imoveis?.terrenos ?? []} /> }]
       : []),
-    ...(imoveis?.[0]?.apartamentos?.length > 0
+    ...(imoveis?.apartamentos?.length > 0
       ? [
           {
             value: 'Apartamentos',
-            component: <ImoveisGarantia item="apartamentos" dados={imoveis?.[0]?.apartamentos ?? []} />,
+            component: <ImoveisGarantia item="apartamentos" dados={imoveis?.apartamentos ?? []} />,
           },
         ]
       : []),
-    ...(imoveis?.[0]?.predios?.length > 0
-      ? [{ value: 'Prédios', component: <ImoveisGarantia item="predios" dados={imoveis?.[0]?.predios ?? []} /> }]
+    ...(imoveis?.predios?.length > 0
+      ? [{ value: 'Prédios', component: <ImoveisGarantia item="predios" dados={imoveis?.predios ?? []} /> }]
       : []),
   ];
 

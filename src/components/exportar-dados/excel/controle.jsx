@@ -6,7 +6,7 @@ import { ptDateTime, ptDate } from '../../../utils/formatTime';
 //
 import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalho } from './formatacoes';
 // _mock
-import { dis } from '../../../_mock';
+import { tiposDocumentos } from '../../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -147,9 +147,9 @@ export default function ExportarDadosControle({ titulo, dados, tabela }) {
             row?.conta_processo || '',
             row?.segmento_cliente || '',
             row?.doc_idp || '',
-            dis?.find((di) => di?.id === row?.tipo_doc_idp)?.label || row?.tipo_doc_idp || '',
+            tiposDocumentos?.find((di) => di?.id === row?.tipo_doc_idp)?.label || row?.tipo_doc_idp || '',
             row?.doc_ids || '',
-            dis?.find((di) => di?.id === row?.tipo_doc_ids)?.label || row?.tipo_doc_ids || '',
+            tiposDocumentos?.find((di) => di?.id === row?.tipo_doc_ids)?.label || row?.tipo_doc_ids || '',
             '',
             row?.valor ? fNumber(row?.valor) : '',
             row?.cdg_operacao || '',
@@ -162,7 +162,7 @@ export default function ExportarDadosControle({ titulo, dados, tabela }) {
             row?.ordenador || '',
             row?.nif || '',
             row?.docid || '',
-            dis?.find((di) => di?.id === row?.tipo_docid)?.label || row?.tipo_docid || '',
+            tiposDocumentos?.find((di) => di?.id === row?.tipo_docid)?.label || row?.tipo_docid || '',
             row?.estado_civil || '',
             ptDate(row?.data_nascimento),
             row?.pai || '',

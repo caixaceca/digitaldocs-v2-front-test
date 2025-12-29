@@ -75,7 +75,21 @@ export default function DetalhesTicket({ onClose }) {
         />
       ),
     },
-    ...(selectedItem?.sla_report ? [{ value: 'SLA', component: <SLA sla={selectedItem?.sla_report ?? null} /> }] : []),
+    ...(selectedItem?.sla_report
+      ? [
+          {
+            value: 'SLA',
+            component: (
+              <SLA
+                sla={selectedItem?.sla_report ?? null}
+                departments={selectedItem?.ticket_histories?.filter(
+                  ({ action, sla_report: sla }) => action === 'FORWARDING' && sla
+                )}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (

@@ -28,7 +28,7 @@ import { SearchIndicadores } from '../../components/SearchToolbar';
 import { IndicadorItem } from './Indicadores';
 import { applySortFilter } from './applySortFilter';
 // _mock_
-import { meses, mesesAbr } from '../../_mock';
+import { meses } from '../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -99,9 +99,9 @@ export function EntradaTrabalhado({ entradas, saidas }) {
                 <TableHead>
                   <TableRow>
                     <TableCell> </TableCell>
-                    {mesesAbr?.map((row, index) => (
+                    {meses?.map((row, index) => (
                       <TableCell key={`mes_${index}`} align="right">
-                        {row?.label}
+                        {row?.abrev}
                       </TableCell>
                     ))}
                     <TableCell align="right" sx={{ typography: 'subtitle1' }}>
@@ -439,11 +439,11 @@ export function DadosMes({
 
 function entradaTrabalhado(entradas, saidas) {
   const dadosCompletos = [];
-  mesesAbr?.forEach(({ id, label }) => {
+  meses?.forEach(({ id, abrev }) => {
     const entrada = entradas?.find(({ mes }) => mes === id);
     const saida = saidas?.find(({ mes }) => mes === id);
     dadosCompletos?.push({
-      mes: label,
+      mes: abrev,
       saida: saida?.total || 0,
       entrada: entrada?.total || 0,
       desvio: (saida?.total || 0) - (entrada?.total || 0),

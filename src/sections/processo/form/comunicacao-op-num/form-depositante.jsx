@@ -25,7 +25,7 @@ import {
 import GridItem from '../../../../components/GridItem';
 import { ButtonsStepper } from '../../../../components/Actions';
 // _mock
-import { dis, estadosCivis } from '../../../../_mock';
+import { tiposDocumentos, estadosCivis } from '../../../../_mock';
 //
 import { submitDados } from '../utils-form-processo';
 
@@ -75,7 +75,8 @@ export default function FormDepositante({ dados }) {
       titular_ordenador: dadosStepper?.titular_ordenador || processo?.con?.titular_ordenador || false,
       data_nascimento: dadosStepper?.data_nascimento || fillData(processo?.con?.data_nascimento, null),
       local_pais_nascimento: dadosStepper?.local_pais_nascimento || processo?.con?.local_pais_nascimento || '',
-      tipo_docid: dadosStepper?.tipo_docid || dis?.find(({ id }) => id === processo?.con?.tipo_docid) || null,
+      tipo_docid:
+        dadosStepper?.tipo_docid || tiposDocumentos?.find(({ id }) => id === processo?.con?.tipo_docid) || null,
       estado_civil:
         dadosStepper?.estado_civil || estadosCivis?.find(({ id }) => id === processo?.con?.estado_civil) || null,
     }),
@@ -128,7 +129,7 @@ export default function FormDepositante({ dados }) {
             <>
               <GridItem sm={6} children={<RHFTextField name="ordenador" label="Nome" />} />
               <GridItem sm={6} xl={3}>
-                <RHFAutocompleteObj name="tipo_docid" label="Tipo doc. identificação" options={dis} />
+                <RHFAutocompleteObj name="tipo_docid" label="Tipo doc. identificação" options={tiposDocumentos} />
               </GridItem>
               <GridItem sm={6} xl={3} children={<RHFTextField name="docid" label="Nº doc. identificação" />} />
               <GridItem sm={6} xl={3} children={<RHFTextField name="nif" label="NIF" />} />

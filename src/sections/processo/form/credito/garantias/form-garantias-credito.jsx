@@ -57,10 +57,10 @@ export default function FormGarantias({ dados, processoId, onClose }) {
       fiadores: dados?.metadados?.fiadores || [],
       livrancas: dados?.metadados?.livrancas || [],
       percentagem_cobertura: dados?.percentagem_cobertura || '',
-      predios: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.predios || []),
-      terrenos: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.terrenos || []),
-      veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.veiculos || []),
-      apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.[0]?.apartamentos || []),
+      predios: construirSchemaImoveis(dados?.metadados?.imoveis?.predios || []),
+      terrenos: construirSchemaImoveis(dados?.metadados?.imoveis?.terrenos || []),
+      veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.veiculos || []),
+      apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.apartamentos || []),
       subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
       tipo_garantia: tipoGarantia,
     }),
@@ -83,7 +83,7 @@ export default function FormGarantias({ dados, processoId, onClose }) {
   const onSubmit = async (values) => {
     const formData = composeGarantiaPayload(values, chaveMeta);
     const msg = isEdit ? 'Garantia atualizada' : 'Garantia adicionada';
-    const params = { fillCredito: true, processoId, msg, creditoId: dados?.id ?? '', put: true };
+    const params = { id: dados?.id || '', fillCredito: true, processoId, msg, put: true };
     dispatch((isEdit ? updateItem : createItem)('garantias', JSON.stringify([formData]), { ...params, onClose }));
   };
 

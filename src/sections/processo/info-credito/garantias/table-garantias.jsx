@@ -26,11 +26,11 @@ export default function TableGarantias({ dados, outros = {} }) {
   const [item, setItem] = useState(null);
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
-  const { creditoId, processoId, modificar = false } = outros;
+  const { processoId, modificar = false } = outros;
   const notFound = dados?.length === 0;
 
   const confirmarEliminar = () => {
-    const ids = { processoId, id: item?.id, creditoId };
+    const ids = { processoId, id: item?.id };
     dispatch(deleteItem('garantias', { ...ids, msg: 'Garantia eliminada', onClose: () => setItem(null) }));
   };
 
@@ -51,7 +51,7 @@ export default function TableGarantias({ dados, outros = {} }) {
         </TableHead>
         <TableBody>
           {dados?.map((row, index) => (
-            <TableRow hover key={`${row?.id}_${creditoId}_${index}`}>
+            <TableRow hover key={`${row?.id}_${index}`}>
               <TableCell>
                 {row?.tipo_garantia}
                 {row?.subtipo_garantia ? ` - ${row?.subtipo_garantia}` : ''}
@@ -89,9 +89,7 @@ export default function TableGarantias({ dados, outros = {} }) {
           handleOk={() => confirmarEliminar()}
         />
       )}
-      {item?.modal === 'detail' && (
-        <DetalhesGarantia onClose={() => setItem(null)} dados={{ ...item, processoId, creditoId: dados?.creditoId }} />
-      )}
+      {item?.modal === 'detail' && <DetalhesGarantia onClose={() => setItem(null)} dados={{ ...item, processoId }} />}
       {(item?.modal === 'add' || item?.modal === 'update') && (
         <FormGarantias processoId={processoId} dados={item} onClose={() => setItem(null)} />
       )}

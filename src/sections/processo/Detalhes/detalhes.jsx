@@ -30,7 +30,7 @@ import { Checked, CellChecked, Criado, newLineText } from '../../../components/P
 //
 import { colorProcesso } from '../../tabela/table-processos';
 // _mock
-import { dis } from '../../../_mock';
+import { tiposDocumentos } from '../../../_mock';
 
 const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor: 'background.neutral', minHeight: 36 };
 
@@ -161,14 +161,14 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
             <TextItem
               baralhar
               text={docIdP?.toString()}
-              title={`${dis?.find(({ id }) => id === tipoIdP)?.label || 'Doc. primário'}:`}
+              title={`${tiposDocumentos?.find(({ id }) => id === tipoIdP)?.label || 'Doc. primário'}:`}
             />
           )}
           {docIdS && (
             <TextItem
               baralhar
               text={docIdS?.toString()}
-              title={`${dis?.find(({ id }) => id === tipoIdS)?.label || 'Doc. secundário'}:`}
+              title={`${tiposDocumentos?.find(({ id }) => id === tipoIdS)?.label || 'Doc. secundário'}:`}
             />
           )}
           {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} baralhar />}

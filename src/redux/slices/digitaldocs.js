@@ -507,12 +507,12 @@ export function updateItem(item, dados, params) {
           `/v2/processos/${params?.id}/operacoes_credito/${perfilId}?credito_id=${params?.creditoId}`) ||
         (item === 'encaminhar serie' &&
           `/v2/processos/encaminhar/serie/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}`) ||
+        (item === 'garantias' &&
+          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&garantia_id=${params?.id}`) ||
         (item === 'libertar' &&
           `/v2/processos/abandonar/${params?.perfilId}?processo_id=${params?.id}&estado_id=${params?.estadoId}`) ||
         (item === 'confidencialidade' &&
           `/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
-        (item === 'garantias' &&
-          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&garantia_id=${params?.garantiaId}`) ||
         (item === 'cancelar' &&
           `/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`) ||
         (item === 'encaminhar paralelo' &&
@@ -559,10 +559,10 @@ export function deleteItem(item, params) {
 
       const apiUrl =
         (item === 'seguros' && `/v2/processos/${params?.processoId}/credito/seguros?seguro_id=${params?.id}`) ||
+        (item === 'garantias' &&
+          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&garantia_id=${params?.id}`) ||
         (item === 'anexo-parecer' &&
           `/v2/processos/${params?.processoId}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}&anexo_id=${params?.id}`) ||
-        (item === 'garantias' &&
-          `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&credito_id=${params?.creditoId}&garantia_id=${params?.id}`) ||
         (item === 'processo' &&
           `/v2/processos/marcar/desmarcar/duplicacao?perfil_id=${perfilId}&processo_id=${params?.id}&estado_id=${params?.estadoId}&duplicado=${params?.duplicado}`) ||
         (item === 'anexo' &&
