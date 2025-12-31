@@ -14,16 +14,7 @@ export const seguroSchema = {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const tituloSchema = {
-  valor_titulo: '',
-  tipo_titulo: null,
-  numero_cliente: '',
-  numero_titulos: '',
-  percentagem_cobertura: '',
-  nome_entidade_emissora: '',
-  nome_instituicao_registo: '',
-  seguros: [],
-};
+export const tituloSchema = { codigo: '', numero_cliente: '', percentagem_cobertura: '', seguros: [] };
 
 // ---------------------------------------------------------------------------------------------------------------------
 

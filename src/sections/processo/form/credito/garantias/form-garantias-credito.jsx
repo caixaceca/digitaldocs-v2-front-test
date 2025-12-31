@@ -7,11 +7,7 @@ import Grid from '@mui/material/Grid';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { shapeGarantia } from './validationFields';
-import composeGarantiaPayload from './composePayload';
 import { vdt } from '../../../../../utils/formatObject';
-import { construirSchemaImoveis } from './schemaFileds';
-import { getFromGaji9 } from '../../../../../redux/slices/gaji9';
 import { useSelector, useDispatch } from '../../../../../redux/store';
 import { createItem, updateItem } from '../../../../../redux/slices/digitaldocs';
 // components
@@ -27,6 +23,9 @@ import FormSeguros from './form-seguros';
 import FormVeiculos from './form-veiculos';
 import FormEntidades from './form-entidades';
 import FormLivrancas from './form-livrancas';
+import { shapeGarantia } from './validationFields';
+import composeGarantiaPayload from './composePayload';
+import { construirSchemaImoveis } from './schemaFileds';
 import { listaGarantias } from '../../../../gaji9/applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -42,11 +41,6 @@ export default function FormGarantias({ dados, processoId, onClose }) {
     () => garantiasList?.find(({ id }) => id === dados?.tipo_garantia_id) || null,
     [dados?.tipo_garantia_id, garantiasList]
   );
-
-  useEffect(() => {
-    dispatch(getFromGaji9('tiposSeguros'));
-    dispatch(getFromGaji9('garantias-selecionaveis', { item: 'tiposGarantias' }));
-  }, [dispatch]);
 
   const formSchema = shapeGarantia();
   const defaultValues = useMemo(

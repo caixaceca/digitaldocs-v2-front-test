@@ -28,13 +28,9 @@ export const shapeGarantia = () =>
     titulos: Yup.array(
       Yup.object({
         seguros: shapeSeguros(true),
-        valor_titulo: shapeNumberStd('Valor'),
+        codigo: Yup.string().required().label('Código'),
         numero_cliente: shapeNumberStd('Nº de cliente'),
-        numero_titulos: shapeNumberStd('Nº de títulos'),
-        tipo_titulo: Yup.mixed().required().label('Tipo'),
         percentagem_cobertura: shapePercentagem('Cobertura'),
-        nome_entidade_emissora: Yup.string().required().label('Entidade emissora'),
-        nome_instituicao_registo: Yup.string().required().label('Entidade registradora'),
       })
     ),
     veiculos: Yup.array(

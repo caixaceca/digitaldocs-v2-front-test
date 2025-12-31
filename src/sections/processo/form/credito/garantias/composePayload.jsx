@@ -10,41 +10,15 @@ export default function composeGarantiaPayload(form, chaveMeta) {
 }
 
 const metaBuilders = {
-  fiadores: (form) => ({
-    fiadores: (form?.fiadores ?? []).map(mapFiador),
-  }),
-
-  livrancas: (form) => ({
-    livrancas: (form?.livrancas ?? []).map(mapLivranca),
-  }),
-
-  seguros: (form) => ({
-    seguros: (form?.seguros ?? []).map(mapSeguro),
-  }),
-
-  contas: (form) => ({
-    contas: (form?.contas ?? []).map(mapContas),
-  }),
-
-  titulos: (form) => ({
-    titulos: (form?.titulos ?? []).map(mapTitulo),
-  }),
-
-  predios: (form) => ({
-    imoveis: { predios: (form?.predios ?? []).map(mapPredio) },
-  }),
-
-  terrenos: (form) => ({
-    imoveis: { terrenos: (form?.terrenos ?? []).map(mapTerreno) },
-  }),
-
-  veiculos: (form) => ({
-    imoveis: { veiculos: (form?.veiculos ?? []).map(mapVeiculo) },
-  }),
-
-  apartamentos: (form) => ({
-    imoveis: { apartamentos: (form?.apartamentos ?? []).map(mapApartamento) },
-  }),
+  fiadores: (form) => ({ fiadores: (form?.fiadores ?? []).map(mapFiador) }),
+  livrancas: (form) => ({ livrancas: (form?.livrancas ?? []).map(mapLivranca) }),
+  seguros: (form) => ({ seguros: (form?.seguros ?? []).map(mapSeguro) }),
+  contas: (form) => ({ contas: (form?.contas ?? []).map(mapContas) }),
+  titulos: (form) => ({ titulos: (form?.titulos ?? []).map(mapTitulo) }),
+  predios: (form) => ({ imoveis: { predios: (form?.predios ?? []).map(mapPredio) } }),
+  terrenos: (form) => ({ imoveis: { terrenos: (form?.terrenos ?? []).map(mapTerreno) } }),
+  veiculos: (form) => ({ imoveis: { veiculos: (form?.veiculos ?? []).map(mapVeiculo) } }),
+  apartamentos: (form) => ({ imoveis: { apartamentos: (form?.apartamentos ?? []).map(mapApartamento) } }),
 };
 
 // Mapeadores principais -----------------------------------------------------------------------------------------------
@@ -144,13 +118,8 @@ function mapTerreno(terreno) {
 
 function mapTitulo(titulo) {
   return {
-    tipo_titulo_id: 0,
-    tipo_titulo: titulo?.tipo_titulo ?? '',
+    codigo: titulo?.codigo ?? '',
     numero_cliente: titulo?.numero_cliente ?? '',
-    valor_titulo: String(titulo?.valor_titulo ?? ''),
-    numero_titulos: String(titulo?.numero_titulos ?? ''),
-    nome_entidade_emissora: titulo?.nome_entidade_emissora ?? '',
-    nome_instituicao_registo: titulo?.nome_instituicao_registo ?? '',
     percentagem_cobertura: String(titulo?.percentagem_cobertura ?? ''),
     seguros: (titulo?.seguros ?? []).map(mapSeguro),
   };

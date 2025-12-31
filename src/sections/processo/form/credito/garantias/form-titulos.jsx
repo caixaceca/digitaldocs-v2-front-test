@@ -13,7 +13,7 @@ import FormSeguros from './form-seguros';
 import GridItem from '../../../../../components/GridItem';
 import { SemDados } from '../../../../../components/Panel';
 import { AddItem, DefaultAction } from '../../../../../components/Actions';
-import { RHFTextField, RHFNumberField, RHFAutocompleteSmp } from '../../../../../components/hook-form';
+import { RHFTextField, RHFNumberField } from '../../../../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -42,30 +42,14 @@ function Titulos({ fields = [], remove }) {
     fields.map((item, index) => (
       <Card key={item.id} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Grid container spacing={2} justifyContent="center">
-            <GridItem sm={6} md={4}>
-              <RHFAutocompleteSmp
-                label="Tipo"
-                options={['Ações', 'Obrigações']}
-                name={`titulos[${index}].tipo_titulo`}
-              />
+          <Grid container spacing={2} sx={{ flexGrow: 1 }}>
+            <GridItem sm={4}>
+              <RHFTextField name={`titulos[${index}].codigo`} label="Código" />
             </GridItem>
-            <GridItem sm={6} md={4}>
-              <RHFTextField name={`titulos[${index}].nome_entidade_emissora`} label="Entidade emissora" />
-            </GridItem>
-            <GridItem sm={6} md={4}>
-              <RHFTextField name={`titulos[${index}].nome_instituicao_registo`} label="Entidade registradora" />
-            </GridItem>
-            <GridItem sm={6} md={3}>
+            <GridItem sm={4}>
               <RHFNumberField name={`titulos[${index}].numero_cliente`} label="Nº de cliente" noFormat />
             </GridItem>
-            <GridItem sm={6} md={3}>
-              <RHFNumberField name={`titulos[${index}].numero_titulos`} label="Nº de títulos" />
-            </GridItem>
-            <GridItem sm={6} md={3}>
-              <RHFNumberField name={`titulos[${index}].valor_titulo`} label="Valor" tipo="CVE" />
-            </GridItem>
-            <GridItem sm={6} md={3}>
+            <GridItem sm={4}>
               <RHFNumberField name={`titulos[${index}].percentagem_cobertura`} label="Cobertura" tipo="%" />
             </GridItem>
             <GridItem children={<FormSeguros prefixo={`titulos[${index}].seguros`} tipo />} />

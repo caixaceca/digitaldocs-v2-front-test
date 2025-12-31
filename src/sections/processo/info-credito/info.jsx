@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -8,12 +8,14 @@ import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
-import { useSelector } from '../../../redux/store';
 import { ptDate } from '../../../utils/formatTime';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 import { formatPrazoAmortizacao } from '../../../utils/formatText';
 import { processoEstadoInicial, emailCheck } from '../../../utils/validarAcesso';
+//
+import { getFromGaji9 } from '../../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import { TextItem } from '../Detalhes/detalhes';
@@ -34,13 +36,19 @@ const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function InfoCredito({ dados }) {
+  const dispatch = useDispatch();
   const [currentTab, setCurrentTab] = useState('Caracterização');
 
   const { mail } = useSelector((state) => state.intranet);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-  const estadoInicial = processoEstadoInicial(meusAmbientes, dados?.estado?.estado_id);
 
   const modificar = dados?.estado?.preso && dados?.estado?.atribuidoAMim;
+  const estadoInicial = processoEstadoInicial(meusAmbientes, dados?.estado?.estado_id);
+
+  useEffect(() => {
+    dispatch(getFromGaji9('tiposSeguros'));
+    dispatch(getFromGaji9('garantias-selecionaveis', { item: 'tiposGarantias' }));
+  }, [dispatch]);
 
   const tabsList = [
     { value: 'Caracterização', component: <DadosCredito dados={dados} modificar={modificar} mail={mail} /> },

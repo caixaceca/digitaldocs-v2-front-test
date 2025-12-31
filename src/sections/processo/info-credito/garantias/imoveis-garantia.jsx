@@ -2,6 +2,7 @@
 import { Stack, Typography, Box, Paper, Grid } from '@mui/material';
 // utils
 import { ptDate } from '../../../../utils/formatTime';
+import { useSelector } from '../../../../redux/store';
 import { fNumber, fCurrency, fPercent } from '../../../../utils/formatNumber';
 // components
 import TableInfoGarantias from './table-info-garantias';
@@ -46,8 +47,8 @@ function renderColumns(item, row) {
     contas: {
       kpis: [
         ['Cobertura', fPercent(row?.percentagem_cobertura)],
-        ['Valor', fCurrency(row?.valor)],
-        ['Saldo', fCurrency(row?.saldo)],
+        ['Valor cobertura', fCurrency(row?.valor_cobertura)],
+        ['Saldo', `${fNumber(row?.saldo)} ${row?.moeda}`],
       ],
       details: [
         ['Nº de conta', row?.numero_conta],
@@ -61,7 +62,7 @@ function renderColumns(item, row) {
     veiculos: {
       kpis: [
         ['Cobertura', fPercent(row?.percentagem_cobertura)],
-        ['Valor', fCurrency(row?.valor)],
+        ['Valor cobertura', fCurrency(row?.valor_cobertura)],
         ['Valor PVT', fCurrency(row?.valor_pvt)],
       ],
       details: [
@@ -70,12 +71,13 @@ function renderColumns(item, row) {
         ['Matrícula', row?.matricula],
         ['NURA', row?.nura],
         ['Ano fabricação', row?.ano_fabrico],
+        ['Valor', fCurrency(row?.valor)],
       ],
     },
     imoveis: {
       kpis: [
         ['Cobertura', fPercent(row?.percentagem_cobertura)],
-        ['Valor', fCurrency(row?.valor)],
+        ['Valor cobertura', fCurrency(row?.valor_cobertura)],
         ['Valor PVT', fCurrency(row?.valor_pvt)],
       ],
       details: [
@@ -83,8 +85,8 @@ function renderColumns(item, row) {
         ['Tipo de matriz', row?.tipo_matriz],
         ['Matriz predial', row?.matriz_predial],
         ['Nº de matriz', row?.numero_matriz],
-        ['Nº de descrição predial', row?.numero_descricao_predial],
-        ['NIP', row?.nip],
+        ['Nº de descrição predial', row?.numero_descricao_predial || undefined],
+        ['NIP', row?.nip || undefined],
         ['Nº de andar', row?.numero_andar],
         ['Identificação fração', row?.identificacao_fracao],
       ],
@@ -101,12 +103,13 @@ function renderColumns(item, row) {
     titulos: {
       kpis: [
         ['Cobertura', fPercent(row?.percentagem_cobertura)],
-        ['Valor', fCurrency(row?.valor)],
+        ['Valor cobertura', fCurrency(row?.valor_cobertura)],
         ['Valor do título', fCurrency(row?.valor_titulo)],
       ],
       details: [
         ['Nº de títulos', fNumber(row?.numero_titulos)],
-        ['Tipo de título', row?.tipo_titulo],
+        ['Código', row?.codigo],
+        ['Tipo', row?.tipo_titulo],
         ['Entidade emissora', row?.nome_entidade_emissora],
         ['Entidade registadora', row?.nome_instituicao_registo],
         ['Cliente', row?.numero_cliente],
@@ -193,6 +196,8 @@ function GarantiaLayout({ children, donos, seguros, donosTitle }) {
   );
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+
 function Item({ title, value }) {
   const hasValue = value !== null && value !== undefined && value !== '';
   if (value === undefined) return null;
@@ -202,10 +207,22 @@ function Item({ title, value }) {
       <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
         {title}:
       </Typography>
-      {hasValue ? <Typography variant="body2">{value}</Typography> : noDados('(Não defenido...)')}
+      {hasValue ? (
+        <Typography variant="body2">{title === 'Balcão' ? <Balcao balcao={value} /> : value}</Typography>
+      ) : (
+        noDados('(Não defenido...)')
+      )}
     </Stack>
   );
 }
+
+function Balcao({ balcao }) {
+  const { uos } = useSelector((state) => state.intranet);
+  const balcaoLabel = uos?.find(({ balcao: balc }) => balc === balcao)?.label;
+  return balcaoLabel ? `${balcao} - ${balcaoLabel}` : balcao;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 function Livrancas({ dados }) {
   return (
