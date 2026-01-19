@@ -72,10 +72,10 @@ export function Parecer({ estadoId, parecer, handleEditar, accord, handleAccord 
             <Stack direction="row" alignItems="center" useFlexGap flexWrap="wrap">
               {colaborador && (
                 <ColaboradorInfo
-                  id={colaborador?.id}
                   nome={colaborador?.nome}
                   foto={colaborador?.foto_anexo}
                   labelAlt={colaborador?.uo_label}
+                  presence={colaborador?.presence}
                   other={
                     temParecer && (
                       <Box>

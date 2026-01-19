@@ -4,14 +4,12 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { alpha, styled } from '@mui/material/styles';
 // utils
-import { nomeacaoBySexo } from '../../utils/formatText';
-import { getIntranetFile } from '../../utils/formatFile';
-// redux
 import { useSelector } from '../../redux/store';
+import { nomeacaoBySexo } from '../../utils/formatText';
 // components
 import Label from '../../components/Label';
 import SvgIconStyle from '../../components/SvgIconStyle';
-import MyAvatar, { AvatarBedge } from '../../components/MyAvatar';
+import { AvatarBadge } from '../../components/custom-avatar';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -31,37 +29,33 @@ const InfoStyle = styled('div')(({ theme }) => ({
   zIndex: 99,
   right: 'auto',
   display: 'flex',
-  alignItems: 'center',
   position: 'absolute',
-  left: theme.spacing(1),
-  [theme.breakpoints.up('md')]: { left: theme.spacing(2) },
+  left: theme.spacing(2),
+  marginTop: theme.spacing(3),
+  [theme.breakpoints.up('md')]: { alignItems: 'center', bottom: theme.spacing(4) },
 }));
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function PerfilCover({ colaborador, isDeFeria }) {
-  const { isLoading } = useSelector((state) => state.intranet);
+  const { isLoading, colaboradores } = useSelector((state) => state.intranet);
   return (
     <RootStyle>
       <InfoStyle>
         <Stack>
-          <AvatarBedge
-            id={colaborador?.id}
-            sx={{ border: (theme) => `2px solid ${theme.palette.common.white}`, width: 15, height: 15 }}
-          >
-            <MyAvatar
-              sx={{
-                borderWidth: 2,
-                mt: { xs: 3, md: 1.5 },
-                borderStyle: 'solid',
-                width: { xs: 80, md: 128 },
-                height: { xs: 80, md: 128 },
-                borderColor: 'common.white',
-              }}
-              name={colaborador?.nome}
-              src={getIntranetFile('colaborador', colaborador?.foto_anexo)}
-            />
-          </AvatarBedge>
+          <AvatarBadge
+            name={colaborador?.nome}
+            foto={colaborador?.foto_anexo}
+            presence={colaboradores?.find?.(({ id }) => id === colaborador?.id)?.presence}
+            avatarSx={{
+              borderWidth: 2,
+              borderStyle: 'solid',
+              width: { xs: 80, md: 128 },
+              height: { xs: 80, md: 128 },
+              borderColor: 'common.white',
+            }}
+            sx={{ width: 15, height: 15 }}
+          />
         </Stack>
         <Stack sx={{ ml: 3, mt: { md: -2 }, color: 'common.white', textAlign: { md: 'left' } }}>
           <Stack direction="row" alignItems="center" spacing={1} sx={{ pr: 1 }}>

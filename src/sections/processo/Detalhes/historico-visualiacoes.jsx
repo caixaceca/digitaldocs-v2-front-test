@@ -52,9 +52,9 @@ export default function Views() {
                   <AccordionSummary>
                     <Stack direction="row" alignItems="center" sx={{ flexGrow: 1 }} justifyContent="space-between">
                       <ColaboradorInfo
-                        id={colaborador?.id}
                         label={colaborador?.uo_label}
                         foto={colaborador?.foto_anexo}
+                        presence={colaborador?.presence}
                         nome={colaborador?.nome || `Perfil: ${perfilId}`}
                       />
                       <Stack direction="row" alignItems="end" sx={{ pr: 2 }} spacing={0.5}>

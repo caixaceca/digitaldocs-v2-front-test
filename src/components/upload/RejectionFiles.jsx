@@ -9,17 +9,28 @@ import { getFileData } from '../../utils/formatFile';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function RejectionFiles({ fileRejections }) {
+export default function RejectionFiles({ fileRejections, maxSize, maxFiles }) {
+  const getErrorMessage = (error) => {
+    switch (error.code) {
+      case 'file-too-large':
+        return `O ficheiro é maior que ${fData(maxSize)}`;
+      case 'file-too-small':
+        return `O ficheiro é menor que ${fData(1024)}`; // Exemplo para 1KB ou use outra prop
+      case 'too-many-files':
+        return `Pode enviar no máximo ${maxFiles} ${maxFiles > 1 ? 'ficheiros' : 'ficheiro'}`;
+      case 'file-invalid-type':
+        return 'O tipo de ficheiro não é permitido';
+      default:
+        return error.message;
+    }
+  };
+
+  if (fileRejections.length === 0) return null;
+
   return (
     <Paper
       variant="outlined"
-      sx={{
-        py: 1,
-        px: 2,
-        mt: 3,
-        borderColor: 'error.light',
-        bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
-      }}
+      sx={{ px: 2, mt: 3, borderColor: 'error.light', bgcolor: (theme) => alpha(theme.palette.error.main, 0.08) }}
     >
       {fileRejections.map(({ file, errors }) => {
         const { path, size } = getFileData(file);
@@ -31,8 +42,8 @@ export default function RejectionFiles({ fileRejections }) {
             </Typography>
 
             {errors.map((error) => (
-              <Box key={error.code} component="li" sx={{ typography: 'caption' }}>
-                {error.message}
+              <Box key={error.code} component="li" sx={{ typography: 'caption', listStyle: 'none', pl: 1 }}>
+                • {getErrorMessage(error)}
               </Box>
             ))}
           </Box>

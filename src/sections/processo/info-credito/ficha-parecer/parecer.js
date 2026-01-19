@@ -37,8 +37,8 @@ export function textParecer(ficha) {
 
   const conclusao = gerarConclusao(regras, credito);
 
-  const idadeTitular = idadeCliente(ficha.entidade.data_nascimento);
-  const reforma = idadeReforma(ficha.entidade.sexo);
+  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
+  const reforma = idadeReforma(ficha?.entidade?.sexo);
 
   const idadeFimCredito = idadeTitular + Number(proposta?.prazo_amortizacao || 0) / 12;
   let ajusteRendimentoTexto = '';
@@ -54,10 +54,26 @@ export function textParecer(ficha) {
   const riscoProspectivo = gerarRiscoProspectivo(ficha, rendimento, proposta);
 
   return `
-    <p><strong>${ficha?.titular ?? 'NOME DO CLIENTE'}</strong>${rendimento?.nome_conjuge ? ` e <strong>${rendimento?.nome_conjuge}</strong>` : ''}, cliente nº <strong>${ficha?.cliente ?? 'Nº DE CLIENTE'}</strong>, com início de relacionamento com o banco em <strong>${dataAbertura}</strong>, ${historicoReestruturacao}. O cliente possui salário domiciliado na Caixa, é funcionári${ficha.entidade.sexo === 'Masculino' ? 'o' : 'a'} do(a) <strong>${rendimento?.local_trabalho ?? 'EMPRESA/INSTITUIÇÃO'}</strong>, auferindo um vencimento mensal bruto de <strong>${fCurrency(calcRendimento(rendimento, true))}</strong>.</p>
+    <p><strong>${ficha?.titular ?? 'NOME DO CLIENTE'}</strong>${
+      rendimento?.nome_conjuge ? ` e <strong>${rendimento?.nome_conjuge}</strong>` : ''
+    }, cliente nº <strong>${
+      ficha?.cliente ?? 'Nº DE CLIENTE'
+    }</strong>, com início de relacionamento com o banco em <strong>${dataAbertura}</strong>, ${historicoReestruturacao}. O cliente possui salário domiciliado na Caixa, é funcionári${
+      ficha?.entidade?.sexo === 'Masculino' ? 'o' : 'a'
+    } do(a) <strong>${
+      rendimento?.local_trabalho ?? 'EMPRESA/INSTITUIÇÃO'
+    }</strong>, auferindo um vencimento mensal bruto de <strong>${fCurrency(
+      calcRendimento(rendimento, true)
+    )}</strong>.</p>
 
     <br>
-    <p>O cliente, com <strong>${idadeTitular} anos</strong>, solicita um crédito <strong>${credito?.componente}</strong> no valor de <strong>${fCurrency(proposta?.montante)}</strong>, correspondente a <strong>${fShortenNumber(proposta?.montante / calcRendimento(rendimento, true))}</strong> vezes o seu salário, destinado a <strong>${credito?.finalidade ?? 'FINALIDADE'}</strong>. O crédito proposto apresenta as seguintes condições:</p>
+    <p>O cliente, com <strong>${idadeTitular} anos</strong>, solicita um crédito <strong>${
+      credito?.componente
+    }</strong> no valor de <strong>${fCurrency(proposta?.montante)}</strong>, correspondente a <strong>${fShortenNumber(
+      proposta?.montante / calcRendimento(rendimento, true)
+    )}</strong> vezes o seu salário, destinado a <strong>${
+      credito?.finalidade ?? 'FINALIDADE'
+    }</strong>. O crédito proposto apresenta as seguintes condições:</p>
     <ul>
       <li>Prazo de amortização: <strong>${proposta?.prazo_amortizacao} meses</strong></li>
       <li>Taxa de juros: <strong>${fPercent(proposta?.taxa_juro)}</strong></li>
@@ -98,9 +114,9 @@ function gerarResponsabilidades({ dividas, fiancas, dividasExterna, avalesExtern
       `<li>Possui ${dividas.length} crédito${dividas.length > 1 ? 's' : ''} ativo na Caixa:${criarListaInterna(
         dividas,
         (d) =>
-          `<li class="ql-indent-1">C/CR ${d.tipo}, saldo ${fNumber(
-            Math.abs(d.saldo_divida)
-          )} ${d.moeda}, situação ${d.situacao};</li>`
+          `<li class="ql-indent-1">C/CR ${d.tipo}, saldo ${fNumber(Math.abs(d.saldo_divida))} ${d.moeda}, situação ${
+            d.situacao
+          };</li>`
       )}</li>`
     );
   }
@@ -112,9 +128,9 @@ function gerarResponsabilidades({ dividas, fiancas, dividasExterna, avalesExtern
       } na Caixa:${criarListaInterna(
         fiancas,
         (f) =>
-          `<li class="ql-indent-1">Beneficiário ${f.beneficiario}, saldo ${fNumber(
-            Math.abs(f.saldo_divida)
-          )} ${f.moeda}, situação ${f.situacao};</li>`
+          `<li class="ql-indent-1">Beneficiário ${f.beneficiario}, saldo ${fNumber(Math.abs(f.saldo_divida))} ${
+            f.moeda
+          }, situação ${f.situacao};</li>`
       )}</li>`
     );
   }
@@ -184,8 +200,8 @@ function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, prop
     status: somaAval <= limiteAval ? 'Dentro do limite recomendado' : 'Fora do limite recomendado',
   });
 
-  const idadeTitular = idadeCliente(ficha.entidade.data_nascimento);
-  const reforma = idadeReforma(ficha.entidade.sexo);
+  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
+  const reforma = idadeReforma(ficha?.entidade?.sexo);
   const idadeFimCredito = idadeTitular + Number(proposta?.prazo_amortizacao || 0) / 12;
   let ajusteStatus = 'Antes da idade de reforma';
   if (idadeFimCredito >= reforma) ajusteStatus = 'ATENÇÃO';
@@ -201,8 +217,8 @@ function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, prop
 // ---------------------------------------------------------------------------------------------------------------------
 
 function gerarRiscoProspectivo(ficha, rendimento, proposta) {
-  const idadeTitular = idadeCliente(ficha.entidade.data_nascimento);
-  const reforma = idadeReforma(ficha.entidade.sexo);
+  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
+  const reforma = idadeReforma(ficha?.entidade?.sexo);
   const idadeFimCredito = idadeTitular + Number(proposta?.prazo_amortizacao || 0) / 12;
   const anosAposReforma = Math.max(0, idadeFimCredito - reforma);
 
@@ -232,7 +248,7 @@ function gerarRiscoProspectivo(ficha, rendimento, proposta) {
     );
   }
 
-  const somaAval = [...(ficha.fiancas || []), ...(ficha.avales_externas || [])].reduce(
+  const somaAval = [...(ficha?.fiancas || []), ...(ficha?.avales_externas || [])].reduce(
     (acc, a) => acc + Math.abs(a.valor_prestacao || 0),
     0
   );
@@ -260,12 +276,14 @@ function gerarConclusao(regras, credito) {
   const fails = regras.filter((r) => r.status === 'Fora do limite recomendado' || r.status === 'ATENÇÃO');
 
   if (fails.length === 0) {
-    return `<p>O cliente cumpre todas as ${total} regras de solvabilidade estabelecidas. Considerando também a garantia apresentada (${credito?.garantia ?? 'N/A'}), a proposta revela-se enquadrada dentro do perfil de risco aceitável.</p>`;
+    return `<p>O cliente cumpre todas as ${total} regras de solvabilidade estabelecidas. Considerando também a garantia apresentada (${
+      credito?.garantia ?? 'N/A'
+    }), a proposta revela-se enquadrada dentro do perfil de risco aceitável.</p>`;
   }
 
   return `<p>O cliente atende ${ok} das ${total} regras de solvabilidade, com atenção ou não conformidade observada em: ${fails
     .map((f) => f.regra)
-    .join(
-      '; '
-    )}. Considerando as garantias apresentadas (${credito?.garantia ?? 'N/A'}), recomenda-se uma avaliação criteriosa e detalhada antes da decisão final sobre a aprovação do crédito.</p>`;
+    .join('; ')}. Considerando as garantias apresentadas (${
+    credito?.garantia ?? 'N/A'
+  }), recomenda-se uma avaliação criteriosa e detalhada antes da decisão final sobre a aprovação do crédito.</p>`;
 }

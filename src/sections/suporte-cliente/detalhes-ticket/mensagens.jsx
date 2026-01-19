@@ -16,7 +16,7 @@ import { useColaborador } from '../utils';
 import { ptDateTime } from '../../../utils/formatTime';
 import { getFileThumb } from '../../../utils/formatFile';
 import useResponsive from '../../../hooks/useResponsive';
-import { SUPORTE_CLIENTE_API_SERVER } from '../../../utils/apisUrl';
+import { API_SUPORTE_CLIENTE_URL } from '../../../utils/apisUrl';
 // components
 import { SemRegisto } from './historico';
 import { newLineText } from '../../../components/Panel';
@@ -89,7 +89,7 @@ function TimelineMessageItem({ message, isLast, isDesktop }) {
                   rel="noopener noreferrer"
                   sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
                   startIcon={getFileThumb(false, { width: 20, height: 20 }, anexo?.filename)}
-                  href={`${SUPORTE_CLIENTE_API_SERVER}/api/v1/ticket-attachments/download/${anexo?.identifier}`}
+                  href={`${API_SUPORTE_CLIENTE_URL}/api/v1/ticket-attachments/download/${anexo?.identifier}`}
                 >
                   {anexo?.filename}
                 </Button>

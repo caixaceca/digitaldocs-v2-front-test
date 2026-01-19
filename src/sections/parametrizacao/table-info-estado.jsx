@@ -77,8 +77,8 @@ export default function TableInfoEstado({ item, dados }) {
                       <TableCell>
                         <ColaboradorInfo
                           caption
-                          id={row?.cid}
                           foto={row?.foto}
+                          presence={row?.presence}
                           nome={row?.nome || `Perfil: ${row.perfil_id}`}
                           label={nomeacaoBySexo(row?.nomeacao_funcao, row?.sexo)}
                         />
@@ -152,6 +152,7 @@ function colaboradoresList(transicoes, colaboradores) {
       nome: colaborador?.nome,
       foto: colaborador?.foto_anexo,
       balcao: colaborador?.uo_balcao,
+      presence: colaborador?.presence,
       unidade_organica: colaborador?.uo_label,
       nomeacao_funcao: colaborador?.nomeacao_funcao,
     });

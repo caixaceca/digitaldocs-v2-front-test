@@ -69,7 +69,9 @@ export default function ModelosRespostas() {
         tipo !== 'Cliente sem saldo' && cativos?.length > 0
           ? processo.cativos.map(({ conta, saldo_cve: saldo, tipo: tipoConta = '' }) =>
               createBullet(
-                `${conta}, com saldo de ${fCurrency(saldo)} (${valorPorExtenso(Number(saldo))}) à ${tipoConta || 'ordem/prazo'};`
+                `${conta}, com saldo de ${fCurrency(saldo)} (${valorPorExtenso(Number(saldo))}) à ${
+                  tipoConta || 'ordem/prazo'
+                };`
               )
             )
           : [createBullet(`${conta || cliente || 'xxxxxxxxxxxx'}, com saldo de 0 CVE (zero escudos);`)];

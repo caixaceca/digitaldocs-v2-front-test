@@ -26,7 +26,7 @@ export const identificacao = (dados) =>
       },
       {
         label: '2. Identificação do(s) interveniente(s) de crédito (Mutuário(s))',
-        value: dados?.nome_mutuario ?? 'Nome(s) do(s) mutuário(s)',
+        value: dados?.mutuario ?? 'Nome(s) do(s) mutuário(s)',
       },
       { cells: 2, label: '3. Data de elaboração da FINCC', value: formatDate(new Date(), "dd 'de' MMMM 'de' yyyy") },
       { cells: 2, label: '4. Tipo de FINCC', value: 'Simulação' },

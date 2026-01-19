@@ -72,9 +72,9 @@ export default function Versoes({ id }) {
                         <Typography variant="subtitle2">{ptDateTime(row?.feito_em)}</Typography>
                       </Stack>
                       <ColaboradorInfo
-                        id={colaborador?.id}
                         label={colaborador?.uo_label}
                         foto={colaborador?.foto_anexo}
+                        presence={colaborador?.presence}
                         nome={colaborador?.nome || row.feito_por}
                       />
                     </Stack>

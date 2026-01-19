@@ -124,7 +124,7 @@ export default function TableDetalhes({ id, item }) {
                   <TableRow hover key={`table_detalhes_${index}`}>
                     {(item === 'hretencoes' || item === 'hatribuicoes') && (
                       <TableCell>
-                        <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} id={row?.idColab} />
+                        <ColaboradorInfo nome={row?.nome} label={row?.uo} foto={row?.foto} presence={row?.presence} />
                       </TableCell>
                     )}
                     {(item === 'hretencoes' && (
@@ -318,6 +318,7 @@ function dadosComColaboradores(dados, colaboradores) {
       mail: colaborador?.email,
       uo: colaborador?.uo_label,
       foto: colaborador?.foto_anexo,
+      presence: colaborador?.presence,
       nome: colaborador?.nome || `Perfil: ${row.perfil_id}`,
     });
   });

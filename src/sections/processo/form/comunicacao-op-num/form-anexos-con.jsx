@@ -72,8 +72,8 @@ export default function FormAnexosCON({ dados }) {
       if (dadosStepper.estado_civil?.id) formData.append('estado_civil', dadosStepper.estado_civil?.id);
       if (dadosStepper.local_pais_nascimento)
         formData.append('local_pais_nascimento', dadosStepper.local_pais_nascimento);
-      if (dadosStepper.data_nascimento)
-        formData.append('data_nascimento', format(dadosStepper.data_nascimento, 'yyyy-MM-dd'));
+      if (dadosStepper?.data_nascimento)
+        formData.append('data_nascimento', format(dadosStepper?.data_nascimento, 'yyyy-MM-dd'));
 
       appendAnexos(formData, values.anexos, outros, values.checklist);
       dispatch(createProcesso('processo', formData, { msg: 'Processo adicionado', id, onClose }));

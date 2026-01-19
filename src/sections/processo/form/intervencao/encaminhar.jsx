@@ -163,7 +163,7 @@ export function EncaminharEmSerie({ dados }) {
   const onSubmit = async () => dispatch(updateDados({ forward: true, dados: values }));
 
   useEffect(() => {
-    if (indicarMotivo) dispatch(getFromParametrizacao('motivosTransicao', { fluxoId }));
+    if (indicarMotivo) dispatch(getFromParametrizacao('motivosTransicao', { fluxoId, modo: 'Seguimento' }));
   }, [acao, dispatch, indicarMotivo, fluxoId]);
 
   useEffect(() => {

@@ -41,7 +41,7 @@ export default function CreditoForm({ onClose }) {
 
   const formSchema = Yup.object().shape({
     finalidade: Yup.string().required().label('Finalidade'),
-    taxa_taeg: Yup.number().min(0).required().label('Taxa TAEG'),
+    taxa_taeg: Yup.number().min(0).required().label('TAEG'),
     tipo_titular_id: Yup.mixed().required().label('Tipo de titular'),
     conta_do_renda: Yup.number().min(0).required().label('Conta DO débito'),
     valor_juro: Yup.number().min(0).required().label('Valor total de juros'),
@@ -131,7 +131,7 @@ export default function CreditoForm({ onClose }) {
             <GridItem xs={6} md={4}>
               <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
             </GridItem>
-            <GridItem xs={6} md={4} children={<RHFNumberField label="Taxa TAEG" name="taxa_taeg" tipo="%" />} />
+            <GridItem xs={6} md={4} children={<RHFNumberField label="TAEG" name="taxa_taeg" tipo="%" />} />
             <GridItem xs={6} md={4}>
               <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
             </GridItem>

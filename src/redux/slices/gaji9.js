@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { GAJI9_API_SERVER } from '../../utils/apisUrl';
+import { API_GAJI9_URL } from '../../utils/apisUrl';
 import { meusAcessosGaji9 } from '../../utils/formatObject';
 //
 import {
@@ -127,7 +127,7 @@ export function getFromGaji9(item, params) {
 
     try {
       const accessToken = await getAccessToken();
-      // console.log(accessToken);
+      console.log(accessToken);
       const apiUrl =
         // DETALHES
         (item === 'infoCaixa' && `/v1/suportes/instituicao`) ||
@@ -152,7 +152,9 @@ export function getFromGaji9(item, params) {
         (item === 'representsBalcao' && `/v1/acs/representantes/credito?balcao=${params?.balcao}`) ||
         ((item === 'utilizador' || item === 'funcao') && `/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
         (item === 'proposta' &&
-          `/v1/suportes/creditos/carregar/proposta?numero_proposta=${params?.proposta}&credibox=${!!params?.credibox}`) ||
+          `/v1/suportes/creditos/carregar/proposta?numero_proposta=${
+            params?.proposta
+          }&credibox=${!!params?.credibox}`) ||
         // LISTA
         (item === 'importar componentes' && `/v1/produtos/importar`) ||
         (item === 'tiposTitulos' && `/v1/suportes/creditos/tipos/titulos`) ||
@@ -173,21 +175,33 @@ export function getFromGaji9(item, params) {
         (item === 'tiposImoveis' && `/v1/suportes/tipo_imovel/lista?ativo=${!params?.inativos}`) ||
         (item === 'representantes' && `/v1/acs/representantes/lista?ativo=${!params?.inativos}`) ||
         (item === 'minutas' &&
-          `/v1/minutas/lista?em_analise=${params?.emAnalise}&em_vigor=${params?.emVigor}&revogado=${params?.revogado}&ativo=${!params?.inativos}`) ||
+          `/v1/minutas/lista?em_analise=${params?.emAnalise}&em_vigor=${params?.emVigor}&revogado=${
+            params?.revogado
+          }&ativo=${!params?.inativos}`) ||
         (item === 'creditos' &&
-          `/v1/suportes/creditos/localizar?cursor=${params?.cursor || 0}${params?.balcao ? `&balcao=${params?.balcao}` : ''}${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.codigo ? `&codigo=${params?.codigo}` : ''}${params?.proposta ? `&numero_proposta=${params?.proposta}` : ''}`) ||
+          `/v1/suportes/creditos/localizar?cursor=${params?.cursor || 0}${
+            params?.balcao ? `&balcao=${params?.balcao}` : ''
+          }${params?.cliente ? `&cliente=${params?.cliente}` : ''}${params?.codigo ? `&codigo=${params?.codigo}` : ''}${
+            params?.proposta ? `&numero_proposta=${params?.proposta}` : ''
+          }`) ||
         (item === 'clausulas' &&
-          `/v1/clausulas/lista?ativo=${!params?.inativos}&situacao=${params?.situacao}${params?.solta ? `&solta=true` : ''}${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''}${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${params?.segmentoId ? `&segmento_id=${params?.segmentoId}` : ''}`) ||
+          `/v1/clausulas/lista?ativo=${!params?.inativos}&situacao=${params?.situacao}${
+            params?.solta ? `&solta=true` : ''
+          }${params?.caixa ? `&seccao_id_caixa=true` : ''}${params?.identificacao ? `&seccao_id=true` : ''}${
+            params?.titularId ? `&tipo_titular_id=${params?.titularId}` : ''
+          }${params?.garantiaId ? `&tipo_garantia_id=${params?.garantiaId}` : ''}${
+            params?.segmentoId ? `&segmento_id=${params?.segmentoId}` : ''
+          }`) ||
         '';
       if (apiUrl) {
         if (params?.reset)
           dispatch(slice.actions.getSuccess({ item, dados: item === 'creditos' ? 'reset' : params?.reset?.val }));
 
         const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.get(`${GAJI9_API_SERVER}${apiUrl}`, headers);
+        const response = await axios.get(`${API_GAJI9_URL}${apiUrl}`, headers);
 
         if (item === 'grupo') {
-          const uts = await axios.get(`${GAJI9_API_SERVER}/v1/acs/grupos/utilizadores?grupo_id=${params?.id}`, headers);
+          const uts = await axios.get(`${API_GAJI9_URL}/v1/acs/grupos/utilizadores?grupo_id=${params?.id}`, headers);
           const dados = { ...response.data?.objeto, utilizadores: uts.data?.objeto };
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados }));
         } else if (item === 'funcao' || item === 'utilizador') {
@@ -235,7 +249,11 @@ export function getDocumento(item, params) {
         (item === 'preview-contrato' &&
           `/v2/suportes/creditos/previsualizar/contrato?credito_id=${params?.creditoId}&representante_id=${params?.representanteId}`) ||
         (item === 'minuta' &&
-          `/v1/minutas/documento/preview?id=${params?.id}${params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''}${params?.prazo ? `&prazo=${params?.prazo}` : ''}${params?.montante ? `&montante=${params?.montante}` : ''}&isento_comissao=${params?.isento}&com_representante=${params?.representante}`) ||
+          `/v1/minutas/documento/preview?id=${params?.id}${
+            params?.taxa ? `&taxa_juros_negociado=${params?.taxa}` : ''
+          }${params?.prazo ? `&prazo=${params?.prazo}` : ''}${
+            params?.montante ? `&montante=${params?.montante}` : ''
+          }&isento_comissao=${params?.isento}&com_representante=${params?.representante}`) ||
         '';
       if (apiUrl) {
         const headers = {
@@ -248,11 +266,11 @@ export function getDocumento(item, params) {
         const response =
           item === 'gerar-contrato' || item === 'minutav2'
             ? await axios.post(
-                `${GAJI9_API_SERVER}${apiUrl}`,
+                `${API_GAJI9_URL}${apiUrl}`,
                 item === 'minutav2' ? JSON.stringify(params) : null,
                 headers
               )
-            : await axios.get(`${GAJI9_API_SERVER}${apiUrl}`, headers);
+            : await axios.get(`${API_GAJI9_URL}${apiUrl}`, headers);
         const blob = new Blob([response.data], { type: params?.tipo_conteudo });
         const fileUrl = URL.createObjectURL(blob);
         dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: fileUrl }));
@@ -322,7 +340,7 @@ export function createItem(item, dados, params) {
           `/v1/suportes/creditos/seguros_garantia?credito_id=${params?.creditoId}&garantia_id=${params?.garantiaId}`) ||
         '';
       if (apiUrl) {
-        const response = await axios.post(`${GAJI9_API_SERVER}${apiUrl}`, dados, options);
+        const response = await axios.post(`${API_GAJI9_URL}${apiUrl}`, dados, options);
         if (params?.getItem)
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));
         else if (params?.getList) dispatch(getFromGaji9(item, { id: params?.id }));
@@ -340,11 +358,7 @@ export function createItem(item, dados, params) {
 
       if (item === 'condicionaisCl') {
         const requisicoes = dados.map(async (row) => {
-          const ausencia = axios.post(
-            `${GAJI9_API_SERVER}/v1/clausulas/c2c/${params?.id}`,
-            JSON.stringify(row),
-            options
-          );
+          const ausencia = axios.post(`${API_GAJI9_URL}/v1/clausulas/c2c/${params?.id}`, JSON.stringify(row), options);
           return ausencia;
         });
         const responses = await Promise.all(requisicoes);
@@ -403,21 +417,21 @@ export function updateItem(item, dados, params) {
       if (apiUrl) {
         if (params?.patch) {
           if (item === 'datas contrato') {
-            if (dados?.data_entrega) await axios.patch(`${GAJI9_API_SERVER}${apiUrl}`, dados.data_entrega, options);
+            if (dados?.data_entrega) await axios.patch(`${API_GAJI9_URL}${apiUrl}`, dados.data_entrega, options);
             if (dados?.data_recebido)
               await axios.patch(
-                `${GAJI9_API_SERVER}/v1/contratos/recebido?codigo=${params?.codigo}`,
+                `${API_GAJI9_URL}/v1/contratos/recebido?codigo=${params?.codigo}`,
                 dados.data_recebido,
                 options
               );
             await dispatch(getFromGaji9('contratos', { id: params?.creditoId }));
           } else {
-            const response = await axios.patch(`${GAJI9_API_SERVER}${apiUrl}`, dados, options);
+            const response = await axios.patch(`${API_GAJI9_URL}${apiUrl}`, dados, options);
             dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: null }));
             dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: response.data?.objeto || null }));
           }
         } else {
-          const response = await axios.put(`${GAJI9_API_SERVER}${apiUrl}`, dados, options);
+          const response = await axios.put(`${API_GAJI9_URL}${apiUrl}`, dados, options);
           if (item === 'prg') dispatch(getFromGaji9('grupo', { id: params?.grupoId }));
           else if (params?.getItem)
             dispatch(getSuccess({ item: params?.getItem, dados: response.data?.clausula || response.data?.objeto }));
@@ -478,7 +492,7 @@ export function deleteItem(item, params) {
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.delete(`${GAJI9_API_SERVER}${apiUrl}`, options);
+        const response = await axios.delete(`${API_GAJI9_URL}${apiUrl}`, options);
         if (item === 'contratos') dispatch(slice.actions.setContratado(false));
         else if (params?.getItem)
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));

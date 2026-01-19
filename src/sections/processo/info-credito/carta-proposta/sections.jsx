@@ -16,12 +16,16 @@ export const condicoesGerais = (dados) =>
       {
         cells: 2,
         label: `Montante aprovado`,
-        value: `${fCurrency(dados?.montante) || 'XX CVE'}, corresponde a XX meses de vencimento do proponente.`,
+        value: `${fCurrency(dados?.montante) || 'XX CVE'}, corresponde a ${
+          fCurrency(dados?.meses_vencimento) || 'XX'
+        } meses de vencimento do proponente.`,
       },
       {
         cells: 2,
         label: `Desembolso`,
-        value: `Numa única tranche no prazo máximo de ${dados?.prazo_entrega_contrato || 'XX'} dias úteis após entrega do contrato com as assinaturas reconhecidas perante o Notário.`,
+        value: `Numa única tranche no prazo máximo de ${
+          dados?.prazo_entrega_contrato || 'XX'
+        } dias úteis após entrega do contrato com as assinaturas reconhecidas perante o Notário.`,
       },
       { cells: 2, label: `Forma de utilização`, value: 'Imediata, na data de disponibilização do crédito.' },
       {
@@ -53,21 +57,33 @@ export const condicoesGerais = (dados) =>
       {
         cells: 2,
         label: `Garantia`,
-        value: [
-          new TextRun({ text: 'Fiança solidária sem benefício de excussão prévia, prestada por:' }),
-          ...dados?.fiadores.map(
-            (f) =>
-              new TextRun({
-                text: `- ${f?.nome}, ${f?.estadoCivil || ''}, NATURAL DE ${f?.naturalidade || ''}, NIF ${f?.nif || ''}, RESIDENTE EM ${f?.residencia || ''}`,
-                break: 1,
-              })
-          ),
-        ],
+        value:
+          dados?.fiadores?.length > 0
+            ? [
+                new TextRun({
+                  text: 'Fiança solidária sem benefício de excussão prévia, prestada por:',
+                  bold: false,
+                }),
+                ...dados.fiadores.flatMap((f, index) => [
+                  new TextRun({
+                    text: `${index + 1}. ${f.nome}`,
+                    break: 1,
+                    bold: true,
+                  }),
+                  new TextRun({
+                    text: `, Estado Civil: ${f.estadoCivil}, NIF: ${f.nif}.`,
+                    bold: false,
+                  }),
+                ]),
+              ]
+            : 'Garantia constituída por livrança subscrita pelo proponente.',
       },
       {
         cells: 2,
         label: `Reembolso`,
-        value: `Em ${dados?.prazo_amortizacao || 'XX'} prestações mensais e consecutivas de ${fCurrency(dados?.valor_orestacao) || 'XX CVE'} cada, acrescido de imposto de selo sobre os juros.`,
+        value: `Em ${dados?.prazo_amortizacao || 'XX'} prestações mensais e consecutivas de ${
+          fCurrency(dados?.valor_prestacao) || 'XX CVE'
+        } cada, acrescido de imposto de selo sobre os juros.`,
       },
     ],
   });
@@ -83,22 +99,30 @@ export const encargos = (dados) =>
       {
         cells: 2,
         label: 'Comissão de abertura',
-        value: `À taxa de ${fPercent(dados?.comissao_bertura) || 'X%'}. No montante de ${fCurrency(dados?.valor_comissao_abertura) || 'XX CVE'}.`,
+        value: `À taxa de ${fPercent(dados?.comissao_abertura) || 'X%'}. No montante de ${
+          fCurrency(dados?.valor_comissao_abertura) || 'XX CVE'
+        }.`,
       },
       {
         cells: 2,
         label: 'Imposto de selo sobre crédito',
-        value: `À taxa de ${fPercent(dados?.imposto_selo) || 'X%'}. No montante de ${fCurrency(dados?.valor_imposto_selo) || 'XX CVE'}.`,
+        value: `À taxa de ${fPercent(dados?.imposto_selo) || 'X%'}. No montante de ${
+          fCurrency(dados?.valor_imposto_selo) || 'XX CVE'
+        }.`,
       },
       {
         cells: 2,
         label: 'Imposto de selo sobre comissão',
-        value: `À taxa de ${fPercent(dados?.imposto_selo_comissao) || 'X%'}. No montante de ${fCurrency(dados?.valor_imposto_selo_comissao) || 'XX CVE'}.`,
+        value: `À taxa de ${fPercent(dados?.imposto_selo_comissao) || 'X%'}. No montante de ${
+          fCurrency(dados?.valor_imposto_selo_comissao) || 'XX CVE'
+        }.`,
       },
       {
         cells: 2,
         label: 'Total de encargos iniciais',
-        value: `${fCurrency(dados?.valor_encargos_iniciais) || 'XX CVE'}. Todos os pagamentos serão efetuados por débito na conta nº ${dados?.conta_pagamento ?? 'XX'} do proponente.`,
+        value: `${
+          fCurrency(dados?.valor_encargos_iniciais) || 'XX CVE'
+        }. Todos os pagamentos serão efetuados por débito na conta nº ${dados?.conta_pagamento ?? 'XX'} do proponente.`,
       },
     ],
   });
@@ -120,7 +144,9 @@ export const obrigacoes = (dados) =>
       {
         cells: 2,
         label: 'Contratualização',
-        value: `O contrato deverá ser assinado e devolvido no prazo máximo de ${dados?.prazo_entrega_contrato ?? 'XX'} dias úteis, sob pena da proposta ser considerada sem efeito.`,
+        value: `O contrato deverá ser assinado e devolvido no prazo máximo de ${
+          dados?.prazo_entrega_contrato ?? 'XX'
+        } dias úteis, sob pena da proposta ser considerada sem efeito.`,
       },
     ],
   });

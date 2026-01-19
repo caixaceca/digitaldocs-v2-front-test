@@ -18,7 +18,9 @@ export function situacaoProfissionalRows(dados) {
   if (dados?.conjuge) {
     rows.push({
       item: 'Cônjuge',
-      tipo: `${dados?.tipo_contrato_conjuge ?? ''}${dados?.tipo_contrato_conjuge ? ` (${dados?.local_trabalho_conjuge})` : ''}`,
+      tipo: `${dados?.tipo_contrato_conjuge ?? ''}${
+        dados?.tipo_contrato_conjuge ? ` (${dados?.local_trabalho_conjuge})` : ''
+      }`,
       bruto: dados?.renda_bruto_mensal_conjuge,
       liquido: dados?.renda_liquido_mensal_conjuge,
     });

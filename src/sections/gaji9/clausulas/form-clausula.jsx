@@ -406,7 +406,9 @@ function Resumo({ onClose, clausula }) {
         : null),
     };
 
-    const msg = `Cláusula ${(modalGaji9 === 'clonar-clausula' && 'clonada') || (isEdit && 'atualizada') || 'adicionada'}`;
+    const msg = `Cláusula ${
+      (modalGaji9 === 'clonar-clausula' && 'clonada') || (isEdit && 'atualizada') || 'adicionada'
+    }`;
     const params = { onClose, id: clausula?.id, msg, getItem: 'clausula' };
 
     if (isEdit && modalGaji9 !== 'clonar-clausula') dispatch(updateItem('clausulas', JSON.stringify(formData), params));

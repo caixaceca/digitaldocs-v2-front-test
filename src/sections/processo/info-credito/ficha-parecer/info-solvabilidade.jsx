@@ -69,7 +69,9 @@ export function NovoFinanciamento({ dados }) {
       {rowInfo('Taxa do preçario', proposta?.taxa_precario || '', false)}
       {rowInfo(
         'Taxa de juros',
-        `${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''}`
+        `${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${
+          proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''
+        }`
       )}
       {rowInfo('Prazo de amortização', `${proposta?.prazo_amortizacao || credito?.prazo_amortizacao} meses`, false)}
       {rowInfo(

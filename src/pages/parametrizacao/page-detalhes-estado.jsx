@@ -134,7 +134,11 @@ export default function PageDetalhesEstado() {
               onClose={onClose}
               isSaving={isSaving}
               handleOk={() => confirmEliminar()}
-              desc={`eliminar est${(currentTab === 'Colaboradores' && 'e colaborador') || (currentTab === 'Regras parecer' && 'a regra') || 'e estado'}`}
+              desc={`eliminar est${
+                (currentTab === 'Colaboradores' && 'e colaborador') ||
+                (currentTab === 'Regras parecer' && 'a regra') ||
+                'e estado'
+              }`}
             />
           )}
         </RoleBasedGuard>

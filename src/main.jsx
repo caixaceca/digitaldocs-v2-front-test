@@ -4,11 +4,7 @@ import 'simplebar-react/dist/simplebar.min.css';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 import 'react-lazy-load-image-component/src/effects/black-and-white.css';
-// eslint-disable-next-line import/no-unresolved
 import 'yet-another-react-lightbox/styles.css';
-// pdf-viewer
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 // Highlight
 import './utils/highlight';
 

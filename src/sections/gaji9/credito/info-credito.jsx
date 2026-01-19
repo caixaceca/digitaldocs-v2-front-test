@@ -64,7 +64,7 @@ export default function InfoCredito() {
         { label: 'Taxa juro desconto', value: fPercent(credito?.taxa_juro_desconto) },
         { label: 'Isento de comissão', value: credito?.isento_comissao ? 'Sim' : 'Não' },
         { label: 'Taxa imposto de selo', value: fPercent(credito?.taxa_imposto_selo) },
-        { label: 'Taxa TAEG', value: fPercent(credito?.taxa_taeg) },
+        { label: 'TAEG', value: fPercent(credito?.taxa_taeg) },
         { label: 'Taxa comissão de abertura', value: fPercent(credito?.taxa_comissao_abertura) },
         { label: 'Valor total de comissões', value: fCurrency(credito?.valor_comissao) },
         { label: 'Valor total de imposto selo', value: fCurrency(credito?.valor_imposto_selo) },

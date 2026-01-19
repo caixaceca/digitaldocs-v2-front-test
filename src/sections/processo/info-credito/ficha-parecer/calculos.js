@@ -110,7 +110,7 @@ export function limiteDstiCorrigido(dados) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function extractClientes(data = []) {
+export function extractClientes(data) {
   const totaisPorMoedaMap = new Map();
 
   const {

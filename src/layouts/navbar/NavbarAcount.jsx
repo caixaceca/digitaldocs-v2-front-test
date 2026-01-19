@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -8,10 +9,9 @@ import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
 //
 import { useSelector } from '../../redux/store';
-import { getIntranetFile } from '../../utils/formatFile';
 import { useAuthContext } from '../../providers/auth-provider';
 // components
-import MyAvatar, { AvatarBedge } from '../../components/MyAvatar';
+import { AvatarBadge } from '../../components/custom-avatar';
 
 const RootStyle = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -26,7 +26,8 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 export default function NavbarAccount({ isCollapse }) {
   const { account, logout } = useAuthContext();
-  const { cc } = useSelector((state) => state.intranet);
+  const { cc, colaboradores } = useSelector((state) => state.intranet);
+  const colaborador = useMemo(() => colaboradores?.find(({ id }) => id === cc?.id), [cc?.id, colaboradores]);
 
   return (
     <Link color="inherit" underline="none">
@@ -40,13 +41,12 @@ export default function NavbarAccount({ isCollapse }) {
         </Box>
       )}
       <RootStyle sx={{ ...(isCollapse && { p: 1 }) }}>
-        <AvatarBedge id={cc?.id}>
-          <MyAvatar
-            name={account?.name}
-            sx={{ height: 44, width: 44 }}
-            src={getIntranetFile('colaborador', cc?.foto_anexo)}
-          />
-        </AvatarBedge>
+        <AvatarBadge
+          nome={account?.name}
+          foto={cc?.foto_anexo}
+          presence={colaborador?.presence}
+          avatarSx={{ height: 44, width: 44 }}
+        />
         <Box sx={{ ml: 2, ...(isCollapse && { ml: 0, width: 0 }) }}>
           <Typography variant="subtitle2" noWrap sx={{ maxWidth: 170 }}>
             {account?.name}

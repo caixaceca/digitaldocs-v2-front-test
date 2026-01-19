@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { getIntranetFile } from '../../../utils/formatFile';
 import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
 import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
 // redux
@@ -17,7 +16,7 @@ import { useDispatch, useSelector } from '../../../redux/store';
 // components
 import { DefaultAction } from '../../../components/Actions';
 import { Criado, newLineText } from '../../../components/Panel';
-import MyAvatar, { AvatarBedge } from '../../../components/MyAvatar';
+import { AvatarBadge } from '../../../components/custom-avatar';
 //
 import Pareceres from './historico-pareceres';
 import { Encaminhar, destinosProcesso } from '../intervencao-em-serie';
@@ -251,9 +250,7 @@ export function DataParecer({ data1, data2 = '', envio = false }) {
 export function InfoCriador({ criador = null, temParecer = false, dados = null }) {
   return (
     <Stack direction="row" spacing={1.5} alignItems="center">
-      <AvatarBedge id={criador?.id}>
-        <MyAvatar src={getIntranetFile('colaborador', criador?.foto_anexo)} />
-      </AvatarBedge>
+      <AvatarBadge foto={criador?.foto_anexo} presence={criador?.presence} />
       <Stack
         useFlexGap
         spacing={2}

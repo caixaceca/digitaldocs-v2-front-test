@@ -1,6 +1,5 @@
 // utils
 import { gerarTabela } from './gerar-tabela';
-import { fCurrency, fPercent } from '../../../../utils/formatNumber';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -40,12 +39,12 @@ export const custos = (dados) =>
       },
       { cells: 2, level: 2, label: '1.6. Outros componentes', value: dados?.outros_componentes ?? '--' },
       { label: '2. Taxa anual de encargos efetiva global (TAEG)' },
-      { cells: 2, level: 2, label: '2.1. TAEG', value: fPercent(dados?.taeg ?? 0) },
+      { cells: 2, level: 2, label: '2.1. TAEG', value: dados?.taeg },
       {
         cells: 2,
         level: 2,
         label: '2.2. Valor total dos encargos',
-        value: fCurrency(dados?.valor_total_encargos_iniciais ?? 0),
+        value: dados?.valor_total_encargos_iniciais,
       },
       {
         cells: 2,

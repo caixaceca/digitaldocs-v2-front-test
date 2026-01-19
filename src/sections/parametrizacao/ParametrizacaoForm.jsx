@@ -105,7 +105,7 @@ export function MotivoPendenciaForm({ onClose }) {
   const { enqueueSnackbar } = useSnackbar();
   const { selectedItem, isEdit, isSaving } = useSelector((state) => state.parametrizacao);
 
-  const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Designação') });
+  const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Motivo') });
   const defaultValues = useMemo(
     () => ({ motivo: selectedItem?.motivo || '', obs: selectedItem?.obs || '' }),
     [selectedItem]
@@ -134,7 +134,7 @@ export function MotivoPendenciaForm({ onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
-            <RHFTextField name="motivo" label="Designação" />
+            <RHFTextField name="motivo" label="Motivo" />
             <RHFTextField name="obs" label="Observação" />
           </Stack>
           <DialogButons
@@ -184,6 +184,7 @@ export function MotivoTransicaoForm({ onClose }) {
       observacao: selectedItem?.observacao || '',
       ativo: isEdit ? selectedItem?.ativo : true,
       imputavel: selectedItem?.imputavel || false,
+      para_seguimento: !!selectedItem?.para_seguimento,
     }),
     [selectedItem, isEdit]
   );
@@ -216,7 +217,7 @@ export function MotivoTransicaoForm({ onClose }) {
             <Stack spacing={3} sx={{ pt: 3 }}>
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
                 <Box sx={{ width: 1 }}>
-                  <RHFTextField name="designacao" label="Designação" InputProps={{ readOnly }} />
+                  <RHFTextField name="designacao" label="Motivo" InputProps={{ readOnly }} />
                   {readOnly && (
                     <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>
                       *A designação não pode ser alterada, está em uso para validações na aplicação
@@ -228,6 +229,7 @@ export function MotivoTransicaoForm({ onClose }) {
                 </Box>
               </Stack>
               <Stack direction="row" spacing={3}>
+                <RHFSwitch name="para_seguimento" label="Seguimento" />
                 <RHFSwitch name="imputavel" label="Imputável" />
                 {isEdit && <RHFSwitch name="ativo" label="Ativo" />}
               </Stack>

@@ -16,11 +16,9 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // utils
 import { ptDateTime } from '../utils/formatTime';
-import { baralharString } from '../utils/formatText';
-import { getIntranetFile } from '../utils/formatFile';
 // components
 import Label from './Label';
-import MyAvatar, { AvatarBedge } from './MyAvatar';
+import { AvatarBadge } from './custom-avatar';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -57,7 +55,7 @@ export default function Panel({ label, value, sx }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Criado({ iconText = '', tipo = '', value, value1 = '', caption = false, baralhar = false, sx }) {
+export function Criado({ iconText = '', tipo = '', value, value1 = '', caption = false, sx }) {
   const styles = { width: caption ? 13 : 15, height: caption ? 13 : 15, color: sx?.color || 'text.disabled' };
   return value ? (
     <Stack direction="row" spacing={caption ? 0.25 : 0.5} alignItems="center" sx={{ pr: caption ? 1 : 1.5, ...sx }}>
@@ -76,11 +74,11 @@ export function Criado({ iconText = '', tipo = '', value, value1 = '', caption =
         ))}
 
       <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
-        {baralhar ? baralharString(value) : value}
+        {value}
       </Typography>
       {value1 && (
         <Typography noWrap variant={caption ? 'caption' : 'body2'} sx={{ pr: 0.1 }}>
-          ({baralhar ? baralharString(value1) : value1})
+          ({value1})
         </Typography>
       )}
     </Stack>
@@ -93,10 +91,10 @@ export function Colaborador({ row, email }) {
   return (
     <ColaboradorInfo
       labelAltCaption
-      id={row?.colaborador?.id}
       labelAlt={row?.utilizador_id}
       foto={row?.colaborador?.foto_anexo}
       caption={!row?.colaborador?.uo_label}
+      presence={row?.colaborador?.presence}
       nome={row?.colaborador?.nome || row?.utilizador_email || row?.nome}
       label={email ? row?.colaborador?.email : row?.colaborador?.uo || 'Perfil sem ID_AAD na Intranet'}
     />
@@ -106,23 +104,21 @@ export function Colaborador({ row, email }) {
 export function ColaboradorInfo({
   nome,
   foto,
-  id = 0,
   sx = null,
   label = '',
   other = null,
   labelAlt = '',
+  presence = '',
   caption = false,
   labelAltCaption = false,
 }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', ...sx }}>
-      <AvatarBedge id={id}>
-        <MyAvatar name={baralharString(nome)} src={getIntranetFile('colaborador', foto)} />
-      </AvatarBedge>
+      <AvatarBadge nome={nome} foto={foto} presence={presence} />
       <Stack sx={{ ml: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography noWrap variant="subtitle2">
-            {baralharString(nome)}
+            {nome}
           </Typography>
           {!!labelAlt && (
             <Typography variant={labelAltCaption ? 'caption' : 'body2'} sx={{ color: 'text.secondary' }}>

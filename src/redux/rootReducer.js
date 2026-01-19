@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux';
-import storage from 'redux-persist/lib/storage';
 // slices
 import gaji9Reducer from './slices/gaji9';
 import stepperReducer from './slices/stepper';
@@ -11,8 +10,6 @@ import parametrizacaoReducer from './slices/parametrizacao';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const rootPersistConfig = { key: 'root', storage, keyPrefix: 'redux-', whitelist: [] };
-
 const rootReducer = combineReducers({
   gaji9: gaji9Reducer,
   suporte: suporteReducer,
@@ -23,4 +20,4 @@ const rootReducer = combineReducers({
   parametrizacao: parametrizacaoReducer,
 });
 
-export { rootPersistConfig, rootReducer };
+export { rootReducer };

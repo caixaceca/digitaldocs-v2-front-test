@@ -79,9 +79,9 @@ export default function Acessos() {
                       <TableCell>
                         <ColaboradorInfo
                           caption
-                          id={row?.id}
                           nome={row?.nome}
                           foto={row?.foto_anexo}
+                          presence={row?.presence}
                           label={nomeacaoBySexo(row.nomeacao_funcao, row?.sexo)}
                         />
                       </TableCell>

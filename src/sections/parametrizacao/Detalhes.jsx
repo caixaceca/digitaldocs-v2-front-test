@@ -43,6 +43,7 @@ const fields = [
   { key: 'is_paralelo', title: 'Em paralelo:' },
   { key: 'limpo', title: 'Limpo:' },
   { key: 'requer_parecer', title: 'Requer parecer:' },
+  { key: 'para_seguimento', title: 'Seguimento:' },
   { key: 'formulario', title: 'Formulário:' },
   { key: 'anexo', title: 'Anexo:' },
   { key: 'identificador', title: 'Identificador:' },
@@ -151,7 +152,9 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                     {(dados?.estado_final || dados?.estado_destino) && (
                       <TableRowItem
                         title="Destino:"
-                        text={`${dados?.estado_final || dados?.estado_destino}${dados?.estado_final_id ? ` (ID: ${dados?.estado_final_id})` : ''}`}
+                        text={`${dados?.estado_final || dados?.estado_destino}${
+                          dados?.estado_final_id ? ` (ID: ${dados?.estado_final_id})` : ''
+                        }`}
                       />
                     )}
                     <TableRowItem title="Transição ID:" text={dados?.transicao_id} />

@@ -181,11 +181,10 @@ function Despesas({ dados }) {
   });
   const defaultValues = useMemo(() => ({ despesas: dados || [] }), [dados]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
   const { fields, append, remove } = useFieldArray({ control, name: 'despesas' });
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       dispatch(forwardStep());
       dispatch(updateFicha(values));
@@ -237,10 +236,9 @@ function RespExterna({ dados }) {
   const defaultValues = useMemo(() => dados, [dados]);
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       dispatch(forwardStep());
       dispatch(updateFicha(values));
@@ -308,12 +306,12 @@ function Proposta({ dados, credito, onClose }) {
 
   const defaultValues = useMemo(
     () => ({
-      taxa_juro: dados?.taxa_juro || credito?.taxa_juro || '',
-      comissoes: dados?.comissoes || credito?.comissoes || '',
+      taxa_juro: dados?.taxa_juro || credito?.taxa_juro,
+      comissoes: dados?.comissoes || credito?.comissoes || 'Em vigor',
       montante: dados?.montante || credito?.montante_solicitado || '',
-      origem_taxa: dados?.origem_taxa || credito?.origem_taxa || null,
       observacao: dados?.observacao || credito?.observacao_proposta || '',
-      taxa_precario: dados?.taxa_precario || credito?.taxa_precario || '',
+      taxa_precario: dados?.taxa_precario || credito?.taxa_precario || 11,
+      origem_taxa: dados?.origem_taxa || credito?.origem_taxa || 'Preçario',
       prazo_utilizacao: dados?.prazo_utilizacao || credito?.prazo_utilizacao || '',
       prazo_amortizacao: dados?.prazo_amortizacao || credito?.prazo_amortizacao || '',
     }),
@@ -321,10 +319,9 @@ function Proposta({ dados, credito, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       dispatch(updateFicha({ proposta: values }));
       onClose();

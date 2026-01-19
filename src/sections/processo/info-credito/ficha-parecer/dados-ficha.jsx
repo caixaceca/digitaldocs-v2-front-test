@@ -474,11 +474,10 @@ export const rowInfo = (title, value, total, extra = null) => {
 function CellValor({ valor = 0, moeda = 'CVE', total = false }) {
   return (
     <TableCell align="right">
-      <Typography
-        noWrap
-        variant="body2"
-        sx={{ fontWeight: total ? 'bold' : 'normal' }}
-      >{`${fNumber(Math.abs(valor), 2)} ${moeda}`}</Typography>
+      <Typography noWrap variant="body2" sx={{ fontWeight: total ? 'bold' : 'normal' }}>{`${fNumber(
+        Math.abs(valor),
+        2
+      )} ${moeda}`}</Typography>
     </TableCell>
   );
 }

@@ -180,7 +180,9 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   {dados?.numero_ordem > -1 && (
                     <TableRowItem
                       title="Nº de cláusula:"
-                      text={`${dados?.numero_ordem}${dados?.descritivo_numero_ordem ? ` (${dados?.descritivo_numero_ordem})` : ''}`}
+                      text={`${dados?.numero_ordem}${
+                        dados?.descritivo_numero_ordem ? ` (${dados?.descritivo_numero_ordem})` : ''
+                      }`}
                     />
                   )}
                   <TableRowItem title="Doc. identificação:" text={dados?.cni} />

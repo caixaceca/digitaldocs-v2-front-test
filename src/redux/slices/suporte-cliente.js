@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { SUPORTE_CLIENTE_API_SERVER } from '../../utils/apisUrl';
+import { API_SUPORTE_CLIENTE_URL } from '../../utils/apisUrl';
 //
 import {
   hasError,
@@ -117,13 +117,17 @@ export function getInSuporte(item, params) {
         (item === 'prompt' && `/api/v1/mail-scan-presets/generate-prompt`) ||
         (item === 'pesquisa' && `/api/v1/tickets/search?query=${params?.query}`) ||
         (item === 'indicadores' &&
-          `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}${params?.department ? `&department=${params?.department}` : ''}`) ||
+          `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}${
+            params?.department ? `&department=${params?.department}` : ''
+          }`) ||
         (item === 'tickets' &&
-          `/api/v1/tickets/all${params?.department ? `?departmentId=${params?.department}` : ''}${params?.status ? `${params?.department ? '&' : '?'}status=${params?.status}` : ''}`) ||
+          `/api/v1/tickets/all${params?.department ? `?departmentId=${params?.department}` : ''}${
+            params?.status ? `${params?.department ? '&' : '?'}status=${params?.status}` : ''
+          }`) ||
         '';
       if (apiUrl) {
         const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.get(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, headers);
+        const response = await axios.get(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, headers);
 
         const dados = response.data?.payload;
         dispatch(slice.actions.getSuccess({ item: params?.item || item, dados }));
@@ -162,7 +166,7 @@ export function createInSuporte(item, body, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.post(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
+        const response = await axios.post(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
         const dados = response.data?.payload;
         dispatch(slice.actions.createSuccess({ item: params?.item || item, item1: params?.item1 || '', dados }));
       }
@@ -187,7 +191,7 @@ export function updateInSuporte(item, body, params) {
       const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
 
       if (item === 'core-validation') {
-        // const response = await axios.patch(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
+        // const response = await axios.patch(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
         body = JSON.stringify({ coreBankingAccountValidation: null, coreBankingEmailValition: null, ...body });
       }
 
@@ -216,7 +220,7 @@ export function updateInSuporte(item, body, params) {
 
       if (apiUrl) {
         const method = params?.patch ? 'patch' : 'put';
-        const response = await axios[method](`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, body, options);
+        const response = await axios[method](`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
 
         const dados = response.data?.payload;
         if (item?.includes('toggle-')) dispatch(slice.actions.toogleItem(params));
@@ -264,7 +268,7 @@ export function deleteInSuporte(item, params) {
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        await axios.delete(`${SUPORTE_CLIENTE_API_SERVER}${apiUrl}`, options);
+        await axios.delete(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, options);
         dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);

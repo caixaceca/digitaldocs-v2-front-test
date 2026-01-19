@@ -6,6 +6,7 @@ import { Packer, Document, Paragraph } from 'docx';
 import Stack from '@mui/material/Stack';
 // utils
 import { useSelector } from '../../../../redux/store';
+import { mapearPayloadParaFINCC } from './dados-mapper';
 import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
 // components
 import { custos } from './custos';
@@ -21,32 +22,7 @@ export default function Fincc() {
   const { enqueueSnackbar } = useSnackbar();
   const processo = useSelector((state) => state.digitaldocs.processo);
 
-  const defaulted = {
-    proponente_nome: processo?.titular ?? 'Nome do proponente',
-    fiadores: [
-      { nome: 'Nome Fiador 1', estadoCivil: 'Solteiro', nif: '124357453', residencia: 'Palmarejo' },
-      { nome: 'Nome Fiador 2', estadoCivil: 'Solteira', nif: '223145321', residencia: 'Fazenda' },
-    ],
-    data_proposta: new Date(),
-    data_solicitacao: processo?.data_entrada ?? '2025-01-21',
-    montante: 1250000,
-    prazo_amortizacao: 60,
-    tan: 11,
-    taeg: 13.153,
-    taxa_mora: 2,
-    comissao_abertura: 1.75,
-    valor_comissao_abertura: 1250,
-    imposto_selo_credito: 0.5,
-    valor_imposto_selo_credito: 136,
-    valor_imposto_selo_comissao: 250,
-    valor_total_encargos_iniciais: 12500,
-    conta_pagamento: '3929767210001',
-    agencia: 'PLATEAU',
-    prazo_entrega_contrato: 15,
-    gerente_nome: 'Nome do Gerente',
-    agencia_localizacao: 'Plateau',
-    ...processo,
-  };
+  const dadosMapeados = mapearPayloadParaFINCC(processo);
 
   const exportToWord = async (setLoading) => {
     try {
@@ -58,11 +34,11 @@ export default function Fincc() {
         fetch('/assets/iso9001.png').then((r) => r.arrayBuffer()),
       ]);
 
-      const { agencia, fiadores, gerente_nome: nomeGerente, proponente_nome: nomeProponente } = defaulted;
+      const { mutuario, agencia, fiadores, gerente_nome: nomeGerente } = dadosMapeados;
 
       const doc = new Document({
         creator: 'Intranet - Caixa Económica de Cabo Verde',
-        title: `FINCC - Simulação - ${nomeProponente}`,
+        title: `FINCC - Simulação - ${mutuario}`,
         styles: createStyles('10pt'),
         sections: [
           {
@@ -75,24 +51,24 @@ export default function Fincc() {
             }),
             footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
             children: [
-              identificacao(defaulted),
-              principaisCaracteristicas(defaulted),
-              custos(defaulted),
+              identificacao(dadosMapeados),
+              principaisCaracteristicas(dadosMapeados),
+              custos(dadosMapeados),
 
               new Paragraph({ text: '', break: 1 }),
-              planoFinanceiro(defaulted),
+              planoFinanceiro(dadosMapeados),
 
               new Paragraph({ text: '', break: 1 }),
-              informacaoGeral(defaulted),
+              informacaoGeral(dadosMapeados),
 
-              ...assinaturas(agencia, nomeGerente, nomeProponente, fiadores),
+              ...assinaturas(agencia, nomeGerente, mutuario, fiadores),
             ],
           },
         ],
       });
 
       Packer.toBlob(doc).then((blob) => {
-        saveAs(blob, `FINCC - Simulação - ${nomeProponente || 'Proponente'}.docx`);
+        saveAs(blob, `FINCC - Simulação - ${mutuario || 'Proponente'}.docx`);
       });
     } catch (error) {
       enqueueSnackbar('Erro ao gerar FINCC', { variant: 'error' });

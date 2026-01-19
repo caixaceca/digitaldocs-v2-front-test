@@ -24,11 +24,11 @@ import { fNumber, fPercent, fNumber2 } from '../../utils/formatNumber';
 // redux
 import { useSelector } from '../../redux/store';
 // components
-import MyAvatar from '../../components/MyAvatar';
 import { BoxMask } from '../../components/Panel';
 import GridItem from '../../components/GridItem';
 import { BarChart } from '../../components/skeleton';
 import { SearchNotFound } from '../../components/table';
+import CustomAvatar from '../../components/custom-avatar';
 //
 import { Cabecalho } from './cabecalho-filtrar';
 import { Todos, Media, Maximo } from '../../assets';
@@ -234,7 +234,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
           justifyContent="center"
           sx={{ py: 1.5, bgcolor: detail && 'background.neutral', borderRadius: 1 }}
         >
-          <MyAvatar
+          <CustomAvatar
             name={colaborador?.nome}
             src={getIntranetFile('colaborador', colaborador?.foto_anexo)}
             sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}

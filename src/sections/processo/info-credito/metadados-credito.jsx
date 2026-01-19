@@ -1,15 +1,20 @@
 // @mui
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
+import { alpha, useTheme } from '@mui/material/styles';
 // utils
 import useToggle from '../../../hooks/useToggle';
 import { ptDate } from '../../../utils/formatTime';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 // Components
+import Label from '../../../components/Label';
+import GridItem from '../../../components/GridItem';
 import { LabelSN } from '../../parametrizacao/Detalhes';
 import { DefaultAction } from '../../../components/Actions';
 import MetadadosCreditoForm from '../form/credito/form-metadados-credito';
@@ -17,149 +22,221 @@ import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function MetadadosCredito({ dados, modificar = false, ids = null, action = null }) {
+export default function MetadadosCredito({ dados, prazo = '', modificar = false, ids = null }) {
+  const theme = useTheme();
   const { toggle: open, onOpen, onClose } = useToggle();
 
-  const cards = [
+  const financeiroPrincipal = [
+    { label: 'Valor da prestação', value: fCurrency(dados?.valor_prestacao), color: 'primary' },
+    { label: 'Custo total', value: fCurrency(dados?.custo_total), color: 'info' },
+    { label: 'TAEG', value: fPercent(dados?.taxa_taeg), color: 'error' },
+    { label: 'TAN', value: fPercent(Number(dados?.taxa_tan)), color: 'warning' },
+  ];
+
+  const allCards = [
     {
-      step: 0,
-      titulo: 'Identificação e Contexto',
+      titulo: 'Regime & Isenções',
       dados: [
-        { title: 'Bonificado', value: dados?.bonificado ? 'Sim' : '' },
-        { title: 'Jovem bonificado', value: dados?.jovem_bonificado ? 'Sim' : '' },
-        { title: 'Revolving', value: dados?.revolving ? 'Sim' : '' },
-        { title: 'Isento de comissão', value: dados?.isento_comissao ? 'Sim' : 'Não' },
-        { title: 'Colab. empresa parceira', value: dados?.colaborador_empresa_parceira ? 'Sim' : '' },
-        { title: 'Com 3º outorgante', value: dados?.com_terceiro_outorgante ? 'Sim' : '' },
-        { title: 'Conta DO renda', value: dados?.conta_do_renda },
-        { title: 'Finalidade crédito habitação', value: dados?.finalidade_credito_habitacao },
-        { title: 'Data 1ª prestação', value: ptDate(dados?.data_vencimento_prestacao1) },
-        { title: 'Tranches credibolsa', value: fCurrency(dados?.montante_tranches_credibolsa) },
-        { title: 'Nível formação', value: dados?.nivel_formacao },
+        ...(dados?.bonificado || dados?.revolving || dados?.jovem_bonificado || dados?.colaborador_empresa_parceira
+          ? [
+              {
+                title: 'Regime',
+                value: (
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="flex-end">
+                    {dados?.bonificado && <Label color="success">Bonificado</Label>}
+                    {dados?.jovem_bonificado && <Label color="info">Jovem Bonificado</Label>}
+                    {dados?.revolving && <Label color="warning">Revolving</Label>}
+                    {dados?.colaborador_empresa_parceira && <Label color="secondary">Parceiro</Label>}
+                  </Stack>
+                ),
+              },
+            ]
+          : []),
+        { title: 'Isento Comissão', value: <LabelSN item={dados?.isento_comissao} /> },
+        { title: 'Isento Imposto Selo', value: <LabelSN item={dados?.tem_isencao_imposto_selo} /> },
+        {
+          title: 'Capital Máx. Isento Selo',
+          value:
+            Number(dados?.capital_max_isento_imposto_selo) > 0 ? fCurrency(dados?.capital_max_isento_imposto_selo) : '',
+        },
+        { title: 'Conta DO Renda', value: dados?.conta_do_renda, bold: true },
+      ],
+    },
+    {
+      titulo: 'Ciclo & Prazos',
+      dados: [
+        { title: 'Data da 1ª prestação', value: ptDate(dados?.data_vencimento_prestacao1) },
+        { title: 'Data de utilização', value: ptDate(dados?.data_utilizacao) },
+        { title: 'Nº de prestações', value: dados?.numero_prestacao && `${dados?.numero_prestacao} meses`, bold: true },
+        { title: 'Meses de vencimento', value: dados?.meses_vencimento && `${dados?.meses_vencimento} meses` },
+        { title: 'Período de carência', value: dados?.periodo_carencia && `${dados?.periodo_carencia} meses` },
+        { title: 'Prazo de utilização', value: dados?.prazo_utilizacao && `${dados?.prazo_utilizacao} meses` },
+      ],
+    },
+    {
+      titulo: 'Taxas Detalhadas',
+      dados: [
+        { title: 'Juro precário', value: fPercent(dados?.taxa_juro_precario) },
+        {
+          title: 'Juro desconto',
+          value: Number(dados?.taxa_juro_desconto) > 0 ? fPercent(dados?.taxa_juro_desconto) : '',
+          bold: true,
+        },
+        { title: 'Comissão de abertura', value: fPercent(dados?.taxa_comissao_abertura) },
+        {
+          title: 'Comissão de imobilização',
+          value: Number(dados?.taxa_comissao_imobilizacao) > 0 ? fPercent(dados?.taxa_comissao_imobilizacao) : '',
+        },
+        { title: 'Taxa de imposto selo', value: fPercent(dados?.taxa_imposto_selo) },
+        {
+          title: 'Taxa imp. selo utilização',
+          value: Number(dados?.taxa_imposto_selo_utilizacao) > 0 ? fPercent(dados?.taxa_imposto_selo_utilizacao) : '',
+        },
+      ],
+    },
+    {
+      titulo: 'Cálculos (Valores)',
+      dados: [
+        { title: 'Valor do juro', value: fCurrency(dados?.valor_juro) },
+        { title: 'Valor da comissão', value: fCurrency(dados?.valor_comissao) },
+        { title: 'Valor do imposto selo', value: fCurrency(dados?.valor_imposto_selo) },
+        { title: 'Prestação s/ desconto', value: fCurrency(dados?.valor_prestacao_sem_desconto) },
+      ],
+    },
+    {
+      id: 'objeto_ensino',
+      titulo: 'Objeto & Ensino/Credibolsa',
+      dados: [
+        { title: 'Tipo de imóvel', value: dados?.tipo_imovel?.label || dados?.tipo_imovel || dados?.tipo_imovel_id },
+        { title: 'Bem/Serviço', value: dados?.bem_servico_financiado },
+        { title: 'Finalidade', value: dados?.finalidade_credito_habitacao },
+        { title: 'Nível de formação', value: dados?.nivel_formacao },
         { title: 'Curso', value: dados?.designacao_curso },
-        { title: 'Estabelecimento ensino', value: dados?.estabelecimento_ensino },
+        {
+          title: 'Tranches da credibolsa',
+          value: Number(dados?.montante_tranches_credibolsa) > 0 ? fCurrency(dados?.montante_tranches_credibolsa) : '',
+        },
+        { title: 'Estabelecimento de ensino', value: dados?.estabelecimento_ensino },
         { title: 'Localização', value: dados?.localizacao_estabelecimento_ensino },
       ],
     },
     {
-      step: 1,
-      titulo: 'Condições & Taxas',
+      id: 'entidade_transferencia',
+      titulo: 'Entidade & Transferência',
       dados: [
-        { title: 'Nº prestações', value: dados?.numero_prestacao ? `${dados?.numero_prestacao} meses` : '' },
-        { title: 'Meses vencimento', value: dados?.meses_vencimento ? `${dados?.meses_vencimento} meses` : '' },
-        { title: 'Prazo utilização', value: dados?.prazo_utilizacao ? `${dados?.prazo_utilizacao} meses` : '' },
-        { title: 'Taxa TAEG', value: fPercent(dados?.taxa_taeg) },
-        { title: 'Taxa juro precário', value: fPercent(dados?.taxa_juro_precario) },
-        { title: 'Taxa juro desconto', value: fPercent(dados?.taxa_juro_desconto) },
-        { title: 'Taxa imposto selo', value: fPercent(dados?.taxa_imposto_selo) },
-        { title: 'Taxa comissão abertura', value: fPercent(dados?.taxa_comissao_abertura) },
-        { title: 'Taxa comissão imobilização', value: fPercent(dados?.taxa_comissao_imobilizacao) },
-      ],
-    },
-    {
-      step: 2,
-      titulo: 'Custos & Cálculos',
-      dados: [
-        { title: 'Valor prestação', value: fCurrency(dados?.valor_prestacao) },
-        { title: 'Valor prestação s/ desconto', value: fCurrency(dados?.valor_prestacao_sem_desconto) },
-        { title: 'Valor juros', value: fCurrency(dados?.valor_juro) },
-        { title: 'Valor comissão', value: fCurrency(dados?.valor_comissao) },
-        { title: 'Valor imposto selo', value: fCurrency(dados?.valor_imposto_selo) },
-        { title: 'Custo total', value: fCurrency(dados?.custo_total) },
-      ],
-    },
-    {
-      step: 3,
-      titulo: 'Imóvel / Bem Financiado',
-      dados: [
-        {
-          title: 'Tipo de imóvel',
-          value: dados?.tipo_imovel?.id || dados?.tipo_imovel_id?.id || dados?.tipo_imovel || dados?.tipo_imovel_id,
-        },
-        { title: 'Bem/Serviço financiado', value: dados?.bem_servico_financiado },
-        { title: 'Tipo de seguro', value: dados?.tipo_seguro },
-      ],
-    },
-    {
-      step: 4,
-      titulo: 'Entidade Vendedora / Fornecedora',
-      dados: [
-        { title: 'Nome empresa fornecedora', value: dados?.nome_empresa_fornecedora },
-        { title: 'NIB vendedor/fornecedor', value: dados?.nib_vendedor_ou_fornecedor },
-        { title: 'Instituição crédito', value: dados?.instituicao_credito_conta_vendedor_ou_fornecedor },
+        { title: 'Empresa fornecedora', value: dados?.nome_empresa_fornecedora },
+        { title: 'NIB', value: dados?.nib_vendedor_ou_fornecedor },
+        { title: 'Banco/Instituição', value: dados?.instituicao_credito_conta_vendedor_ou_fornecedor },
         {
           title: 'Valor a transferir',
-          value: fCurrency(dados?.valor_transferir_conta_vendedor_ou_fornecedor),
+          value:
+            Number(dados?.valor_transferir_conta_vendedor_ou_fornecedor) > 0
+              ? fCurrency(dados?.valor_transferir_conta_vendedor_ou_fornecedor)
+              : '',
+          bold: true,
+          color: 'primary.main',
         },
       ],
     },
   ];
 
+  const cardsVisible = allCards.filter((card) => {
+    if (card.id === 'objeto_ensino' || card.id === 'entidade_transferencia') {
+      return card.dados.some((d) => d.value && d.value !== '');
+    }
+    return true;
+  });
+
   return (
-    <>
-      <Stack spacing={3} useFlexGap flexWrap="wrap" direction="row" alignItems="stretch" sx={{ pt: action ? 1 : 0 }}>
-        {!dados ? (
-          <Stack alignItems="center" sx={{ width: 1, pt: 3 }}>
-            <SearchNotFoundSmall message="Nenhuma informação adicionada..." />
-          </Stack>
-        ) : (
-          cards?.map((row, index) => (
-            <Card
-              key={index}
-              sx={{
-                maxWidth: '100%',
-                flex: {
-                  xs: '1 1 calc(100% - 16px)',
-                  sm: '1 1 calc(50% - 16px)',
-                  lg: !action && '1 1 calc(33.333% - 16px)',
-                },
-                boxShadow: (theme) => theme.customShadows.cardAlt,
-              }}
-            >
-              <CardHeader
-                title={row?.titulo}
-                titleTypographyProps={{ variant: 'subtitle1', color: 'primary.main' }}
-                action={action ? <DefaultAction small label="EDITAR" onClick={() => action(row?.step)} /> : null}
-              />
+    <Box sx={{ p: 1 }}>
+      {dados ? (
+        <>
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            {financeiroPrincipal.map((item) => (
+              <GridItem xs={6} sm={6} md={3} key={item.label}>
+                <Card
+                  sx={{
+                    p: 1.5,
+                    textAlign: 'center',
+                    boxShadow: theme.customShadows.cardAlt,
+                    bgcolor: alpha(theme.palette[item.color].main, 0.025),
+                  }}
+                >
+                  <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                    {item.label}
+                  </Typography>
+                  <Typography variant="h6" sx={{ color: `${item.color}.main` }}>
+                    {item.value || '---'}
+                  </Typography>
+                </Card>
+              </GridItem>
+            ))}
+          </Grid>
 
-              <CardContent sx={{ p: { xs: 1, sm: 3 }, pt: '12px !important' }}>
-                <Divider sx={{ mb: 2 }} />
-
-                <Stack spacing={0.5}>
-                  {(() => {
-                    const validData = row?.dados?.filter((d) => d?.value) || [];
-                    if (validData.length === 0) {
-                      return <SearchNotFoundSmall message="Nenhuma informação adicionada..." xs />;
-                    }
-
-                    return validData.map(({ value, title }, idx) => (
-                      <Stack key={idx} useFlexGap direction="row" flexWrap="wrap" alignItems="center">
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {title}:&nbsp;
-                        </Typography>
-                        <Typography variant="body2">
-                          {(value === 'Sim' && <LabelSN item />) ||
-                            (value === 'Não' && <LabelSN />) ||
-                            value ||
-                            '(Não definido)'}
-                        </Typography>
-                      </Stack>
-                    ));
-                  })()}
-                </Stack>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </Stack>
+          <Box
+            gap={3}
+            display="grid"
+            gridTemplateColumns={{
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              lg: `repeat(${cardsVisible?.length > 4 ? 3 : 2}, 1fr)`,
+              xl: `repeat(${cardsVisible?.length > 4 ? 3 : cardsVisible?.length}, 1fr)`,
+            }}
+            alignItems="center"
+          >
+            {cardsVisible.map((card, index) => (
+              <Card key={index} sx={{ height: '100%', boxShadow: theme.customShadows.cardAlt }}>
+                <CardHeader
+                  title={card.titulo}
+                  titleTypographyProps={{
+                    variant: 'subtitle2',
+                    sx: { color: 'primary.main', textTransform: 'uppercase' },
+                  }}
+                  sx={{ py: 1.5, bgcolor: 'background.neutral', borderBottom: `1px solid ${theme.palette.divider}` }}
+                />
+                <CardContent sx={{ py: 2 }}>
+                  <Stack spacing={1} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
+                    {card.dados
+                      .filter((d) => d.value)
+                      .map((item, idx) => (
+                        <Box
+                          key={idx}
+                          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}
+                        >
+                          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'medium' }}>
+                            {item.title}:
+                          </Typography>
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: item.bold ? 700 : 400,
+                                color: item.color || 'text.primary',
+                                wordBreak: 'break-word',
+                              }}
+                            >
+                              {item.value}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </>
+      ) : (
+        <SearchNotFoundSmall message="Nenhuma informação adicionada..." />
+      )}
 
       {modificar && (
-        <Stack direction="row" justifyContent="center" sx={{ mt: 3 }}>
+        <Stack direction="row" justifyContent="center" sx={{ mt: 4 }}>
           <DefaultAction variant="contained" button label={dados ? 'Editar' : 'Adicionar'} onClick={onOpen} />
         </Stack>
       )}
 
-      {open && <MetadadosCreditoForm onClose={onClose} dados={dados} ids={ids} />}
-    </>
+      {open && <MetadadosCreditoForm onClose={onClose} dados={{ ...dados, prazo }} ids={ids} />}
+    </Box>
   );
 }

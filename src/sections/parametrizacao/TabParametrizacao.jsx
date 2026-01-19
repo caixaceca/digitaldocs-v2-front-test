@@ -6,6 +6,7 @@ import { AddItem } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 //
+import TableMotivos from './table-motivos';
 import TableParametrizacao from './TableParametrizacao';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -37,8 +38,8 @@ function SubTabsParametrizacao({ item, label }) {
     }
     if (item === 'motivos') {
       return [
-        { value: 'Transição', component: <TableParametrizacao item="motivosTransicao" /> },
-        { value: 'Pendência', component: <TableParametrizacao item="motivosPendencia" /> },
+        { value: 'Transição', component: <TableMotivos transicao /> },
+        { value: 'Pendência', component: <TableMotivos /> },
       ];
     }
     return [];

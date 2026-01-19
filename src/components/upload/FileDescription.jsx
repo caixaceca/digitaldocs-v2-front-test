@@ -15,13 +15,7 @@ export default function FileDescription({ file, size = false, sx }) {
       spacing={2}
       direction="row"
       alignItems="center"
-      sx={{
-        px: 1.5,
-        py: 0.75,
-        borderRadius: 0.75,
-        border: (theme) => `solid 1px ${theme.palette.divider}`,
-        ...sx,
-      }}
+      sx={{ px: 1.5, py: 0.75, borderRadius: 0.75, border: (theme) => `solid 1px ${theme.palette.divider}`, ...sx }}
     >
       <Stack>{getFileThumb(false, null, file.name)}</Stack>
 

@@ -25,8 +25,8 @@ import { getComparator, applySort } from '../../hooks/useTable';
 import { useSelector } from '../../redux/store';
 // components
 import GridItem from '../../components/GridItem';
-import MyAvatar from '../../components/MyAvatar';
 import { DefaultAction } from '../../components/Actions';
+import CustomAvatar from '../../components/custom-avatar';
 import { DialogTitleAlt } from '../../components/CustomDialog';
 //
 import { IndicadorItem, ColaboradorCard } from './Indicadores';
@@ -216,7 +216,7 @@ export function ColaboradorComp({ colaborador, colaboradoresList = [], colaborad
         alignItems="center"
         sx={{ py: 1, px: 1.5, bgcolor: 'background.neutral', borderRadius: 1 }}
       >
-        <MyAvatar
+        <CustomAvatar
           name={colaborador?.label}
           src={getIntranetFile('colaborador', colaborador?.foto)}
           sx={{ width: 50, height: 50, boxShadow: (theme) => theme.customShadows.z8 }}

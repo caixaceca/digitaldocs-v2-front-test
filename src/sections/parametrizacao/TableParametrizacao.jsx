@@ -1,5 +1,5 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -7,15 +7,11 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { setItemValue } from '../../utils/formatObject';
-// hooks
-import useTable, { getComparator } from '../../hooks/useTable';
-// routes
+import { applySortFilter } from './applySortFilter';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
+import useTable, { getComparator } from '../../hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { openModal, getSuccess, closeModal, getFromParametrizacao } from '../../redux/slices/parametrizacao';
@@ -27,26 +23,19 @@ import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { CellChecked, CellUoBalcao, noDados } from '../../components/Panel';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import {
-  LinhaForm,
-  OrigemForm,
-  DespesaForm,
-  DocumentoForm,
-  MotivoTransicaoForm,
-  MotivoPendenciaForm,
-} from './ParametrizacaoForm';
 import { Detalhes } from './Detalhes';
 import { FluxoForm } from './form-fluxo';
 import { EstadoForm } from './form-estado';
-import { applySortFilter } from './applySortFilter';
+import { LinhaForm, OrigemForm, DespesaForm, DocumentoForm } from './ParametrizacaoForm';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function TableParametrizacao({ item }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [fluxo, setFluxo] = useState(null);
+
   const [filter, setFilter] = useState(localStorage.getItem(`filter${item}`) || '');
+
   const {
     done,
     fluxos,
@@ -59,8 +48,6 @@ export default function TableParametrizacao({ item }) {
     documentos,
     isOpenModal,
     selectedItem,
-    motivosTransicao,
-    motivosPendencia,
   } = useSelector((state) => state.parametrizacao);
   const { uos } = useSelector((state) => state.intranet);
 
@@ -96,10 +83,6 @@ export default function TableParametrizacao({ item }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item, filter]);
 
-  useEffect(() => {
-    if (item) dispatch(getFromParametrizacao(item, { fluxoId: fluxo?.id }));
-  }, [dispatch, item, fluxo]);
-
   const dataFiltered = applySortFilter({
     filter,
     dados:
@@ -108,8 +91,6 @@ export default function TableParametrizacao({ item }) {
       (item === 'origens' && origens) ||
       (item === 'despesas' && despesas) ||
       (item === 'documentos' && documentos) ||
-      (item === 'motivosPendencia' && motivosPendencia) ||
-      (item === 'motivosTransicao' && motivosTransicao) ||
       (item === 'estados' &&
         estados?.map((row) => ({
           ...row,
@@ -122,10 +103,7 @@ export default function TableParametrizacao({ item }) {
 
   const handleView = (dados, modal) => {
     const itemSingle =
-      (item === 'origens' && 'origem') ||
-      (item === 'despesas' && 'despesa') ||
-      (item === 'documentos' && 'documento') ||
-      (item === 'motivosTransicao' && 'motivoTransicao');
+      (item === 'origens' && 'origem') || (item === 'despesas' && 'despesa') || (item === 'documentos' && 'documento');
 
     if (modal === 'view' && (item === 'fluxos' || item === 'estados')) {
       navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${dados?.id}`);
@@ -139,12 +117,7 @@ export default function TableParametrizacao({ item }) {
   return (
     <>
       <Card sx={{ p: 1 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          {item === 'motivosTransicao' && <Fluxos fluxo={fluxo} setFluxo={setFluxo} />}
-          <Stack sx={{ flexGrow: 1 }}>
-            <SearchToolbarSimple item={`filter${item}`} filter={filter} setFilter={setFilter} />
-          </Stack>
-        </Stack>
+        <SearchToolbarSimple item={`filter${item}`} filter={filter} setFilter={setFilter} />
         <Scrollbar>
           <TableContainer sx={{ minWidth: 800, position: 'relative', overflow: 'hidden' }}>
             <Table size={dense ? 'small' : 'medium'}>
@@ -170,15 +143,7 @@ export default function TableParametrizacao({ item }) {
                           <TableCell>{row.descricao}</TableCell>
                         </>
                       )) ||
-                        ((item === 'despesas' || item === 'motivosTransicao') && (
-                          <TableCell>{row.designacao || row.descritivo}</TableCell>
-                        )) ||
-                        (item === 'motivosPendencia' && (
-                          <>
-                            <TableCell>{row.motivo}</TableCell>
-                            <TableCell>{row.obs}</TableCell>
-                          </>
-                        )) ||
+                        (item === 'despesas' && <TableCell>{row.designacao || row.descritivo}</TableCell>) ||
                         (item === 'fluxos' && (
                           <>
                             <TableCell>{row.assunto}</TableCell>
@@ -209,9 +174,7 @@ export default function TableParametrizacao({ item }) {
                             <CellChecked check={row.obriga_prazo_validade} />
                           </>
                         ))}
-                      {item !== 'motivosPendencia' && item !== 'estados' && item !== 'origens' && (
-                        <CellChecked check={row?.is_ativo || row.ativo} />
-                      )}
+                      {item !== 'estados' && item !== 'origens' && <CellChecked check={row?.is_ativo || row.ativo} />}
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
                           {item !== 'fluxos' && item !== 'estados' && (
@@ -254,8 +217,6 @@ export default function TableParametrizacao({ item }) {
           {item === 'origens' && <OrigemForm onClose={() => dispatch(closeModal())} />}
           {item === 'despesas' && <DespesaForm onClose={() => dispatch(closeModal())} />}
           {item === 'documentos' && <DocumentoForm onClose={() => dispatch(closeModal())} />}
-          {item === 'motivosPendencia' && <MotivoPendenciaForm onClose={() => dispatch(closeModal())} />}
-          {item === 'motivosTransicao' && <MotivoTransicaoForm onClose={() => dispatch(closeModal())} />}
         </>
       )}
     </>
@@ -277,34 +238,6 @@ export function EstadoDetail({ row = null }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Fluxos({ fluxo = null, setFluxo }) {
-  const { fluxos } = useSelector((state) => state.parametrizacao);
-
-  const fluxosList = useMemo(
-    () => fluxos?.filter(({ is_ativo: ativo }) => ativo)?.map(({ id, assunto }) => ({ id, label: assunto })) || [],
-    [fluxos]
-  );
-
-  useEffect(() => {
-    if (localStorage.getItem('fluxoRegras'))
-      setFluxo(fluxosList.find(({ id }) => Number(id) === Number(localStorage.getItem('fluxoRegras'))) || null);
-  }, [fluxosList, setFluxo]);
-
-  return (
-    <Autocomplete
-      fullWidth
-      options={fluxosList}
-      value={fluxo || null}
-      sx={{ maxWidth: { sm: 250, md: 350 } }}
-      renderInput={(params) => <TextField {...params} label="Fluxo" />}
-      isOptionEqualToValue={(option, value) => option?.id === value?.id}
-      onChange={(event, newValue) => setItemValue(newValue, setFluxo, 'fluxoRegras', true)}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function dadosComColaborador(dados, colaboradores) {
   return dados?.map((row) => ({
     ...row,
@@ -316,15 +249,10 @@ export function dadosComColaborador(dados, colaboradores) {
 
 function headerTable(item) {
   return [
-    ...((item === 'motivosPendencia' && [
-      { id: 'motivo', label: 'Designação' },
-      { id: 'obs', label: 'Observação' },
+    ...((item === 'linhas' && [
+      { id: 'linha', label: 'Designação' },
+      { id: 'descricao', label: 'Segmento' },
     ]) ||
-      ((item === 'motivosTransicao' || item === 'despesas') && [{ id: 'designacao', label: 'Designação' }]) ||
-      (item === 'linhas' && [
-        { id: 'linha', label: 'Designação' },
-        { id: 'descricao', label: 'Segmento' },
-      ]) ||
       (item === 'fluxos' && [
         { id: 'assunto', label: 'Assunto' },
         { id: 'modelo', label: 'Modelo' },
@@ -351,7 +279,7 @@ function headerTable(item) {
         { id: 'obriga_prazo_validade', label: 'Validade', align: 'center' },
       ]) ||
       []),
-    ...(item !== 'motivosPendencia' && item !== 'estados' && item !== 'origens'
+    ...(item !== 'estados' && item !== 'origens'
       ? [{ id: item === 'fluxos' ? 'is_ativo' : 'ativo', label: 'Ativo', align: 'center', width: 10 }]
       : []),
     { id: '', width: 10 },

@@ -52,10 +52,6 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   }, [dispatch]);
 
   useEffect(() => {
-    setFluxo(null);
-  }, [dispatch, estado]);
-
-  useEffect(() => {
     if (!meusAmbientes?.length) return;
 
     let estadoSelecionado = null;
@@ -73,9 +69,11 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   }, [ambientId, meusAmbientes, isEdit]);
 
   useEffect(() => {
-    const fluxoProcesso = fluxosList?.find(({ id }) => id === processo?.fluxo_id) || null;
-    if (fluxoProcesso) setFluxo(fluxoProcesso);
-  }, [dispatch, fluxosList, processo?.fluxo_id]);
+    const fluxoAlt = meusAmbientes
+      .flatMap((estado) => estado.fluxos)
+      .find((fluxo) => fluxo.fluxo_id === processo?.fluxo_id);
+    if (fluxoAlt) setFluxo({ ...fluxoAlt, id: processo?.fluxo_id, nome: fluxoAlt?.assunto });
+  }, [dispatch, meusAmbientes, processo?.fluxo_id]);
 
   useEffect(() => {
     if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
@@ -95,6 +93,11 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
     dispatch(resetDados());
   };
 
+  const changeEstado = (newValue) => {
+    setEstado(newValue);
+    changeFluxo(null);
+  };
+
   return (
     <Dialog open fullWidth maxWidth={fluxo || (isEdit && !fluxo) ? 'lg' : 'md'}>
       <DialogTitle>
@@ -103,7 +106,7 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
           {isEdit ? 'Atualizar processo' : 'Adicionar processo'}
         </Stack>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ pb: 2 }}>
-          <EstadoAssunto dados={{ value: estado, setValue: setEstado, options: estadosList, isEdit }} />
+          <EstadoAssunto dados={{ value: estado, setValue: changeEstado, options: estadosList, isEdit }} />
           <EstadoAssunto dados={{ value: fluxo, setValue: changeFluxo, options: fluxosList, label: 'Assunto' }} />
         </Stack>
         {!!fluxo?.iscon && (

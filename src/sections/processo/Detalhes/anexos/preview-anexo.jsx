@@ -1,8 +1,5 @@
 import { useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
-import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
-import { Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
@@ -11,21 +8,38 @@ import Image from '../../../../components/Image';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function PdfPreview({ url }) {
+export function PdfPreview({ url, title }) {
   const theme = useTheme();
-  const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {}, sidebarTabs: () => [] });
   const heightContent =
     document?.getElementById('detalhes')?.clientHeight - document?.getElementById('anexos')?.clientHeight - 52;
 
+  // const containerRef = useRef(null);
+
+  // const toggleFullScreen = () => {
+  //   if (containerRef.current) {
+  //     if (!document.fullscreenElement) containerRef.current.requestFullscreen();
+  //     else document.exitFullscreen();
+  //   }
+  // };
+
   return (
-    <Box sx={{ height: `${heightContent}px`, minHeight: '660px' }}>
-      <Viewer
-        fileUrl={url}
-        localization={pt}
-        theme={{ theme: theme.palette.mode }}
-        plugins={[defaultLayoutPluginInstance]}
-        defaultScale={SpecialZoomLevel.PageWidth}
-      />
+    <Box sx={{ height: `${heightContent}px`, minHeight: '660px', boxShadow: 3 }}>
+      {/* <button onClick={toggleFullScreen} style={{ position: 'absolute', zIndex: 10, right: 0 }}>
+        Expandir Tela Cheia
+      </button> */}
+      <object
+        data={url}
+        title={title}
+        width="100%"
+        height="100%"
+        type="application/pdf"
+        style={{ colorScheme: theme.palette.mode, minHeight: '660px' }}
+      >
+        <p>
+          Seu navegador não suporta a visualização de PDFs.
+          <a href={url}>Clique aqui para baixar o arquivo.</a>
+        </p>
+      </object>
     </Box>
   );
 }

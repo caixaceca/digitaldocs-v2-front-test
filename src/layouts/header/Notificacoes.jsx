@@ -37,7 +37,9 @@ export default function Notificacoes() {
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 {totalUnRead === 0
                   ? 'Todas as notificações já foram vistas'
-                  : `Você tem ${totalUnRead} notificação${totalUnRead > 1 ? 's' : ''} não vista${totalUnRead > 1 ? 's' : ''}`}
+                  : `Você tem ${totalUnRead} notificação${totalUnRead > 1 ? 's' : ''} não vista${
+                      totalUnRead > 1 ? 's' : ''
+                    }`}
               </Typography>
             )}
           </Box>

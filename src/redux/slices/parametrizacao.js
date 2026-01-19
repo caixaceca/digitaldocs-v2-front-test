@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { DDOCS_API_SERVER } from '../../utils/apisUrl';
+import { API_FORMINGA_URL } from '../../utils/apisUrl';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 //
@@ -167,8 +167,8 @@ export function getFromParametrizacao(item, params) {
         (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'origem' && `/v1/origens/${params?.id}/${perfilId}`) ||
         (item === 'acesso' && `/v1/acessos/${perfilId}/${params?.id}`) ||
+        (item === 'motivoTransicao' && `/v1/motivos_transicoes/detalhe?id=${params?.id}`) ||
         (item === 'documento' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
-        (item === 'motivoTransicao' && `/v1/motivos_transicoes/detalhe/${perfilId}?id=${params?.id}`) ||
         (item === 'despesa' && `/v1/despesas/tipos/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         (item === 'checklistitem' &&
           `/v1/tipos_documentos/checklist/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
@@ -191,12 +191,16 @@ export function getFromParametrizacao(item, params) {
         (item === 'despesas' && `/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'documentos' && `/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'motivosTransicao' &&
-          `/v1/motivos_transicoes/lista/${perfilId}?ativo=${!params?.inativos}${params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}`) ||
+          `/v1/motivos_transicoes/lista?ativo=${!params?.inativos}${`&para_seguimento=${
+            params?.modo === 'Seguimento' ? 'true' : 'false'
+          }`}${params?.fluxoId ? `&fluxo_id=${params?.fluxoId}` : ''}`) ||
         (item === 'checklist' &&
-          `/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${params?.fluxoId}&ativo=${!params?.inativos}${params?.transicaoId ? `&transicao_id=${params?.transicaoId}` : ''}`) ||
+          `/v1/tipos_documentos/checklist/lista?perfil_cc_id=${perfilId}&fluxo_id=${
+            params?.fluxoId
+          }&ativo=${!params?.inativos}${params?.transicaoId ? `&transicao_id=${params?.transicaoId}` : ''}`) ||
         '';
       if (apiUrl) {
-        const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}`, options);
+        const response = await axios.get(`${API_FORMINGA_URL}${apiUrl}`, options);
         const label =
           (item === 'estados' && 'nome') ||
           (item === 'fluxos' && 'assunto') ||
@@ -249,8 +253,8 @@ export function createItem(item, dados, params) {
         (item === 'perfis' && `/v1/estados/asscc/perfis`) ||
         (item === 'transicoes' && `/v1/transicoes/multi`) ||
         (item === 'estadosPerfil' && `/v1/estados/asscc/perfil`) ||
+        (item === 'motivosTransicao' && `/v1/motivos_transicoes`) ||
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}`) ||
-        (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}`) ||
         (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}`) ||
         (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}`) ||
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
@@ -260,14 +264,14 @@ export function createItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.post(`${DDOCS_API_SERVER}${apiUrl}`, dados, options);
+        const response = await axios.post(`${API_FORMINGA_URL}${apiUrl}`, dados, options);
         if (item === 'clonar fluxo') {
           if (params?.transicoes?.length > 0) {
             const id = response?.data?.id;
             const transicoes = params?.transicoes?.map((row) => ({ ...row, perfilIDCC: perfilId, fluxo_id: id }));
-            await axios.post(`${DDOCS_API_SERVER}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
+            await axios.post(`${API_FORMINGA_URL}/v1/transicoes/multi`, JSON.stringify(transicoes), options);
           }
-          const fluxo = await axios.get(`${DDOCS_API_SERVER}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
+          const fluxo = await axios.get(`${API_FORMINGA_URL}/v1/fluxos/${response?.data?.id}/${perfilId}`, options);
           dispatch(slice.actions.getSuccess({ item: 'fluxo', dados: fluxo.data }));
         } else if (item === 'transicoes' || item === 'destinatarios') {
           dispatch(getFromParametrizacao(item === 'transicoes' ? 'fluxo' : item, { id: params?.id }));
@@ -307,13 +311,13 @@ export function updateItem(item, dados, params) {
         (item === 'linhas' && `/v1/linhas/${params?.id}`) ||
         (item === 'acessos' && `/v1/acessos/${params?.id}`) ||
         (item === 'origens' && `/v1/origens/${params?.id}`) ||
-        (item === 'estadosPerfil' && `/v1/estados/asscc/perfil`) ||
         (item === 'transicoes' && `/v1/transicoes/${params?.id}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/${params?.id}`) ||
         (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
+        (item === 'estadosPerfil' && `/v1/estados/asscc/perfil?id=${params?.id}`) ||
+        (item === 'motivosTransicao' && `/v1/motivos_transicoes?id=${params?.id}`) ||
         (item === 'destinatarios' && `/v1/notificacoes/destinatarios/${params?.id}`) ||
         (item === 'motivosPendencia' && `/v1/motivos/${perfilId}?motivoID=${params?.id}`) ||
-        (item === 'motivosTransicao' && `/v1/motivos_transicoes/${perfilId}?id=${params?.id}`) ||
         (item === 'despesas' && `/v1/despesas/tipos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         (item === 'documentos' && `/v1/tipos_documentos?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         (item === 'checklist' && `/v1/tipos_documentos/checklist?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
@@ -324,7 +328,7 @@ export function updateItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.put(`${DDOCS_API_SERVER}${apiUrl}`, dados, options);
+        const response = await axios.put(`${API_FORMINGA_URL}${apiUrl}`, dados, options);
         const dadosR = (item === 'acessos' && response.data) || response.data?.objeto || response.data || null;
         if (item === 'fluxo' || item === 'estado' || params?.getItem)
           dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: dadosR }));
@@ -367,7 +371,7 @@ export function deleteItem(item, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.delete(`${DDOCS_API_SERVER}${apiUrl}`, options);
+        const response = await axios.delete(`${API_FORMINGA_URL}${apiUrl}`, options);
         if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data.objeto }));
         dispatch(
           slice.actions.deleteSuccess({

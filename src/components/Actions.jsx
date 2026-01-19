@@ -112,9 +112,9 @@ export function DefaultAction({
     (label === 'ADICIONAR ANEXO' && <AddAnexo sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'ATAULIZAR DADOS' && <RefreshIcon sx={{ width: 22, height: 22 }} />) ||
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
+    (icon === 'loading' && <CircularProgress size={small ? 18 : 24} color="inherit" />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
-    (label === 'GERANDO PDF...' && <CircularProgress size={small ? 18 : 24} color="inherit" />) ||
     ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
     ((label === 'ATRIBUIR' || label === 'Atribuir') && <Atribuir sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'RESGATAR' || label === 'REATIVAR') && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||

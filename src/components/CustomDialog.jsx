@@ -1,6 +1,3 @@
-import { Viewer } from '@react-pdf-viewer/core';
-import pt from '@react-pdf-viewer/locales/lib/pt_PT.json';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -26,7 +23,8 @@ export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
         <DialogContentText>
-          {content}Tens a certeza de que pretendes {desc}?
+          {content}
+          {desc && <>Tens a certeza de que pretendes {desc}?</>}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -66,7 +64,6 @@ export function DialogTitleAlt({ title, onClose = null, sx = null, action, subti
 export default function DialogPreviewDoc({ params, onClose }) {
   const theme = useTheme();
   const { isLoading = false, titulo, url } = params;
-  const defaultLayoutPluginInstance = defaultLayoutPlugin({ toolbarPlugin: {} });
 
   return (
     <Dialog fullScreen open sx={{ '& .MuiDialog-paper': { margin: 0 } }}>
@@ -88,13 +85,19 @@ export default function DialogPreviewDoc({ params, onClose }) {
                 {!url ? (
                   <SearchNotFound message="Documento não encontrado..." />
                 ) : (
-                  <Viewer
-                    fileUrl={url}
-                    localization={pt}
-                    defaultScale={1.5}
-                    theme={{ theme: theme.palette.mode }}
-                    plugins={[defaultLayoutPluginInstance]}
-                  />
+                  <object
+                    data={url}
+                    width="100%"
+                    height="100%"
+                    title={titulo}
+                    type="application/pdf"
+                    style={{ colorScheme: theme.palette.mode }}
+                  >
+                    <p>
+                      Seu navegador não suporta a visualização de PDFs.
+                      <a href={url}>Clique aqui para baixar o arquivo.</a>
+                    </p>
+                  </object>
                 )}
               </>
             )}

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { DDOCS_API_SERVER } from '../../utils/apisUrl';
+import { API_FORMINGA_URL } from '../../utils/apisUrl';
 import { downloadDoc, canPreview } from '../../utils/formatFile';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
@@ -128,7 +128,7 @@ export function getFromDigitalDocs(item, params) {
         '';
       if (apiUrl) {
         dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: [] }));
-        const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}`, options);
+        const response = await axios.get(`${API_FORMINGA_URL}${apiUrl}`, options);
         dispatch(slice.actions.getSuccess({ item: 'dadosControle', dados: response.data.objeto }));
       }
 
@@ -136,7 +136,7 @@ export function getFromDigitalDocs(item, params) {
         case 'Emissão': {
           dispatch(slice.actions.getSuccess({ item: 'cartoes', dados: [] }));
           const response = await axios.get(
-            `${DDOCS_API_SERVER}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}${
+            `${API_FORMINGA_URL}/v1/cartoes/emitidas?data_inicio=${params?.dataInicio}${
               params?.dataFim ? `&data_final=${params?.dataFim}` : ''
             }`,
             options
@@ -148,7 +148,7 @@ export function getFromDigitalDocs(item, params) {
           dispatch(slice.actions.getSuccess({ item: 'cartoes', dados: [] }));
           if (params?.uoId) {
             const response = await axios.get(
-              `${DDOCS_API_SERVER}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}${
+              `${API_FORMINGA_URL}/v1/cartoes/recebidas?balcao=${params?.uoId}&data_inicio=${params?.dataInicio}${
                 params?.dataFim ? `&data_final=${params?.dataFim}` : ''
               }`,
               options
@@ -159,14 +159,14 @@ export function getFromDigitalDocs(item, params) {
         }
         case 'cartao': {
           const response = await axios.get(
-            `${DDOCS_API_SERVER}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`,
+            `${API_FORMINGA_URL}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`,
             options
           );
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
           break;
         }
         case 'contratacao-gaji9': {
-          const apiUrl = `${DDOCS_API_SERVER}/v2/processos/enviar/contratacao/gaji9/${params?.id}?perfil_cc_id=${perfilId}`;
+          const apiUrl = `${API_FORMINGA_URL}/v2/processos/enviar/contratacao/gaji9/${params?.id}?perfil_cc_id=${perfilId}`;
           await axios.get(apiUrl, options);
           dispatch(slice.actions.enviarContratacao());
           doneSucess(params, dispatch, slice.actions.getSuccess);
@@ -238,7 +238,7 @@ export function getListaProcessos(item, params) {
       const apiUrl = apiPaths[item] || '';
       if (!apiUrl) return;
 
-      const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}?${queryParams}`, options);
+      const response = await axios.get(`${API_FORMINGA_URL}${apiUrl}?${queryParams}`, options);
       const dados = item === 'con' || item === 'pedidosAcesso' ? { objeto: response.data } : response.data;
       dispatch(slice.actions.getListaProcessosSuccess({ item: params?.item || item, ...dados }));
       params?.onClose?.();
@@ -263,7 +263,7 @@ export function getProcesso(item, params) {
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true });
 
-      const apiUrl = `${DDOCS_API_SERVER}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
+      const apiUrl = `${API_FORMINGA_URL}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
       const { data } = await axios.get(apiUrl, options);
 
       if (!data?.objeto) return;
@@ -296,8 +296,8 @@ export function getInfoProcesso(item, params) {
 
       if (item === 'htransicoes') {
         const [htTransicoesRes, htDomiciliosRes] = await Promise.all([
-          axios.get(`${DDOCS_API_SERVER}/v2/processos/ht_transicoes/${idPerfilId}`, options),
-          axios.get(`${DDOCS_API_SERVER}/v2/processos/ht_domicilios/${idPerfilId}`, options),
+          axios.get(`${API_FORMINGA_URL}/v2/processos/ht_transicoes/${idPerfilId}`, options),
+          axios.get(`${API_FORMINGA_URL}/v2/processos/ht_domicilios/${idPerfilId}`, options),
         ]);
 
         const htTransicoes = htTransicoesRes?.data?.objeto ?? [];
@@ -342,7 +342,7 @@ export function getInfoProcesso(item, params) {
           '';
 
         if (apiUrl) {
-          const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}`, options);
+          const response = await axios.get(`${API_FORMINGA_URL}${apiUrl}`, options);
           if (item === 'resgatar' || item === 'aceitar') {
             processarProcesso(response.data.objeto, perfilId, dispatch, item === 'aceitar' ? params?.estadoId : '');
           } else if (item === 'focal-point') {
@@ -364,31 +364,33 @@ export function getInfoProcesso(item, params) {
 
 export function getAnexo(item, params) {
   return async (dispatch, getState) => {
+    const anexo = params?.anexo || null;
     if (item === 'filePreview') dispatch(slice.actions.getSuccess({ item: 'isLoadingPreview', dados: true }));
-    dispatch(slice.actions.getSuccess({ item: 'isLoadingFile', dados: params?.anexo?.anexo }));
-    const isPdf = canPreview(params?.anexo) === 'pdf';
+    dispatch(slice.actions.getSuccess({ item: 'isLoadingFile', dados: anexo?.anexo }));
+    const isPdf = canPreview(anexo) === 'pdf';
     if (isPdf && item !== 'filePreview')
-      dispatch(slice.actions.getSuccess({ item: 'pdfPreview', dados: { ...params?.anexo, url: '' } }));
+      dispatch(slice.actions.getSuccess({ item: 'pdfPreview', dados: { ...anexo, url: '' } }));
 
     try {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
-      let url = params?.anexo?.url || '';
+      let url = anexo?.url || '';
       if (!url) {
         const response = await axios.get(
-          `${DDOCS_API_SERVER}/v2/processos/anexo/file/${perfilId}?anexo_id=${params?.anexo?.id}&processo_id=${params?.processoId}&da_entidade=${!!params?.anexo?.entidade}`,
+          `${API_FORMINGA_URL}/v2/processos/anexo/file/${perfilId}?anexo_id=${anexo?.id}&processo_id=${
+            params?.processoId
+          }&da_entidade=${!!anexo?.entidade}`,
           { ...options, responseType: 'arraybuffer' }
         );
-        const blob = await new Blob([response.data], { type: params?.anexo?.conteudo });
-        url = await URL.createObjectURL(blob);
-        dispatch(slice.actions.getFileSuccess({ url, anexo: params?.anexo?.anexo }));
+        const file = await new File([response.data], anexo?.nome, { type: anexo?.conteudo || 'application/pdf' });
+        url = URL.createObjectURL(file);
+        dispatch(slice.actions.getFileSuccess({ url, anexo: anexo?.anexo }));
       }
-      if (item === 'filePreview')
-        dispatch(slice.actions.getSuccess({ item: 'filePreview', dados: { ...params?.anexo, url } }));
-      else if (isPdf) dispatch(slice.actions.getSuccess({ item: 'pdfPreview', dados: { ...params?.anexo, url } }));
-      else downloadDoc(url, params?.anexo?.nome);
+      if (item === 'filePreview') dispatch(slice.actions.getSuccess({ item: 'filePreview', dados: { ...anexo, url } }));
+      else if (isPdf) dispatch(slice.actions.getSuccess({ item: 'pdfPreview', dados: { ...anexo, url } }));
+      else downloadDoc(url, anexo?.nome);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
@@ -408,7 +410,7 @@ export function createProcesso(item, dados, params) {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
-      const apiUrl = `${DDOCS_API_SERVER}/v2/processos/${params?.ex ? 'externo' : 'interno'}/${perfilId}`;
+      const apiUrl = `${API_FORMINGA_URL}/v2/processos/${params?.ex ? 'externo' : 'interno'}/${perfilId}`;
       const response = await axios.post(apiUrl, dados, options);
 
       dispatch(slice.actions.getSuccess({ item: 'processo', dados: response?.data?.objeto }));
@@ -433,13 +435,13 @@ export function createItem(item, dados, params) {
       if (params?.anexo) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
         const apiUrl = `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}`;
-        await axios.put(`${DDOCS_API_SERVER}${apiUrl}`, params?.anexo, options);
+        await axios.put(`${API_FORMINGA_URL}${apiUrl}`, params?.anexo, options);
       }
       const apiUrl =
-        (item === 'seguros' && `${DDOCS_API_SERVER}/v2/processos/${params?.processoId}/credito/seguros`) ||
-        (item === 'parecer-credito' && `${DDOCS_API_SERVER}/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
+        (item === 'seguros' && `${API_FORMINGA_URL}/v2/processos/${params?.processoId}/credito/seguros`) ||
+        (item === 'parecer-credito' && `${API_FORMINGA_URL}/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
         (item === 'garantias' &&
-          `${DDOCS_API_SERVER}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
+          `${API_FORMINGA_URL}/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}`) ||
         '';
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
@@ -470,12 +472,12 @@ export function updateItem(item, dados, params) {
       if (params?.anexos) {
         const options = headerOptions({ accessToken, mail, cc: true, ct: true, mfd: true });
         const url = `/v2/processos/adicionar/anexo/${perfilId}/${params?.id}?estado_id=${params?.estadoId}`;
-        await axios.patch(`${DDOCS_API_SERVER}${url}`, params?.anexos, options);
+        await axios.patch(`${API_FORMINGA_URL}${url}`, params?.anexos, options);
       }
       if (params?.anexo) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
         const apiUrl = `/v2/processos/${params?.id}/cr/${perfilId}/pareceres/anexo?estado_id=${params?.estadoId}`;
-        await axios.put(`${DDOCS_API_SERVER}${apiUrl}`, params?.anexo, options);
+        await axios.put(`${API_FORMINGA_URL}${apiUrl}`, params?.anexo, options);
       }
 
       const apiUrl =
@@ -514,7 +516,9 @@ export function updateItem(item, dados, params) {
         (item === 'confidencialidade' &&
           `/v2/processos/confidencia/${perfilId}?processo_id=${params?.processoId}&confidencia_id=${params?.id}`) ||
         (item === 'cancelar' &&
-          `/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${params?.fechar ? 'false' : 'true'}`) ||
+          `/v2/processos/fechar/envio/paralelo/${perfilId}?processo_id=${params?.id}&cancelamento=${
+            params?.fechar ? 'false' : 'true'
+          }`) ||
         (item === 'encaminhar paralelo' &&
           `/v2/processos/encaminhar/paralelo/${perfilId}/${params?.id}?estado_origem_id=${params?.estadoId}&estado_dono_id=${params?.dono}`) ||
         (item === 'atribuir' &&
@@ -522,19 +526,19 @@ export function updateItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios[params?.put ? 'put' : 'patch'](`${DDOCS_API_SERVER}${apiUrl}`, dados, options);
+        const response = await axios[params?.put ? 'put' : 'patch'](`${API_FORMINGA_URL}${apiUrl}`, dados, options);
         if (params?.fillCredito)
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
         if (item === 'condicoes-aprovacao')
           dispatch(slice.actions.addItemProcesso({ item: 'condicao_aprovacao', dados: JSON.parse(dados) }));
       }
       if (item === 'processo') {
-        const url = `${DDOCS_API_SERVER}/v2/processos/ei/${perfilId}/${params?.id}`;
+        const url = `${API_FORMINGA_URL}/v2/processos/ei/${perfilId}/${params?.id}`;
         const response = await axios.put(url, dados, options);
         processarProcesso(response.data.objeto, perfilId, dispatch, '', false);
       }
       if (item === 'adicionar-anexos') {
-        const url = `${DDOCS_API_SERVER}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
+        const url = `${API_FORMINGA_URL}/v2/processos/detalhes/${params?.id}?perfil_cc_id=${perfilId}`;
         const { data } = await axios.get(url, options);
         processarProcesso(data.objeto, perfilId, dispatch, '', false);
       }
@@ -566,12 +570,14 @@ export function deleteItem(item, params) {
         (item === 'processo' &&
           `/v2/processos/marcar/desmarcar/duplicacao?perfil_id=${perfilId}&processo_id=${params?.id}&estado_id=${params?.estadoId}&duplicado=${params?.duplicado}`) ||
         (item === 'anexo' &&
-          `/v2/processos/remover/anexo/${perfilId}?processo_id=${params?.processoId}&estado_id=${params?.estadoId}&anexo_id=${params?.id}&parecer_individual=${!!params?.individual}&da_entidade=${!!params?.entidade}`) ||
+          `/v2/processos/remover/anexo/${perfilId}?processo_id=${params?.processoId}&estado_id=${
+            params?.estadoId
+          }&anexo_id=${params?.id}&parecer_individual=${!!params?.individual}&da_entidade=${!!params?.entidade}`) ||
         '';
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.delete(`${DDOCS_API_SERVER}${apiUrl}`, options);
+        const response = await axios.delete(`${API_FORMINGA_URL}${apiUrl}`, options);
         if (item === 'anexo' || item === 'anexo-parecer')
           dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
         if (item === 'garantias' || item === 'seguros')

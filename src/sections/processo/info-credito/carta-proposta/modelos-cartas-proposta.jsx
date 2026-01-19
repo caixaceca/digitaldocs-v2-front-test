@@ -19,35 +19,9 @@ import { condicoesGerais, encargos, obrigacoes } from './sections';
 export default function ModeloCartaProposta() {
   const { enqueueSnackbar } = useSnackbar();
   const processo = useSelector((state) => state.digitaldocs.processo);
+
   const dados = mapDadosPoposta(processo);
   const nomeProponente = dados.condicoes?.nome_proponente || 'Nome do Proponente';
-
-  const defaulted = {
-    proponente_nome: processo?.titular ?? 'Nome do proponente',
-    fiadores: [
-      { nome: 'Nome Fiador 1', estadoCivil: 'Solteiro', nif: '124357453', residencia: 'Palmarejo' },
-      { nome: 'Nome Fiador 2', estadoCivil: 'Solteira', nif: '223145321', residencia: 'Fazenda' },
-    ],
-    data_proposta: new Date(),
-    data_solicitacao: processo?.data_entrada ?? '2025-01-21',
-    montante: 1250000,
-    prazo_amortizacao: 60,
-    tan: 11,
-    taeg: 13.153,
-    taxa_mora: 2,
-    comissao_abertura: 1.75,
-    valor_comissao_abertura: 1250,
-    imposto_selo_credito: 0.5,
-    valor_imposto_selo_credito: 136,
-    valor_imposto_selo_comissao: 250,
-    valor_total_encargos_iniciais: 12500,
-    conta_pagamento: '3929767210001',
-    agencia: 'PLATEAU',
-    prazo_entrega_contrato: 15,
-    gerente_nome: 'Nome do Gerente',
-    agencia_localizacao: 'Plateau',
-    ...processo,
-  };
 
   const exportToWord = async (setLoading) => {
     try {
@@ -58,8 +32,6 @@ export default function ModeloCartaProposta() {
         fetch('/assets/iso27001.png').then((r) => r.arrayBuffer()),
         fetch('/assets/iso9001.png').then((r) => r.arrayBuffer()),
       ]);
-
-      const { gerente_nome: nomeGerente } = defaulted;
 
       const doc = new Document({
         creator: 'Intranet - Caixa Económica de Cabo Verde',
@@ -80,7 +52,9 @@ export default function ModeloCartaProposta() {
               new Paragraph({ spacing: { after: 150 }, text: `Exmo. Sr(a). ${nomeProponente}` }),
               new Paragraph({
                 spacing: { after: 300 },
-                text: `Comunicamos que o crédito solicitado em ${ptDate(dados.condicoes?.data_entrada) || 'DD/MM/YYYY'} foi aprovado nas seguintes condições:`,
+                text: `Comunicamos que o crédito solicitado em ${
+                  ptDate(dados.condicoes?.data_entrada) || 'DD/MM/YYYY'
+                } foi aprovado nas seguintes condições:`,
               }),
 
               condicoesGerais(dados.condicoes),
@@ -88,7 +62,7 @@ export default function ModeloCartaProposta() {
               encargos(dados.encargos),
               new Paragraph({ spacing: { after: 100 } }),
               obrigacoes(dados.obrigacoes),
-              ...assinaturas(dados.condicoes?.agencia, nomeGerente, nomeProponente, dados.condicoes?.fiadores),
+              ...assinaturas(dados.condicoes?.agencia, 'Nome do Gerente', nomeProponente, dados.condicoes?.fiadores),
             ],
           },
         ],

@@ -41,7 +41,7 @@ export default function FichaPdf({ dados }) {
     garantiasPrestadas,
     garantiasRecebidas,
     clientes: clientesList,
-  } = useMemo(() => extractClientes(dados?.clientes || {}), [dados?.clientes]);
+  } = useMemo(() => extractClientes(dados?.clientes || []), [dados?.clientes]);
 
   const renderSection = (title, wrap, success, items, columns, renderItem) => {
     const temRegistos = items && Array.isArray(items) && items?.length > 0;

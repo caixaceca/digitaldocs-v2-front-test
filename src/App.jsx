@@ -1,4 +1,3 @@
-import { Worker } from '@react-pdf-viewer/core';
 import { MsalProvider } from '@azure/msal-react';
 
 import Router from './routes';
@@ -18,11 +17,7 @@ function AuthenticatedApp() {
   if (isLoading) return <LoadingScreen />;
   if (!isAuthenticated) return <LoginPage />;
 
-  return (
-    <Worker workerUrl="/assets/pdf.worker.min.js">
-      <Router />
-    </Worker>
-  );
+  return <Router />;
 }
 
 export default function App() {

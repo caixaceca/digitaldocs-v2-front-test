@@ -12,10 +12,9 @@ import { ptDate } from '../../../utils/formatTime';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 import { formatPrazoAmortizacao } from '../../../utils/formatText';
-import { processoEstadoInicial, emailCheck } from '../../../utils/validarAcesso';
 //
+import { useDispatch } from '../../../redux/store';
 import { getFromGaji9 } from '../../../redux/slices/gaji9';
-import { useSelector, useDispatch } from '../../../redux/store';
 // components
 import Label from '../../../components/Label';
 import { TextItem } from '../Detalhes/detalhes';
@@ -39,11 +38,8 @@ export default function InfoCredito({ dados }) {
   const dispatch = useDispatch();
   const [currentTab, setCurrentTab] = useState('Caracterização');
 
-  const { mail } = useSelector((state) => state.intranet);
-  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
-
   const modificar = dados?.estado?.preso && dados?.estado?.atribuidoAMim;
-  const estadoInicial = processoEstadoInicial(meusAmbientes, dados?.estado?.estado_id);
+  const emAnalise = (dados?.estado?.estado || '')?.toLowerCase()?.includes('análise de crédito');
 
   useEffect(() => {
     dispatch(getFromGaji9('tiposSeguros'));
@@ -51,13 +47,14 @@ export default function InfoCredito({ dados }) {
   }, [dispatch]);
 
   const tabsList = [
-    { value: 'Caracterização', component: <DadosCredito dados={dados} modificar={modificar} mail={mail} /> },
+    { value: 'Caracterização', component: <DadosCredito dados={dados} modificar={modificar} /> },
     {
       value: 'Condições financeiras',
       component: (
         <MetadadosCredito
           modificar={modificar}
           dados={dados?.gaji9_metadados}
+          prazo={dados?.prazo_amortizacao}
           ids={{ processoId: dados?.processoId, creditoId: dados?.id }}
         />
       ),
@@ -71,7 +68,7 @@ export default function InfoCredito({ dados }) {
         />
       ),
     },
-    ...(modificar && estadoInicial ? [{ value: 'Ficha de análise', component: <FichaAnalise /> }] : []),
+    ...(modificar && emAnalise ? [{ value: 'Ficha de análise', component: <FichaAnalise /> }] : []),
     { value: 'Pareceres', component: <PareceresCredito infoCredito /> },
   ];
 
@@ -90,7 +87,7 @@ export default function InfoCredito({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function DadosCredito({ dados, modificar, mail }) {
+function DadosCredito({ dados, modificar }) {
   const [openSituacao, setOpenSituacao] = useState('');
   const situacao = (dados?.situacao_final_mes || 'em análise').toLowerCase();
 
@@ -176,8 +173,8 @@ function DadosCredito({ dados, modificar, mail }) {
           </Stack>
         )}
 
-        {situacao === 'em análise' && emailCheck(mail) && <Fincc />}
-        {situacao === 'aprovado' && emailCheck(mail) && <ModeloCartaProposta />}
+        {situacao === 'em análise' && <Fincc />}
+        {situacao === 'aprovado' && <ModeloCartaProposta />}
       </List>
 
       {openSituacao === 'atualizar' && <FormSituacao dados={dados} onClose={() => setOpenSituacao('')} />}

@@ -157,17 +157,15 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
 
   const onSubmit = async () => {
     try {
-      const formData = {
+      const formData = JSON.stringify({
         ...values,
         estado_id: values?.estado?.id,
         gestor: values?.gestor === 'Gestor',
         observador: values?.gestor === 'Observador',
-      };
+      });
       const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
       const params1 = { item: estadoId ? 'perfis' : '', item1: estadoId ? 'estado' : '', onClose };
-      dispatch(
-        (isEdit ? updateItem : createItem)('estadosPerfil', JSON.stringify(formData), { ...params, ...params1 })
-      );
+      dispatch((isEdit ? updateItem : createItem)('estadosPerfil', formData, { ...params, ...params1 }));
     } catch (error) {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }

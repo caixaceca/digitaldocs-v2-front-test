@@ -172,7 +172,12 @@ export default function TableArquivo({ tab }) {
                       {(tab === 'pedidosAcesso' && (
                         <TableRow hover key={`${tab}_pa_${index}`}>
                           <TableCell>
-                            <ColaboradorInfo id={row?.cid} nome={row?.nome} label={row?.uoColab} foto={row?.foto} />
+                            <ColaboradorInfo
+                              nome={row?.nome}
+                              foto={row?.foto}
+                              label={row?.uoColab}
+                              presence={row?.presence}
+                            />
                           </TableCell>
                           <TableCell>{row?.processo_id}</TableCell>
                           <TableCell align="center" width={50}>
@@ -249,6 +254,7 @@ function pedidosList(dados, colaboradores, uos) {
       uo: uo?.label || row?.uo_id,
       foto: colaborador?.foto_anexo,
       uoColab: colaborador?.uo_label,
+      presence: colaborador?.presence,
       nome: colaborador?.nome || row.perfil_id,
     });
   });

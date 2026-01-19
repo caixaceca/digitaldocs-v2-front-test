@@ -161,7 +161,9 @@ function addTotalGeral(sheet, dados, fase, length, moeda) {
 
   sheet.addRow([...Array((fase === 'ENTRADOS' && 10) || (fase === 'CONTRATADOS' && 14) || 9)].map(() => null));
   sheet.addRow([
-    `TOTAL DE CRÉDITOS ${fase} (${dadosPorItem(dados, '', '')?.length}) - ${moeda === 'Escudo' ? fCurrency(total) : fConto(total, true)}`,
+    `TOTAL DE CRÉDITOS ${fase} (${dadosPorItem(dados, '', '')?.length}) - ${
+      moeda === 'Escudo' ? fCurrency(total) : fConto(total, true)
+    }`,
   ]);
   sheet.getRow(length).height = 20;
   sheet.getCell(`A${length}`).font = { size: 12, bold: true };
@@ -181,7 +183,9 @@ function addTotalGeral(sheet, dados, fase, length, moeda) {
 
   if ((fase === 'APROVADOS' || fase === 'CONTRATADOS') && totalPrev !== total) {
     sheet.addRow([
-      `* O montante ${fase === 'APROVADOS' ? 'solicitado' : 'aprovado'} difere do montante ${fase === 'APROVADOS' ? 'aprovado' : 'contratado'}`,
+      `* O montante ${fase === 'APROVADOS' ? 'solicitado' : 'aprovado'} difere do montante ${
+        fase === 'APROVADOS' ? 'aprovado' : 'contratado'
+      }`,
     ]);
     sheet.getCell(`A${length + 1}`).font = { bold: false };
     sheet.mergeCells(length + 1, 1, length + 1, fase === 'APROVADOS' ? 10 : 14);

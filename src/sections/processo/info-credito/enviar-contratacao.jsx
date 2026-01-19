@@ -65,18 +65,9 @@ function DialogEnvioContratacao({ dados, onClose }) {
       {
         cond:
           dados?.gaji9_metadados &&
-          [
-            'taxa_taeg',
-            'valor_juro',
-            'custo_total',
-            'valor_prestacao',
-            'numero_prestacao',
-            'taxa_imposto_selo',
-            'taxa_juro_precario',
-            'valor_imposto_selo',
-            'data_vencimento_prestacao1',
-            'valor_prestacao_sem_desconto',
-          ].some((key) => !metadados[key]),
+          ['numero_prestacao', 'taxa_imposto_selo', 'taxa_juro_precario', 'data_vencimento_prestacao1'].some(
+            (key) => !metadados[key]
+          ),
         msg: 'Metadados do GAJ-i9 estão incompletos (faltam campos obrigatórios)',
       },
     ];

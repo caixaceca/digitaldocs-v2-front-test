@@ -56,7 +56,9 @@ export function transicoesList(transicoes, estados, label, checklist) {
 
 export function transicaoDesc(transicao) {
   return transicao
-    ? `${transicao?.modo}${transicao?.is_after_devolucao ? ' (DD)' : ''}: ${transicao?.estado_inicial} » ${transicao?.estado_final}`
+    ? `${transicao?.modo}${transicao?.is_after_devolucao ? ' (DD)' : ''}: ${transicao?.estado_inicial} » ${
+        transicao?.estado_final
+      }`
     : '';
 }
 

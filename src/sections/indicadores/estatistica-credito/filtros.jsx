@@ -48,10 +48,10 @@ export default function FiltrosEstatisticaCredito({ dados }) {
     switch (periodo) {
       case 'Mensal': {
         const mes = formatDate(data, 'M');
-        const intervalo = `?data_inicio=${formatDate(
+        const intervalo = `?data_inicio=${formatDate(data, 'yyyy-MM')}-01&data_final=${formatDate(
           data,
           'yyyy-MM'
-        )}-01&data_final=${formatDate(data, 'yyyy-MM')}-${ultimoDiaDoMes(data)}`;
+        )}-${ultimoDiaDoMes(data)}`;
         dispatch(getEstatisticaCredito('estCreditoMensal', { uoID: uo.id, mes, ano, intervalo }));
         break;
       }

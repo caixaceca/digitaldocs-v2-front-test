@@ -73,7 +73,9 @@ export default function Anexos({ anexos }) {
         </Stack>
       ) : (
         <>
-          {filePreview?.url && filePreview?.tipoDoc === 'pdf' && <PdfPreview url={filePreview?.url} />}
+          {filePreview?.url && filePreview?.tipoDoc === 'pdf' && (
+            <PdfPreview url={filePreview?.url} nome={filePreview?.nome} />
+          )}
           {filePreview?.url && filePreview?.tipoDoc === 'image' && <ImagemPreview imagem={filePreview?.url} />}
           {filePreview && !filePreview?.url && (
             <Stack alignItems="center" justifyContent="center" sx={sx1}>

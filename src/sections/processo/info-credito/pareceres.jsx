@@ -148,9 +148,9 @@ export function Parecer({ dados, acessoParecer = false, historico = false, openM
             justifyContent="space-between"
           >
             <ColaboradorInfo
-              id={colaborador?.id}
               foto={colaborador?.foto_anexo}
               labelAlt={colaborador?.uo_label}
+              presence={colaborador?.presence}
               nome={colaborador?.nome || `Perfil ID: ${perfil}`}
               other={
                 <Box sx={{ mt: 0.25 }}>

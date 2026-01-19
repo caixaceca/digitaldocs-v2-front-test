@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { DDOCS_API_SERVER } from '../../utils/apisUrl';
+import { API_FORMINGA_URL } from '../../utils/apisUrl';
 //
 import { getAccessToken } from './intranet';
 import { selectUtilizador, headerOptions, actionGet, hasError } from './sliceActions';
@@ -112,7 +112,7 @@ export function getIndicadores(item, params) {
       const apiUrl = apiPaths[item] || '';
       if (!apiUrl) return;
 
-      const response = await axios.get(`${DDOCS_API_SERVER}${apiUrl}?${queryParams}`, options);
+      const response = await axios.get(`${API_FORMINGA_URL}${apiUrl}?${queryParams}`, options);
       dispatch(
         slice.actions.getSuccess({ item: params?.item || 'indicadores', dados: response.data?.objeto || response.data })
       );
@@ -133,13 +133,15 @@ export function getEstatisticaCredito(item, params) {
       const accessToken = await getAccessToken();
       const { mail, perfilId } = selectUtilizador(getState()?.intranet || {});
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
-      const urlResumo = `${DDOCS_API_SERVER}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${params?.intervalo}`;
+      const urlResumo = `${API_FORMINGA_URL}/v1/indicadores/resumo${params?.uoID > 0 ? `/dauo/${params?.uoID}` : ''}${
+        params?.intervalo
+      }`;
 
       switch (item) {
         case 'estCreditoMensal': {
           const uoParam = `uoID=${params?.uoID}`;
           const dataString = `${params?.ano}&mes=${params?.mes}`;
-          const basePath = `${DDOCS_API_SERVER}/v1/indicadores/estatistica/credito/${perfilId}`;
+          const basePath = `${API_FORMINGA_URL}/v1/indicadores/estatistica/credito/${perfilId}`;
 
           if (params?.uoID > 0) {
             const requests = [

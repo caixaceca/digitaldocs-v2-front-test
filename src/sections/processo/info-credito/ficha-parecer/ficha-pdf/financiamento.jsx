@@ -45,7 +45,9 @@ export default function Financiamento({ dados }) {
           <RowFicha
             small
             title="Taxa de juros"
-            value={`${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''}`}
+            value={`${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${
+              proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''
+            }`}
           />
         )}
         <RowFicha

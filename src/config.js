@@ -12,11 +12,9 @@ export const ambiente =
 
 export const msalConfig = {
   auth: {
-    clientId: import.meta.env.VITE_CLIENTE_ID_AAD,
-    authority: import.meta.env.VITE_AUTHORITY_AAD,
-    // redirectUri: window.location.origin,
-    redirectUri: 'https://ddocsteste.caixa.cv/fila-trabalho/lista',
-    // redirectUri: 'https://digitaldocs.caixa.cv/fila-trabalho/lista',
+    clientId: import.meta.env.VITE_AZURE_CLIENT_ID,
+    redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI,
+    authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
   system: { allowRedirectInIframe: false },

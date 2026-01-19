@@ -87,9 +87,7 @@ export default function AdminDashboardMetrics({ departamentos = [], department, 
               <Evolucao
                 periodo={periodo}
                 dados={
-                  periodo === 'Mensal'
-                    ? (indicadores?.indicators_by_day ?? [])
-                    : (indicadores?.indicators_by_month ?? [])
+                  periodo === 'Mensal' ? indicadores?.indicators_by_day ?? [] : indicadores?.indicators_by_month ?? []
                 }
               />
             </GridItem>

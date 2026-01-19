@@ -11,7 +11,7 @@ import MultiFilePreview from './MultiFilePreview';
 
 const DropZoneStyle = styled('div')(({ theme }) => ({
   outline: 'none',
-  padding: theme.spacing(1),
+  padding: theme.spacing(2, 1),
   borderRadius: theme.shape.borderRadius,
   backgroundColor: theme.palette.background.neutral,
   border: `1px dashed ${theme.palette.grey['500_32']}`,
@@ -37,7 +37,7 @@ export default function UploadMultiFile({ error, showPreview = false, files, onR
         <BlockContent multiple small={other?.small} permitidos={other?.permitidos} />
       </DropZoneStyle>
 
-      {fileRejections.length > 0 && <RejectionFiles fileRejections={fileRejections} />}
+      {fileRejections.length > 0 && <RejectionFiles fileRejections={fileRejections} {...other} />}
 
       <MultiFilePreview files={files} showPreview={showPreview} onRemove={onRemove} />
 
