@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import { useMemo } from 'react';
 import { useSnackbar } from 'notistack';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Fab from '@mui/material/Fab';
@@ -39,19 +39,20 @@ export function FormSugestao({ onClose }) {
     descricao: Yup.string().required('Descrção não pode ficar vazio'),
   });
 
-  const defaultValues = useMemo(() => ({ titulo: '', descricao: '', imagem: '' }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { titulo: '', descricao: '', imagem: '' },
+  });
+  const { setValue, handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const formData = new FormData();
       formData.append('titulo', values.titulo);
       formData.append('descricao', values.descricao);
       if (values.imagem instanceof File) formData.append('imagem', values.imagem);
       dispatch(createItem('sugestao', formData, { msg: 'Sugestão enviada', onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -87,16 +88,13 @@ export function DenunciaForm({ onClose }) {
     denuncia: Yup.string().required('Descrição não pode ficar vazio'),
   });
 
-  const defaultValues = useMemo(
-    () => ({ assunto: '', denuncia: '', contato_or_email: mail, comprovativo: null }),
-    [mail]
-  );
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { assunto: '', denuncia: '', contato_or_email: mail, comprovativo: null },
+  });
+  const { setValue, handleSubmit } = methods;
 
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
-
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const formData = new FormData();
       formData.append('assunto', values.assunto);
@@ -104,7 +102,7 @@ export function DenunciaForm({ onClose }) {
       formData.append('contato_or_email', values.contato_or_email);
       if (values.comprovativo instanceof File) formData.append('comprovativo', values.comprovativo);
       dispatch(createItem('denuncia', formData, { msg: 'Denúncia enviada', onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -144,8 +142,8 @@ export function ConsultarDocForm() {
     [docPdex]
   );
   const methods = useForm({ defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const { control, setValue, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(() => dispatch(getFromIntranet('docPdex', values)))}>

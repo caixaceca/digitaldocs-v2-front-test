@@ -8,6 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 // utils
 import { fPercent } from '../../utils/formatNumber';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
@@ -23,22 +24,17 @@ import { DetalhesContent } from './Detalhes';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesTransicao({ dados }) {
-  const [currentTab, setCurrentTab] = useState('Info');
-
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} /> },
     { value: 'Regras', component: <RegrasTransicoes dados={dados} /> },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Info', '');
+
   return (
     <>
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
-        changeTab={(_, newValue) => setCurrentTab(newValue)}
-      />
-      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+      <TabsWrapperSimple tabsList={tabsList} tab={tab} sx={{ mt: 2, mb: 1, boxShadow: 'none' }} setTab={setTab} />
+      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </>
   );
 }

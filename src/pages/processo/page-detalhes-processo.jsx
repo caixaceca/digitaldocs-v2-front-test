@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
@@ -17,6 +17,7 @@ import { PATH_DIGITALDOCS } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
 import { useNotificacao } from '../../hooks/useNotificacao';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 import { useProcesso, useIdentificacao } from '../../hooks/useProcesso';
 // components
 import Page from '../../components/Page';
@@ -52,7 +53,6 @@ export default function PageProcesso() {
   const dispatch = useDispatch();
   const [params] = useSearchParams();
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useState('Dados gerais');
 
   const { perfilId, colaboradores } = useSelector((state) => state.intranet);
   const { meusAmbientes, isAdmin, colaboradoresEstado: colabEstado } = useSelector((state) => state.parametrizacao);
@@ -84,10 +84,7 @@ export default function PageProcesso() {
   );
 
   const tabsList = useMenuProcesso({ id, processo, handleAceitar });
-
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab)) setCurrentTab(tabsList?.[0]?.value);
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'Dados gerais', '');
 
   const irParaProcesso = (idProcesso) => navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${idProcesso}`);
   const openModal = (modal, dados) => dispatch(setModal({ modal: modal || '', dados: dados || null }));
@@ -220,8 +217,8 @@ export default function PageProcesso() {
           }
         />
         <Card>
-          <TabCard tabs={tabsList} tipo={currentTab} setTipo={setCurrentTab} />
-          <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+          <TabCard tabs={tabsList} tab={tab} setTab={setTab} />
+          <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
         </Card>
 
         {(proxAnt?.anterior || proxAnt?.proximo) && (

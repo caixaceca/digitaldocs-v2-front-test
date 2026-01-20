@@ -8,37 +8,45 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 // utils
 import { pdfInfo } from '../../../utils/formatText';
 import { ptDateTime } from '../../../utils/formatTime';
-import { getFileThumb, downloadDoc } from '../../../utils/formatFile';
+import { getFileThumb } from '../../../utils/formatFile';
 // components
 import { styles, RodapePdfAlt, CabecalhoPdfAlt } from '../../../components/exportar-dados/pdf';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function DownloadPdf({ documento, ficheiro }) {
-  const [pdfUrl, setPdfUrl] = useState(null);
   const [baixar, setBaixar] = useState(false);
 
   useEffect(() => {
-    if (pdfUrl) {
-      setBaixar(false);
-      downloadDoc(pdfUrl, ficheiro);
+    let timeout;
+    if (baixar) {
+      timeout = setTimeout(() => {
+        setBaixar(false);
+      }, 5000);
     }
-  }, [setPdfUrl, pdfUrl, ficheiro]);
+    return () => clearTimeout(timeout);
+  }, [baixar]);
 
   return (
     <>
       {baixar ? (
         <PDFDownloadLink style={{ textDecoration: 'none' }} fileName={ficheiro} document={documento}>
-          {({ loading, url }) => {
-            if (!loading && url) setPdfUrl(url);
-            return (
-              <Tooltip title="Baixar minuta do parecer" arrow>
-                <IconButton sx={{ p: 0.15 }} color="success" loading={loading}>
-                  <FileDownloadIcon sx={{ width: 18, height: 18 }} />
+          {({ loading }) => (
+            <Tooltip title={loading ? 'Gerando PDF...' : 'Baixar minuta do parecer'} arrow>
+              <span>
+                <IconButton
+                  sx={{ p: 0.15 }}
+                  color="success"
+                  disabled={loading}
+                  onClick={() => {
+                    setTimeout(() => setBaixar(false), 500);
+                  }}
+                >
+                  <FileDownloadIcon className={loading ? 'animate-pulse' : ''} sx={{ width: 18, height: 18 }} />
                 </IconButton>
-              </Tooltip>
-            );
-          }}
+              </span>
+            </Tooltip>
+          )}
         </PDFDownloadLink>
       ) : (
         <Tooltip title="Gerar PDF da minuta do parecer" arrow>

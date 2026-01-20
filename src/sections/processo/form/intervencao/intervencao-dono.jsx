@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -57,19 +57,18 @@ export function AtribuirForm({ colaboradores, onClose }) {
     [colaboradores, pid]
   );
   const methods = useForm({ defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colaboradores]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const msg = values?.perfil?.id ? 'Processo atribuído' : 'Atribuição eliminada';
       dispatch(updateItem('atribuir', '', { ...selectedItem, id: values?.perfil?.id || '', msg }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -136,16 +135,14 @@ export function FocalPointForm({ ids, onClose }) {
   }, [dispatch, ids?.fluxoId]);
 
   const formSchema = Yup.object().shape({ estado: Yup.mixed().required('Focal Point não pode ficar vazio') });
-  const defaultValues = useMemo(() => ({ estado: null }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: { estado: null } });
+  const { handleSubmit } = methods;
 
-  const onSubmit = () => {
+  const onSubmit = (values) => {
     try {
       const params = { id: ids?.id, estado: values?.estado };
       dispatch(getInfoProcesso('focal-point', { ...params, msg: 'Focal Point alterado' }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -179,10 +176,12 @@ export function DomiciliarForm({ ids, onClose }) {
     uo: Yup.mixed().required('Unidade orgânica não pode ficar vazio'),
     observacao: Yup.string().required('Observação não pode ficar vazio'),
   });
-  const defaultValues = useMemo(() => ({ uo: null, estado: null, observacao: '' }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { uo: null, estado: null, observacao: '' },
+  });
+  const { control, setValue, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     try {
@@ -193,7 +192,7 @@ export function DomiciliarForm({ ids, onClose }) {
         estado_destino_id: values?.estado?.id,
       };
       dispatch(updateItem('domiciliar', JSON.stringify(formData), { id: ids?.id, msg: 'Processo domiciliado' }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

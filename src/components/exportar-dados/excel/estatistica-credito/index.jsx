@@ -137,7 +137,7 @@ export default function ExportarEstatisticaCredito({ uo, data, periodo }) {
       const blob = new Blob([buffer], { type: 'application/octet-stream' });
       saveAs(blob, `Estatística de crédito ${uo} - ${data}.xlsx`);
       enqueueSnackbar('Ficheiro gerado com sucesso', { variant: 'success' });
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao gerar o ficheiro Excel', { variant: 'error' });
     } finally {
       setLoading(false);

@@ -1,6 +1,8 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
+// utils
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // Components
 import { AddItem } from '../../components/Actions';
 import { TabsWrapperSimple } from '../../components/TabsWrapper';
@@ -25,10 +27,6 @@ export default function TabParametrizacao({ item, label, subTabs }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function SubTabsParametrizacao({ item, label }) {
-  const [currentTab, setCurrentTab] = useState(
-    (item === 'motivos' && 'Transição') || (item === 'credito' && 'Linhas') || ''
-  );
-
   const tabsList = useMemo(() => {
     if (item === 'credito') {
       return [
@@ -45,16 +43,16 @@ function SubTabsParametrizacao({ item, label }) {
     return [];
   }, [item]);
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setCurrentTab(tabsList?.[0]?.value, setCurrentTab);
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(
+    tabsList,
+    (item === 'motivos' && 'Transição') || (item === 'credito' && 'Linhas') || ''
+  );
 
   return (
     <>
-      <HeaderBreadcrumbs sx={{ px: 1 }} heading={`${label} - ${currentTab}`} action={<AddItem />} />
-      <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={(_, newVal) => setCurrentTab(newVal)} />
-      <Box>{tabsList.find((tab) => tab.value === currentTab)?.component}</Box>
+      <HeaderBreadcrumbs sx={{ px: 1 }} heading={`${label} - ${tab}`} action={<AddItem />} />
+      <TabsWrapperSimple tabsList={tabsList} tab={tab} setTab={setTab} />
+      <Box>{tabsList.find(({ value }) => value === tab)?.component}</Box>
     </>
   );
 }

@@ -206,7 +206,7 @@ export function Responsabilidades({ responsabilidades }) {
 
   const rowInfo = (row, incidente) => (
     <TableRow hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
-      <TableCell>{(row?.totais && '') || row?.tipo || row?.classe || ' '}</TableCell>
+      <TableCell>{row?.totais || row?.tipo || row?.classe || ' '}</TableCell>
       <TableCell align="center">{row?.conta || ' '}</TableCell>
       <CellValor valor={row?.valor} moeda={row?.moeda} total={row?.totais} />
       <CellValor valor={row?.saldo_divida} moeda={row?.moeda} total={row?.totais} />

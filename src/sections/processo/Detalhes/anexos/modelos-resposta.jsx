@@ -173,7 +173,7 @@ export default function ModelosRespostas() {
 
       const blob = await Packer.toBlob(doc);
       saveAs(blob, `Modelo de resposta - ${id}.docx`);
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao gerar documento', { variant: 'error' });
     } finally {
       setLoading(false);

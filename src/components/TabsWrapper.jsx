@@ -5,8 +5,6 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-// utils
-import { setItemValue } from '../utils/formatObject';
 //
 import { Voltar } from './Actions';
 import { TabsWrapperStyle } from './Panel';
@@ -26,7 +24,7 @@ const TabsWrapperStyleSimple = styled('div')(({ theme }) => ({
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function TabsWrapper({ title, tabsList, currentTab, changeTab, tab, voltar = false }) {
+export default function TabsWrapper({ title, tabsList, tab, setTab, voltar = false }) {
   return (
     <Card sx={{ mb: 3, position: 'relative' }}>
       <Stack
@@ -42,9 +40,9 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab, ta
       <TabsWrapperStyle>
         {Array.isArray(tabsList) && tabsList.length > 0 && (
           <Tabs
+            onChange={setTab}
             allowScrollButtonsMobile
-            onChange={(event, newValue) => setItemValue(newValue, changeTab, tab)}
-            value={tabsList.some(({ value }) => value === currentTab) ? currentTab : tabsList[0].value}
+            value={tabsList.some(({ value }) => value === tab) ? tab : tabsList[0].value}
           >
             {tabsList.map(({ value, label, icon }) => (
               <Tab
@@ -64,15 +62,15 @@ export default function TabsWrapper({ title, tabsList, currentTab, changeTab, ta
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
+export function TabsWrapperSimple({ tabsList, tab, setTab, sx }) {
   return (
     <Card sx={{ height: 45, mb: 3, ...sx, borderRadius: 1, bgcolor: sx?.boxShadow === 'none' && 'background.neutral' }}>
       <TabsWrapperStyleSimple sx={{ bgcolor: 'transparent' }}>
         {Array.isArray(tabsList) && tabsList.length > 0 && (
           <Tabs
-            onChange={changeTab}
+            onChange={setTab}
             allowScrollButtonsMobile
-            value={tabsList.some(({ value }) => value === currentTab) ? currentTab : tabsList[0]?.value}
+            value={tabsList.some(({ value }) => value === tab) ? tab : tabsList[0]?.value}
           >
             {tabsList.map(({ value, label }) => (
               <Tab key={value} value={value} sx={{ px: 0.64, py: 1.55 }} label={label || value} />
@@ -86,14 +84,9 @@ export function TabsWrapperSimple({ tabsList, currentTab, changeTab, sx }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function TabCard({ tabs, tipo, item = '', setTipo }) {
+export function TabCard({ tabs, tab, setTab }) {
   return (
-    <Tabs
-      value={tipo}
-      allowScrollButtonsMobile
-      sx={{ px: 1.5, bgcolor: 'background.neutral' }}
-      onChange={(event, newValue) => setItemValue(newValue, setTipo, item ? `tipo${item}` : '', false)}
-    >
+    <Tabs value={tab} allowScrollButtonsMobile sx={{ px: 1.5, bgcolor: 'background.neutral' }} onChange={setTab}>
       {tabs.map(({ value, label }) => (
         <Tab disableRipple key={value} value={value} label={label || value} sx={{ py: 2, px: 1 }} />
       ))}

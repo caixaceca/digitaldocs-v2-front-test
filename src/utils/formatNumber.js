@@ -9,7 +9,7 @@ numeral.register('locale', 'cv-cv', {
   },
   currency: { symbol: ' CVE' },
 });
-numeral.locale('cv-cv' || '');
+numeral.locale('cv-cv');
 
 // ---------------------------------------------------------------------------------------------------------------------
 

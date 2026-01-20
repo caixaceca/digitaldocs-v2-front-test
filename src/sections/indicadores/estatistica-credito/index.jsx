@@ -1,10 +1,8 @@
-import { useEffect, useState, useMemo } from 'react';
-
+import { useState, useMemo } from 'react';
 // utils
-import { UosAcesso } from '../../../utils/validarAcesso';
-import { setItemValue } from '../../../utils/formatObject';
-// redux
 import { useSelector } from '../../../redux/store';
+import { UosAcesso } from '../../../utils/validarAcesso';
+import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
 // components
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
 import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
@@ -20,7 +18,6 @@ export default function EstatisticaCredito() {
   const { meusAmbientes, isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
 
   const [periodo, setPeriodo] = useState(localStorage.getItem('periodoEst') || 'Mensal');
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEst') || 'Resumo');
 
   const agencias = useMemo(() => uos?.filter(({ tipo }) => tipo === 'Agências'), [uos]);
   const uosList = useMemo(
@@ -49,24 +46,17 @@ export default function EstatisticaCredito() {
     [uo?.id, periodo]
   );
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabEst', false);
-  }, [tabsList, currentTab]);
-
-  const handleChangeTab = async (event, newValue) => setItemValue(newValue, setCurrentTab, 'tabEst');
+  const [tab, setTab] = useTabsSync(tabsList, 'Resumo', 'tab-estatistica-credito');
 
   return (
     <>
       <HeaderBreadcrumbs
         sx={{ px: 1 }}
         heading="Estatística de crédito"
-        action={<FiltrosEstatisticaCredito dados={{ uo, periodo, setUo, setPeriodo, currentTab, uosList }} />}
+        action={<FiltrosEstatisticaCredito dados={{ uo, periodo, setUo, setPeriodo, tab, uosList }} />}
       />
-      {tabsList?.length > 1 && (
-        <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={handleChangeTab} />
-      )}
-      {tabsList?.find(({ value }) => value === currentTab)?.component}
+      {tabsList?.length > 1 && <TabsWrapperSimple tabsList={tabsList} tab={tab} setTab={setTab} />}
+      {tabsList?.find(({ value }) => value === tab)?.component}
     </>
   );
 }

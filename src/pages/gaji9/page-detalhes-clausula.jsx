@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-//
+// utils
 import useSettings from '../../hooks/useSettings';
 import { usePermissao } from '../../hooks/useAcesso';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, setModal, deleteItem } from '../../redux/slices/gaji9';
@@ -36,7 +37,6 @@ export default function PageDetalhesClausula() {
   const { themeStretch } = useSettings();
   const { temPermissao } = usePermissao();
   const permissao = temPermissao(['READ_CLAUSULA']);
-  const [currentTab, setCurrentTab] = useState('Dados');
 
   const { clausula, isLoading, modalGaji9, selectedItem, done, isSaving } = useSelector((state) => state.gaji9);
 
@@ -81,30 +81,32 @@ export default function PageDetalhesClausula() {
     dispatch(deleteItem(itemDel, { id, itemId: selectedItem, getItem, msg, onClose: () => openModal() }));
   };
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Dados', 'tab-detalhes-clausula');
+
   return (
     <Page title="Cláusula | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           voltar
+          tab={tab}
+          setTab={setTab}
           tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
           title={clausula?.titulo ? `Cláusula: ${clausula?.titulo}` : 'Detalhes da cláusula'}
         />
 
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
-          heading={currentTab === 'Dados' ? 'Detalhes da cláusula' : currentTab}
+          heading={tab === 'Dados' ? 'Detalhes da cláusula' : tab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'GAJ-i9', href: PATH_DIGITALDOCS.gaji9.gestao },
-            { name: currentTab === 'Dados' ? 'Detalhes da cláusula' : currentTab },
+            { name: tab === 'Dados' ? 'Detalhes da cláusula' : tab },
           ]}
           action={
             !!clausula &&
             temPermissao(['READ_CLAUSULA']) && (
               <Stack direction="row" spacing={0.75} alignItems="center">
-                {currentTab === 'Dados' && (
+                {tab === 'Dados' && (
                   <>
                     <DefaultAction small label="CLONAR" onClick={() => openModal('clonar-clausula', clausula)} />
                     {clausula?.ativo && temPermissao(['UPDATE_CLAUSULA']) && (
@@ -113,11 +115,11 @@ export default function PageDetalhesClausula() {
                     <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-clausula', clausula)} />
                   </>
                 )}
-                {((clausula?.segmento_id && currentTab === 'Segmentos') ||
-                  (clausula?.tipo_titular_id && currentTab === 'Tipos de titular')) && (
-                  <DefaultAction button small label="Adicionar" onClick={() => openModal(currentTab)} />
+                {((clausula?.segmento_id && tab === 'Segmentos') ||
+                  (clausula?.tipo_titular_id && tab === 'Tipos de titular')) && (
+                  <DefaultAction button small label="Adicionar" onClick={() => openModal(tab)} />
                 )}
-                {currentTab === 'Condicionais' && (
+                {tab === 'Condicionais' && (
                   <>
                     <DefaultAction
                       small
@@ -126,13 +128,7 @@ export default function PageDetalhesClausula() {
                       label="Condicional"
                       onClick={() => openModal('Condicional')}
                     />
-                    <DefaultAction
-                      small
-                      button
-                      icon="adicionar"
-                      label="Condicionais"
-                      onClick={() => openModal(currentTab)}
-                    />
+                    <DefaultAction small button icon="adicionar" label="Condicionais" onClick={() => openModal(tab)} />
                   </>
                 )}
               </Stack>
@@ -144,7 +140,7 @@ export default function PageDetalhesClausula() {
           {!isLoading && !clausula ? (
             <SearchNotFound404 message="Minuta não encontrada..." />
           ) : (
-            <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+            <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
           )}
 
           {modalGaji9 === 'Condicional' && <CondicionalForm onClose={() => openModal()} id={id} />}

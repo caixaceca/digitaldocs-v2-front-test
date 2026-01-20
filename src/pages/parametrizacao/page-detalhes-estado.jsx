@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // hooks
 import { useNotificacao } from '../../hooks/useNotificacao';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromParametrizacao, setModal, deleteItem } from '../../redux/slices/parametrizacao';
@@ -35,7 +36,6 @@ export default function PageDetalhesEstado() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabEstado') || 'Dados');
 
   const { perfilId, uos } = useSelector((state) => state.intranet);
   const { estado, selectedItem, modalParams, done, isLoading, isSaving } = useSelector((state) => state.parametrizacao);
@@ -65,11 +65,13 @@ export default function PageDetalhesEstado() {
     { value: 'Regras parecer', component: <TableInfoEstado item="regrasEstado" dados={estado?.regras || []} /> },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Dados', 'tab-detalhes-estado');
+
   const confirmEliminar = () => {
-    const item1 = currentTab === 'Colaboradores' ? { item: 'perfis', item1: 'estado' } : null;
-    const msg = (currentTab === 'Colaboradores' && 'Colaborador') || (currentTab === 'Dados' && 'Estado');
-    const item = (currentTab === 'Colaboradores' && 'estadosPerfil') || (currentTab === 'Dados' && 'estado');
-    const params = { id: selectedItem?.id, estadoId: id, getItem: currentTab === 'Regras parecer' ? 'estado' : '' };
+    const item1 = tab === 'Colaboradores' ? { item: 'perfis', item1: 'estado' } : null;
+    const msg = (tab === 'Colaboradores' && 'Colaborador') || (tab === 'Dados' && 'Estado');
+    const item = (tab === 'Colaboradores' && 'estadosPerfil') || (tab === 'Dados' && 'estado');
+    const params = { id: selectedItem?.id, estadoId: id, getItem: tab === 'Regras parecer' ? 'estado' : '' };
     dispatch(deleteItem(item || 'regrasEstado', { ...params, ...item1, msg: `${msg || 'Regra'} eliminado` }));
   };
 
@@ -81,33 +83,31 @@ export default function PageDetalhesEstado() {
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           voltar
-          tab="tabEstado"
+          tab={tab}
+          setTab={setTab}
           tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
           title={estado?.nome || 'Detalhes do estado'}
         />
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
-          heading={currentTab === 'Dados' ? 'Detalhes do estado' : currentTab}
+          heading={tab === 'Dados' ? 'Detalhes do estado' : tab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'Parametrização', href: PATH_DIGITALDOCS.parametrizacao.tabs },
-            { name: currentTab === 'Dados' ? 'Detalhes do estado' : currentTab },
+            { name: tab === 'Dados' ? 'Detalhes do estado' : tab },
           ]}
           action={
             estado?.is_ativo && (
               <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
                 <Stack direction="row" spacing={0.75} alignItems="center">
-                  {currentTab === 'Dados' && (
+                  {tab === 'Dados' && (
                     <>
                       <ActionButton options={{ sm: true, label: 'Editar', item: 'form-estado', dados: estado }} />
                       <ActionButton options={{ sm: true, label: 'Eliminar', item: 'eliminar-item', dados: estado }} />
                     </>
                   )}
-                  {(currentTab === 'Colaboradores' ||
-                    (currentTab === 'Regras parecer' && estado?.perfis?.length > 0)) && (
-                    <ActionButton options={{ label: 'Adicionar', item: currentTab }} />
+                  {(tab === 'Colaboradores' || (tab === 'Regras parecer' && estado?.perfis?.length > 0)) && (
+                    <ActionButton options={{ label: 'Adicionar', item: tab }} />
                   )}
                 </Stack>
               </RoleBasedGuard>
@@ -119,7 +119,7 @@ export default function PageDetalhesEstado() {
           {!isLoading && !estado ? (
             <SearchNotFound404 message="Estado não encontrado..." />
           ) : (
-            <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+            <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
           )}
 
           {modalParams === 'form-estado' && <EstadoForm onClose={onClose} />}
@@ -135,9 +135,7 @@ export default function PageDetalhesEstado() {
               isSaving={isSaving}
               handleOk={() => confirmEliminar()}
               desc={`eliminar est${
-                (currentTab === 'Colaboradores' && 'e colaborador') ||
-                (currentTab === 'Regras parecer' && 'a regra') ||
-                'e estado'
+                (tab === 'Colaboradores' && 'e colaborador') || (tab === 'Regras parecer' && 'a regra') || 'e estado'
               }`}
             />
           )}

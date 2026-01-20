@@ -1,5 +1,4 @@
 import { add } from 'date-fns';
-import { useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
@@ -41,36 +40,28 @@ export default function Transicoes({ transicoes, assunto }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Transicao({ transicao: t, addConector, assunto, uos = [], colaboradores = [] }) {
-  const acao = useMemo(
-    () =>
-      ((t?.modo === 'Arquivamento' || t?.modo === 'arquivamento') && 'Arquivo') ||
-      ((t?.modo === 'desarquivamento' || t?.modo === 'Desarquivamento') && 'Desarquivo') ||
-      ((t?.resgate || t?.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.') && 'Resgate') ||
-      t?.modo,
-    [t?.modo, t?.resgate, t?.observacao]
-  );
+  const acao =
+    ((t?.modo === 'Arquivamento' || t?.modo === 'arquivamento') && 'Arquivo') ||
+    ((t?.modo === 'desarquivamento' || t?.modo === 'Desarquivamento') && 'Desarquivo') ||
+    ((t?.resgate || t?.observacao === 'Envio cancelado/fechado. Resgatar envio em paralelo.') && 'Resgate') ||
+    t?.modo;
+
   const { data_entrada: entrada = '', data_saida: saida = '', parecer_data_limite: limite = '' } = t;
-  const criador = useMemo(
-    () =>
-      t?.domiciliacao
-        ? colaboradores?.find(({ email }) => email?.toLowerCase() === t?.perfil_id?.toLowerCase())
-        : colaboradores?.find(({ perfil_id: pid }) => pid === t?.perfil_id),
-    [colaboradores, t?.domiciliacao, t?.perfil_id]
-  );
-  const arqSistema = useMemo(() => t?.observacao?.includes('por inatividade a pelo menos 6 meses'), [t?.observacao]);
-  const temPareceres = useMemo(() => t?.pareceres && t?.pareceres?.length > 0, [t?.pareceres]);
-  const temParecer = useMemo(
-    () => t?.data_parecer && (t?.parecer_favoravel === true || t?.parecer_favoravel === false),
-    [t?.data_parecer, t?.parecer_favoravel]
-  );
-  const color = useMemo(
-    () =>
-      (acao === 'Arquivo' && 'info') ||
-      (acao === 'Resgate' && 'warning') ||
-      ((acao === 'Devolução' || acao === 'Desarquivo') && 'error') ||
-      'success',
-    [acao]
-  );
+
+  const criador = t?.domiciliacao
+    ? colaboradores?.find(({ email }) => email?.toLowerCase() === t?.perfil_id?.toLowerCase())
+    : colaboradores?.find(({ perfil_id: pid }) => pid === t?.perfil_id);
+
+  const arqSistema = t?.observacao?.includes('por inatividade a pelo menos 6 meses');
+  const temPareceres = t?.pareceres && t?.pareceres?.length > 0;
+
+  const temParecer = t?.data_parecer && (t?.parecer_favoravel === true || t?.parecer_favoravel === false);
+
+  const color =
+    (acao === 'Arquivo' && 'info') ||
+    (acao === 'Resgate' && 'warning') ||
+    ((acao === 'Devolução' || acao === 'Desarquivo') && 'error') ||
+    'success';
 
   return (
     <TimelineItem sx={{ '&:before': { display: 'none' }, mb: addConector ? 1 : 0 }}>

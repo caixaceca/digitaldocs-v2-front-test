@@ -8,6 +8,7 @@ import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 import { setItemValue, transicoesList } from '../../utils/formatObject';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -44,7 +45,6 @@ export default function PageDetalhesFluxo() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const [transicao, setTransicao] = useState(null);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabFluxo') || 'Dados');
 
   const { perfilId } = useSelector((state) => state.intranet);
   const { fluxo, selectedItem, modalParams, isSaving, isLoading } = useSelector((state) => state.parametrizacao);
@@ -52,18 +52,6 @@ export default function PageDetalhesFluxo() {
   useEffect(() => {
     if (perfilId && id) dispatch(getFromParametrizacao('fluxo', { id, reset: { val: null } }));
   }, [dispatch, perfilId, id]);
-
-  useEffect(() => {
-    if (currentTab === 'Checklist' && fluxo?.id) {
-      const params = { fluxoId: fluxo?.id, transicaoId: transicao?.id, reset: { val: [] } };
-      dispatch(getFromParametrizacao('checklist', params));
-    }
-  }, [dispatch, currentTab, fluxo?.id, transicao?.id]);
-
-  useEffect(() => {
-    if (currentTab === 'Notificações' && transicao?.id)
-      dispatch(getFromParametrizacao('notificacoes', { id: transicao?.id }));
-  }, [dispatch, currentTab, transicao?.id]);
 
   const tabsList = [
     {
@@ -80,20 +68,33 @@ export default function PageDetalhesFluxo() {
     { value: 'Notificações', component: <TableInfoFluxo item="notificacoes" /> },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Dados', 'tab-detalhes-fluxo');
+
+  useEffect(() => {
+    if (tab === 'Checklist' && fluxo?.id) {
+      const params = { fluxoId: fluxo?.id, transicaoId: transicao?.id, reset: { val: [] } };
+      dispatch(getFromParametrizacao('checklist', params));
+    }
+  }, [dispatch, tab, fluxo?.id, transicao?.id]);
+
+  useEffect(() => {
+    if (tab === 'Notificações' && transicao?.id) dispatch(getFromParametrizacao('notificacoes', { id: transicao?.id }));
+  }, [dispatch, tab, transicao?.id]);
+
   const form = useMemo(
     () =>
-      (currentTab === 'Checklist' && 'checklist') ||
-      (currentTab === 'Transições' && 'transicoes') ||
-      (currentTab === 'Notificações' && !!transicao && 'notificacoes'),
-    [currentTab, transicao]
+      (tab === 'Checklist' && 'checklist') ||
+      (tab === 'Transições' && 'transicoes') ||
+      (tab === 'Notificações' && !!transicao && 'notificacoes'),
+    [tab, transicao]
   );
 
   const onClose = () => dispatch(setModal());
 
   const handleDelete = () => {
-    const item = currentTab === 'Transições' ? 'transicoes' : 'notificacoes';
-    const msg = `${currentTab === 'Transições' ? 'Transição' : 'Notificação'} eliminada`;
-    dispatch(deleteItem(item, { item1: currentTab === 'Transições' && 'fluxo', id: selectedItem?.id, msg, onClose }));
+    const item = tab === 'Transições' ? 'transicoes' : 'notificacoes';
+    const msg = `${tab === 'Transições' ? 'Transição' : 'Notificação'} eliminada`;
+    dispatch(deleteItem(item, { item1: tab === 'Transições' && 'fluxo', id: selectedItem?.id, msg, onClose }));
   };
 
   return (
@@ -101,35 +102,34 @@ export default function PageDetalhesFluxo() {
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           voltar
-          tab="tabFluxo"
+          tab={tab}
+          setTab={setTab}
           tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
           title={fluxo?.assunto || 'Detalhes do fluxo'}
         />
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
-          heading={currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab}
+          heading={tab === 'Dados' ? 'Detalhes do fluxo' : tab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'Parametrização', href: PATH_DIGITALDOCS.parametrizacao.tabs },
-            { name: currentTab === 'Dados' ? 'Detalhes do fluxo' : currentTab },
+            { name: tab === 'Dados' ? 'Detalhes do fluxo' : tab },
           ]}
           action={
             fluxo && (
               <RoleBasedGuard roles={['Todo-110', 'Todo-111']}>
                 <Stack direction="row" spacing={0.75} alignItems="center">
-                  {(currentTab === 'Notificações' || currentTab === 'Checklist') && (
+                  {(tab === 'Notificações' || tab === 'Checklist') && (
                     <Transicoes
                       options={{
                         transicao,
                         setTransicao,
+                        checklist: tab === 'Checklist',
                         transicoes: fluxo?.transicoes || [],
-                        checklist: currentTab === 'Checklist',
                       }}
                     />
                   )}
-                  {currentTab === 'Dados' && (
+                  {tab === 'Dados' && (
                     <>
                       <ActionButton options={{ label: 'Editar', item: 'form-fluxo', dados: fluxo, sm: true }} />
                       <ActionButton options={{ label: 'Clonar', item: 'form-clonar', dados: fluxo, sm: true }} />
@@ -146,13 +146,13 @@ export default function PageDetalhesFluxo() {
           {!isLoading && !fluxo ? (
             <SearchNotFound404 message="Fluxo não encontrado..." />
           ) : (
-            <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+            <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
           )}
 
           {modalParams === 'form-fluxo' && <FluxoForm onClose={onClose} />}
           {modalParams === 'form-clonar' && <ClonarFluxoForm onClose={onClose} />}
           {modalParams === 'form-checklist' && <ChecklistForm onClose={onClose} fluxo={fluxo} />}
-          {modalParams === 'detalhes-fluxo' && <Detalhes item={currentTab} closeModal={onClose} />}
+          {modalParams === 'detalhes-fluxo' && <Detalhes item={tab} closeModal={onClose} />}
           {modalParams === 'form-transicoes' && <TransicaoForm onClose={onClose} fluxoId={fluxo?.id} />}
           {modalParams === 'form-notificacoes' && (
             <NotificacaoForm onClose={onClose} transicao={transicao} fluxo={fluxo} />
@@ -162,7 +162,7 @@ export default function PageDetalhesFluxo() {
               onClose={onClose}
               isSaving={isSaving}
               handleOk={handleDelete}
-              desc={(currentTab === 'Transições' && 'eliminar esta transição') || 'eliminar esta notificação'}
+              desc={(tab === 'Transições' && 'eliminar esta transição') || 'eliminar esta notificação'}
             />
           )}
         </RoleBasedGuard>

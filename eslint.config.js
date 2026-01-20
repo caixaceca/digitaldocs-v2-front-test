@@ -5,16 +5,17 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 import prettier from 'eslint-plugin-prettier';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import globals from 'globals';
+import { fixupPluginRules } from '@eslint/compat';
 
 export default [
   {
-    ignores: ['build/*', 'public/*', 'dist/*', 'src/setupTests.js'],
+    ignores: ['**/build/**', '**/public/**', '**/dist/**', 'src/setupTests.js', 'node_modules/**'],
   },
 
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
         ...globals.browser,
@@ -27,10 +28,10 @@ export default [
       },
     },
     plugins: {
-      react,
-      'react-hooks': reactHooks,
-      'jsx-a11y': jsxA11y,
-      prettier,
+      react: fixupPluginRules(react),
+      'react-hooks': fixupPluginRules(reactHooks),
+      'jsx-a11y': fixupPluginRules(jsxA11y),
+      prettier: fixupPluginRules(prettier),
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -56,6 +57,7 @@ export default [
       'jsx-a11y/anchor-is-valid': 0,
       'react/no-array-index-key': 0,
       'react-hooks/rules-of-hooks': 2,
+      'react-hooks/exhaustive-deps': 'warn',
       'no-promise-executor-return': 0,
       'no-unsafe-optional-chaining': 0,
       'react/require-default-props': 0,
@@ -76,6 +78,9 @@ export default [
         'error',
         {
           endOfLine: 'auto',
+          singleQuote: true,
+          printWidth: 120,
+          tabWidth: 2,
         },
       ],
     },

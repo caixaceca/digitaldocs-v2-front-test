@@ -49,7 +49,7 @@ export default function AnexarFicha({ dados }) {
 
       const params = { id: processo?.id, estadoId: processo?.estado_atual_id, anexos: formData };
       dispatch(updateItem('adicionar-anexos', null, { ...params, msg: 'Ficha anexado', onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao processar ficheiro', { variant: 'error' });
     } finally {
       setGerando(false);

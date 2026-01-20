@@ -287,7 +287,7 @@ export function getDocumento(item, params) {
           const uint8Array = new Uint8Array(error.response.data);
           const decodedString = new TextDecoder('ISO-8859-1').decode(uint8Array);
           errorMessage = JSON.parse(decodedString)?.mensagem || errorMessage;
-        } catch (parseError) {
+        } catch {
           errorMessage = error.message;
         }
       } else if (error.message) errorMessage = error.message;

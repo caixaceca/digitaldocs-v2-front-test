@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import { setItemValue } from '../utils/formatObject';
-import { temAcesso, estadoInicial } from '../utils/validarAcesso';
-// routes
-import useSettings from '../hooks/useSettings';
-// redux
 import { useSelector } from '../redux/store';
+import useSettings from '../hooks/useSettings';
+import { temAcesso, estadoInicial } from '../utils/validarAcesso';
+import { useTabsSync } from '../hooks/minimal-hooks/use-tabs-sync';
 // components
 import Page from '../components/Page';
 import TabsWrapper from '../components/TabsWrapper';
@@ -25,49 +23,35 @@ export default function Controle() {
   const { isAdmin, isAuditoria, meusAmbientes, meusacessos } = useSelector((state) => state.parametrizacao);
 
   const tabsList = useMemo(
-    () =>
-      [
-        { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },
-        ...(isAdmin || isAuditoria || estadoInicial(meusAmbientes)
-          ? [
-              { value: 'Entradas', component: <TableControle from="Entradas" /> },
-              { value: 'Por concluir', component: <TableControle from="Por concluir" /> },
-              { value: 'Devoluções', component: <TableControle from="Devoluções" /> },
-            ]
-          : []),
-        ...(isAdmin || isAuditoria || cc?.uo_label === 'DOP-CE' || cc?.uo_tipo === 'Agências'
-          ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
-          : []),
-        ...(isAdmin || isAuditoria || temAcesso(['con-100'], meusacessos)
-          ? [{ value: 'CON', component: <TableCON /> }]
-          : []),
-        ...(isAdmin || isAuditoria || temAcesso(['pjf-100'], meusacessos)
-          ? [{ value: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
-          : []),
-      ] || [],
+    () => [
+      { value: 'Trabalhados', component: <TableControle from="Trabalhados" /> },
+      ...(isAdmin || isAuditoria || estadoInicial(meusAmbientes)
+        ? [
+            { value: 'Entradas', component: <TableControle from="Entradas" /> },
+            { value: 'Por concluir', component: <TableControle from="Por concluir" /> },
+            { value: 'Devoluções', component: <TableControle from="Devoluções" /> },
+          ]
+        : []),
+      ...(isAdmin || isAuditoria || cc?.uo_label === 'DOP-CE' || cc?.uo_tipo === 'Agências'
+        ? [{ value: 'Receção de cartões', component: <TableCartoes /> }]
+        : []),
+      ...(isAdmin || isAuditoria || temAcesso(['con-100'], meusacessos)
+        ? [{ value: 'CON', component: <TableCON /> }]
+        : []),
+      ...(isAdmin || isAuditoria || temAcesso(['pjf-100'], meusacessos)
+        ? [{ value: 'Judiciais & Fiscais', component: <TableCON item="pjf" /> }]
+        : []),
+    ],
     [isAdmin, isAuditoria, meusAmbientes, cc?.uo_label, cc?.uo_tipo, meusacessos]
   );
 
-  const [currentTab, setCurrentTab] = useState(
-    tabsList?.map(({ value }) => value)?.find((item) => item === localStorage.getItem('tabControle')) || 'Trabalhados'
-  );
-
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabControle');
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'Trabalhados', 'tab-controle');
 
   return (
     <Page title="Controle | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <TabsWrapper
-          title="Controle"
-          tab="tabControle"
-          tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
-        />
-        <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+        <TabsWrapper title="Controle" tabsList={tabsList} tab={tab} setTab={setTab} />
+        <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
       </Container>
     </Page>
   );

@@ -1,8 +1,8 @@
 import * as Yup from 'yup';
 import { useMemo, useEffect } from 'react';
 // form
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
@@ -80,15 +80,14 @@ export default function CreditoForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, reset, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [credito, titularesList]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const formData = {
       ...values,
       tipo_titular_id: values?.tipo_titular_id?.id,
@@ -171,8 +170,8 @@ export function IntervenienteForm({ id, garantiaId = '', dados, onClose }) {
 
   const defaultValues = useMemo(() => ({ responsabilidade: null, entidade: null, entidade_representada: null }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     const params = { id, getItem: 'credito', msg: 'Interveniente adicionado', onClose };
@@ -239,8 +238,8 @@ export function DataContrato({ creditoId, onClose }) {
     [selectedItem]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const preencheData = (data, dataRef) =>
     !dataRef || (data && formatDate(data, "yyyy-MM-dd'T'HH:mm:ss") !== formatDate(dataRef, "yyyy-MM-dd'T'HH:mm:ss"))
@@ -286,12 +285,10 @@ export function PropostaForm({ onClose }) {
   const { isLoading } = useSelector((state) => state.gaji9);
 
   const formSchema = Yup.object().shape({ proposta: Yup.number().positive().integer().label('Nº de proposta') });
-  const defaultValues = useMemo(() => ({ proposta: '', credibox: false }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: { proposta: '', credibox: false } });
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     dispatch(getFromGaji9('proposta', { ...values, msg: 'Proposta carregada', onClose }));
   };
 

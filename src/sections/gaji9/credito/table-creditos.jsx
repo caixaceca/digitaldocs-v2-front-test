@@ -77,7 +77,6 @@ export default function TableCredito() {
                   { id: 'cliente', label: 'Cliente' },
                   { id: 'titular', label: 'Titular' },
                   { id: 'componente', label: 'Componente' },
-                  // { id: 'finalidade', label: 'Finalidade' },
                   { id: 'montante', label: 'Montante', align: 'right' },
                   { id: '' },
                 ]}

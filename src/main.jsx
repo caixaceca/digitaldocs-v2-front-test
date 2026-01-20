@@ -24,7 +24,6 @@ import App from './App';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-/* eslint-disable no-template-curly-in-string */
 setLocale({
   mixed: {
     default: 'Valor inválido para ${label}',

@@ -6,7 +6,7 @@ import SearchIcon from '@mui/icons-material/Search';
 // utils
 import { useSelector } from '../redux/store';
 import useSettings from '../hooks/useSettings';
-import { setItemValue } from '../utils/formatObject';
+import { useTabsSync } from '../hooks/minimal-hooks/use-tabs-sync';
 // components
 import Page from '../components/Page';
 import TabsWrapper from '../components/TabsWrapper';
@@ -22,7 +22,6 @@ import ProcurarPedidos from '../sections/suporte-cliente/lista-pedidos/procurar-
 export default function PageGestaoSuporteCliente() {
   const { themeStretch } = useSettings();
   const [department, setDepartment] = useState(null);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tab-suporte-cliente') || 'Tickets');
 
   const { departamentos, utilizador } = useSelector((state) => state.suporte);
   const admin = useMemo(() => utilizador?.role === 'ADMINISTRATOR', [utilizador]);
@@ -46,25 +45,17 @@ export default function PageGestaoSuporteCliente() {
       const dep = departamentos.find(({ id }) => Number(id) === Number(idSel));
       if (dep) setDepartment({ id: dep.id, abreviation: dep.abreviation });
     }
-  }, [admin, departamentos, department?.id, utilizador]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [admin, departamentos, utilizador]);
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tab-suporte-cliente', false);
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'Tickets', 'tab-suporte-cliente');
 
   return (
     <Page title="Suporte ao cliente | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <TabsWrapper
-          tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
-          tab="tab-suporte-cliente"
-          title="Suporte ao cliente"
-        />
+        <TabsWrapper tab={tab} setTab={setTab} tabsList={tabsList} title="Suporte ao cliente" />
         <AcessoSuporte>
-          <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+          <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
         </AcessoSuporte>
       </Container>
     </Page>

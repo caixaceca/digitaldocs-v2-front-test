@@ -16,7 +16,7 @@ export function submitDados(values, isEdit, id, dispatch, enqueueSnackbar, onClo
     } else {
       dispatch(updateDados({ forward: true, dados: { ...values, entidadesList } }));
     }
-  } catch (error) {
+  } catch {
     enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
   }
 }

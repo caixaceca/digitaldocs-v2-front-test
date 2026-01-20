@@ -50,15 +50,14 @@ export function MarcadorForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { id: selectedItem?.id, msg: `Marcador ${isEdit ? 'atualizado' : 'adicionad'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)('marcadores', JSON.stringify(values), params));
   };
@@ -98,8 +97,7 @@ export function VariavelForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { reset, control, handleSubmit } = methods;
   const { fields, append, remove } = useFieldArray({ control, name: 'variaveis' });
 
   useEffect(() => {
@@ -107,7 +105,7 @@ export function VariavelForm({ onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { onClose, msg: `Variável ´${isEdit ? 'atualizado' : 'adicionado'}` };
     if (isEdit) dispatch(updateItem('variaveis', JSON.stringify([values?.variaveis?.[0]]), params));
     else dispatch(createItem('variaveis', JSON.stringify(values?.variaveis?.map((row) => row)), params));
@@ -173,15 +171,14 @@ export function GrupoForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { id: selectedItem?.id, msg: `Grupo ${isEdit ? 'atualizado' : 'adicionad'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)('grupos', JSON.stringify(values), params));
   };
@@ -245,8 +242,7 @@ export function RecursoGrupoForm({ onClose, selectedItem, grupoId }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { reset, control, handleSubmit } = methods;
   const { fields, append, remove } = useFieldArray({ control, name: 'recursos' });
 
   useEffect(() => {
@@ -264,7 +260,7 @@ export function RecursoGrupoForm({ onClose, selectedItem, grupoId }) {
     [grupoId, onClose, selectedItem?.action, selectedItem?.id]
   );
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     if (selectedItem?.action === 'add') {
       const formData = values?.recursos?.map(({ recurso, permissao, data_inicio: di, data_termino: dt }) => {
         const updatedPermissions = new Set(permissao);
@@ -359,15 +355,14 @@ export function RecursoForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { id: selectedItem?.id, msg: `Recurso ${isEdit ? 'atualizado' : 'adicionad'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)('recursos', JSON.stringify(values), params));
   };
@@ -422,15 +417,14 @@ export function UtilizadorGrupoForm({ grupoId, onClose, selectedItem }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem, colaboradoresList]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = {
       onClose,
       id: selectedItem?.id,
@@ -497,15 +491,14 @@ export function FuncaoForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem, colaboradoresList]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const formData = removerPropriedades(
       {
         ...values,
@@ -562,15 +555,14 @@ export function BalcaoForm({ id, item, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [balcoesList, item]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const formData = { ...values, balcao: values?.balcao?.id };
     const params = {
       ...{ id: item?.id, repId: id, getItem: 'selectedItem' },

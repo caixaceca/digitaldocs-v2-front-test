@@ -76,8 +76,9 @@ export function limiteDsti(rendimento) {
 }
 
 export function percentagemDsti(dados) {
+  if (!dados) return '';
   const rendimento = calcRendimento(dados?.rendimento);
-  return (!dados && '') || (rendimento > 0 && (totalPrestacao(dados) / rendimento) * 100) || 0;
+  return (rendimento > 0 && (totalPrestacao(dados) / rendimento) * 100) || 0;
 }
 
 export function dstiDisponivel(dados) {
@@ -95,17 +96,15 @@ export function dstiAposContratacao(dados) {
 // --------- DSTI CORRIGIDO --------------------------------------------------------------------------------------------
 
 export function dstiCorrigido(dados) {
+  if (!dados) return '';
   const rendimento = calcRendimento(dados?.rendimento);
-  return (
-    (!dados && '') ||
-    (rendimento > 0 && ((totalPrestacao(dados) + totalDespesas(dados?.despesas)) / rendimento) * 100) ||
-    0
-  );
+  return (rendimento > 0 && ((totalPrestacao(dados) + totalDespesas(dados?.despesas)) / rendimento) * 100) || 0;
 }
 
 export function limiteDstiCorrigido(dados) {
+  if (!dados) return '';
   const rendimento = calcRendimento(dados?.rendimento);
-  return (!dados && '') || (rendimento > 0 && limiteDsti(dados?.rendimento) + rendimento * 0.2) || 0;
+  return (rendimento > 0 && limiteDsti(dados?.rendimento) + rendimento * 0.2) || 0;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

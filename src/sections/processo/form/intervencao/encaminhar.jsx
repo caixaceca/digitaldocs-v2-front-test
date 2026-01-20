@@ -3,7 +3,7 @@ import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -138,8 +138,8 @@ export function EncaminharEmSerie({ dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const aberturaSemEntGer = useMemo(
     () =>
@@ -295,8 +295,8 @@ export function OutrosEmSerie({ acao }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     try {
@@ -323,7 +323,7 @@ export function OutrosEmSerie({ acao }) {
       const params = { mfd: true, id, estadoId: estadoPreso };
       const msg = acao === 'DEVOLVER' ? 'Processo devolvido' : 'Processo encaminhado';
       dispatch(updateItem('encaminhar serie', formData, { ...params, msg }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -364,10 +364,12 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
     destinos: Yup.array(Yup.object({ estado: Yup.mixed().required('Escolhe o estado') })),
   });
 
-  const defaultValues = useMemo(() => ({ estado, destinos: [destinoItem, destinoItem] }), [estado]);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { estado, destinos: [destinoItem, destinoItem] },
+  });
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
   const { fields, append, remove } = useFieldArray({ control, name: 'destinos' });
 
   const onSubmit = async () => {
@@ -378,7 +380,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
       });
       const params = { id: processo.id, msg: 'Processo encaminhado', estadoId: processo?.estado?.estado_id };
       dispatch(updateItem('encaminhar paralelo', JSON.stringify(formData), { ...params, dono: values?.estado?.id }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

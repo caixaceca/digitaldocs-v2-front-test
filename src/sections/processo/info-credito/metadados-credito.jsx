@@ -108,23 +108,23 @@ export default function MetadadosCredito({ dados, prazo = '', modificar = false,
       titulo: 'Objeto & Ensino/Credibolsa',
       dados: [
         { title: 'Tipo de imóvel', value: dados?.tipo_imovel?.label || dados?.tipo_imovel || dados?.tipo_imovel_id },
-        { title: 'Bem/Serviço', value: dados?.bem_servico_financiado },
-        { title: 'Finalidade', value: dados?.finalidade_credito_habitacao },
+        { title: 'Bem/Serviço', value: dados?.bem_servico_financiado, noWrap: false },
+        { title: 'Finalidade', value: dados?.finalidade_credito_habitacao, noWrap: false },
         { title: 'Nível de formação', value: dados?.nivel_formacao },
-        { title: 'Curso', value: dados?.designacao_curso },
+        { title: 'Curso', value: dados?.designacao_curso, noWrap: false },
         {
           title: 'Tranches da credibolsa',
           value: Number(dados?.montante_tranches_credibolsa) > 0 ? fCurrency(dados?.montante_tranches_credibolsa) : '',
         },
-        { title: 'Estabelecimento de ensino', value: dados?.estabelecimento_ensino },
-        { title: 'Localização', value: dados?.localizacao_estabelecimento_ensino },
+        { title: 'Estabelecimento de ensino', value: dados?.estabelecimento_ensino, noWrap: false },
+        { title: 'Localização', value: dados?.localizacao_estabelecimento_ensino, noWrap: false },
       ],
     },
     {
       id: 'entidade_transferencia',
       titulo: 'Entidade & Transferência',
       dados: [
-        { title: 'Empresa fornecedora', value: dados?.nome_empresa_fornecedora },
+        { title: 'Empresa fornecedora', value: dados?.nome_empresa_fornecedora, noWrap: false },
         { title: 'NIB', value: dados?.nib_vendedor_ou_fornecedor },
         { title: 'Banco/Instituição', value: dados?.instituicao_credito_conta_vendedor_ou_fornecedor },
         {
@@ -209,11 +209,8 @@ export default function MetadadosCredito({ dados, prazo = '', modificar = false,
                           <Box sx={{ textAlign: 'right' }}>
                             <Typography
                               variant="body2"
-                              sx={{
-                                fontWeight: item.bold ? 700 : 400,
-                                color: item.color || 'text.primary',
-                                wordBreak: 'break-word',
-                              }}
+                              noWrap={!item.noWrap}
+                              sx={{ fontWeight: item.bold ? 700 : 400, color: item.color || 'text.primary' }}
                             >
                               {item.value}
                             </Typography>

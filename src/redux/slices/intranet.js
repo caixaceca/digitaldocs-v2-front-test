@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
-import { InteractionRequiredAuthError, BrowserAuthError } from '@azure/msal-browser';
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
 //
 import { callMsGraph } from '../../graph';
 import { loginRequest, msalInstance } from '../../config';
@@ -99,15 +99,13 @@ export async function getAccessToken() {
     const response = await msalInstance.acquireTokenSilent(tokenRequest);
     return response.accessToken;
   } catch (error) {
-    if (error instanceof InteractionRequiredAuthError) {
+    if (error instanceof InteractionRequiredAuthError || error.errorCode === 'timed_out') {
       try {
         const response = await msalInstance.acquireTokenPopup(tokenRequest);
         return response.accessToken;
       } catch (popupError) {
-        if (
-          popupError instanceof BrowserAuthError &&
-          (popupError.errorCode === 'popup_window_error' || popupError.errorCode === 'popup_blocked')
-        ) {
+        const { errorCode } = popupError;
+        if (errorCode === 'popup_window_error' || errorCode === 'popup_blocked' || errorCode === 'timed_out') {
           msalInstance.acquireTokenRedirect(tokenRequest);
           return null;
         }

@@ -59,11 +59,10 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onClose }) {
     [cartoes]
   );
   const methods = useForm({ defaultValues });
-  const { watch, control, handleSubmit } = methods;
+  const { control, handleSubmit } = methods;
   const { fields } = useFieldArray({ control, name: 'cartoes' });
-  const values = watch();
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       dispatch(
         updateItem(
@@ -78,7 +77,7 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onClose }) {
           { balcao, onClose: () => onClose(), msg: 'Receção dos cartões confirmada' }
         )
       );
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -153,10 +152,9 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
     [balcao?.id, datai]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       dispatch(
         updateItem(
@@ -170,7 +168,7 @@ export function ConfirmarPorDataForm({ balcao, fase, datai = null, dataf = null,
           { fase, balcao: balcao?.id, onClose, msg: 'Receção dos cartões confirmada' }
         )
       );
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -221,15 +219,14 @@ export function BalcaoEntregaForm({ onClose }) {
     [selectedItem, uosList]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     if (selectedItem) reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       if (selectedItem?.balcao_entrega === values?.balcao?.id) {
         enqueueSnackbar('Escolhe um balcão diferente do atual', { variant: 'error' });
@@ -242,7 +239,7 @@ export function BalcaoEntregaForm({ onClose }) {
           })
         );
       }
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -279,11 +276,10 @@ export function AnularForm({ fase, cartoes, uo, uosList, onClose }) {
     uo: Yup.mixed().required('Data de receção não pode ficar vazio'),
     data: Yup.date().typeError('Introduza uma data válida').required('Data de emissão não pode ficar vazio'),
   });
-  const defaultValues = useMemo(() => ({ data: null, uo }), [uo]);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
-  const onSubmit = async () => {
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: { data: null, uo } });
+  const { handleSubmit } = methods;
+
+  const onSubmit = async (values) => {
     try {
       dispatch(
         updateItem(
@@ -292,7 +288,7 @@ export function AnularForm({ fase, cartoes, uo, uosList, onClose }) {
           { emissao: fase === 'Emissão' ? 'true' : 'false', msg: 'Confirmação anulada' }
         )
       );
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -305,7 +301,7 @@ export function AnularForm({ fase, cartoes, uo, uosList, onClose }) {
         emissao: fase === 'Emissão' ? 'true' : 'false',
       };
       dispatch(updateItem('anular multiplo', JSON.stringify(selected?.map((row) => ({ id: row }))), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

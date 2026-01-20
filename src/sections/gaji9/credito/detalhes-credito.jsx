@@ -1,4 +1,3 @@
-import { useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -10,6 +9,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { useSelector } from '../../../redux/store';
 import { ptDateTime } from '../../../utils/formatTime';
 import { fCurrency } from '../../../utils/formatNumber';
+import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
 // components
 import { SearchNotFoundSmall } from '../../../components/table';
 import { DialogTitleAlt } from '../../../components/CustomDialog';
@@ -45,8 +45,6 @@ export default function DetalhesCredito({ onClose, id, item }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function DetalhesTab({ id, item, dados, participantes = [], onClose }) {
-  const [currentTab, setCurrentTab] = useState('Info');
-
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} id={id} /> },
     ...((item === 'garantia' && [
@@ -73,21 +71,18 @@ function DetalhesTab({ id, item, dados, participantes = [], onClose }) {
       []),
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Info', '');
+
   return (
     <>
       <DialogTitleAlt
         onClose={onClose}
         title="Detalhes da garantia"
         content={
-          <TabsWrapperSimple
-            tabsList={tabsList}
-            currentTab={currentTab}
-            sx={{ mt: 1.5, mb: 2, boxShadow: 'none' }}
-            changeTab={(_, newValue) => setCurrentTab(newValue)}
-          />
+          <TabsWrapperSimple tabsList={tabsList} tab={tab} sx={{ mt: 1.5, mb: 2, boxShadow: 'none' }} setTab={setTab} />
         }
       />
-      <DialogContent>{tabsList?.find(({ value }) => value === currentTab)?.component}</DialogContent>
+      <DialogContent>{tabsList?.find(({ value }) => value === tab)?.component}</DialogContent>
     </>
   );
 }

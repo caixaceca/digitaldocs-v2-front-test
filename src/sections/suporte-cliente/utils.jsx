@@ -13,7 +13,10 @@ export function useColaborador({ userId, nome }) {
   const user = utilizadores?.find(({ id }) => id === userId);
   const colaborador = colaboradores?.find(({ id }) => id === user?.employee_id);
 
-  return nome ? colaborador?.nome ?? '' : colaborador ?? null;
+  const retornarNome = colaborador?.nome ?? '';
+  const retornarObjeto = colaborador ?? null;
+
+  return nome ? retornarNome : retornarObjeto;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

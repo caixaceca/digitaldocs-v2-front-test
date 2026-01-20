@@ -28,7 +28,7 @@ export default function FiltrosEstatisticaCredito({ dados }) {
   const dispatch = useDispatch();
   const { perfilId } = useSelector((state) => state.intranet);
   const { moeda } = useSelector((state) => state.indicadores);
-  const { uo, periodo, setUo, setPeriodo, currentTab, uosList } = dados;
+  const { uo, periodo, setUo, setPeriodo, tab, uosList } = dados;
 
   // estados
   const [data, setData] = useState(getDataLS('dataEst', new Date()));
@@ -153,7 +153,7 @@ export default function FiltrosEstatisticaCredito({ dados }) {
           isOptionEqualToValue={(o, v) => o?.id === v?.id}
           onChange={(e, v) => setItemValue(v, setUo, 'uoEst', true)}
           renderInput={(params) => <TextField {...params} fullWidth label="Agência/U.O" />}
-          options={[...(periodo === 'Mensal' && currentTab !== 'Resumo' ? [] : geral), ...uosList]}
+          options={[...(periodo === 'Mensal' && tab !== 'Resumo' ? [] : geral), ...uosList]}
         />
 
         <Autocomplete

@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { useMemo, useEffect, useCallback } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -103,8 +103,8 @@ function RegimeEspecial({ onClose, dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   return (
     <>
@@ -175,8 +175,8 @@ function Condicoes({ dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   return (
     <>
@@ -247,8 +247,8 @@ function Taxas({ dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   return (
     <>
@@ -309,8 +309,8 @@ function Objeto({ dados }) {
   );
 
   const methods = useForm({ defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   return (
     <>

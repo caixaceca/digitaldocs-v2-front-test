@@ -1,4 +1,3 @@
-import { useState } from 'react';
 // @mui
 import List from '@mui/material/List';
 import Table from '@mui/material/Table';
@@ -9,6 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fCurrency, fPercent } from '../../../../utils/formatNumber';
+import { useTabsSync } from '../../../../hooks/minimal-hooks/use-tabs-sync';
 // components
 import { noDados } from '../../../../components/Panel';
 import Label, { LabelSN } from '../../../../components/Label';
@@ -23,8 +23,6 @@ import { Resgisto, TableRowItem } from '../../../parametrizacao/Detalhes';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesGarantia({ dados, onClose }) {
-  const [currentTab, setCurrentTab] = useState('Info');
-
   const {
     contas = [],
     seguros = [],
@@ -70,21 +68,18 @@ export default function DetalhesGarantia({ dados, onClose }) {
       : []),
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Info', '');
+
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
       <DialogTitleAlt
         onClose={onClose}
         title="Detalhes da garantia"
         content={
-          <TabsWrapperSimple
-            tabsList={tabsList}
-            currentTab={currentTab}
-            sx={{ mt: 1.5, mb: 2, boxShadow: 'none' }}
-            changeTab={(_, newValue) => setCurrentTab(newValue)}
-          />
+          <TabsWrapperSimple tabsList={tabsList} tab={tab} sx={{ mt: 1.5, mb: 2, boxShadow: 'none' }} setTab={setTab} />
         }
       />
-      <DialogContent>{tabsList?.find(({ value }) => value === currentTab)?.component}</DialogContent>
+      <DialogContent>{tabsList?.find(({ value }) => value === tab)?.component}</DialogContent>
     </Dialog>
   );
 }

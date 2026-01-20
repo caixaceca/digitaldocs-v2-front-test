@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -15,14 +15,11 @@ import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 // utils
+import useToggle from '../../hooks/useToggle';
+import { PATH_DIGITALDOCS } from '../../routes/paths';
 import { setItemValue } from '../../utils/formatObject';
-// redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getListaProcessos } from '../../redux/slices/digitaldocs';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-// hooks
-import useToggle from '../../hooks/useToggle';
 // components
 import GridItem from '../../components/GridItem';
 
@@ -43,14 +40,22 @@ export default function ProcuraAvancada() {
   const [noperacao, setNoperacao] = useState(localStorage.getItem('noperacao') || '');
   const [avancada, setAvancada] = useState(localStorage.getItem('tipoPesquisa') === 'avancada');
   const [fromArquivo, setFromArquivo] = useState(localStorage.getItem('fromArquivo') === 'true');
+
   const uosList = useMemo(() => uos?.map(({ id, label }) => ({ id, label })) || [], [uos]);
 
-  useEffect(() => {
+  const [prevSourceId, setPrevSourceId] = useState(null);
+
+  const currentSourceId = cc?.uo_id;
+
+  if (currentSourceId !== prevSourceId && uosList.length > 0) {
     const storedUoId = Number(localStorage.getItem('uoSearch'));
     const selectedUo =
-      uosList.find(({ id }) => id === storedUoId) || uosList.find(({ id }) => Number(id) === Number(cc?.uo_id));
-    if (selectedUo) setUo(selectedUo);
-  }, [cc?.uo_id, uosList]);
+      uosList.find(({ id }) => id === storedUoId) || uosList.find(({ id }) => Number(id) === Number(currentSourceId));
+    if (selectedUo) {
+      setUo(selectedUo);
+      setPrevSourceId(currentSourceId);
+    }
+  }
 
   const searchProcessos = () => {
     dispatch(

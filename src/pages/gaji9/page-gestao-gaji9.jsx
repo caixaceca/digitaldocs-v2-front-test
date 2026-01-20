@@ -1,10 +1,10 @@
+import { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMemo, useState, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import { setItemValue } from '../../utils/formatObject';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 //
 import { useSelector } from '../../redux/store';
 import useSettings from '../../hooks/useSettings';
@@ -25,7 +25,6 @@ export default function PageGaji9Gestao() {
   const { temPermissao, isAdmin } = usePermissao();
 
   const { done, propostaId, utilizador } = useSelector((state) => state.gaji9);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabGaji9') || 'Parametrização');
 
   const tabsList = useMemo(
     () =>
@@ -55,10 +54,7 @@ export default function PageGaji9Gestao() {
     [utilizador, isAdmin, temPermissao]
   );
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabGaji9', false);
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'Parametrização', 'tab-gaj-i9');
 
   useEffect(() => {
     if (done === 'Proposta carregada' && propostaId) navigate(`${PATH_DIGITALDOCS.gaji9.root}/credito/${propostaId}`);
@@ -67,15 +63,9 @@ export default function PageGaji9Gestao() {
   return (
     <Page title="GAJ-i9 | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <TabsWrapper
-          title="GAJ-i9"
-          tab="tabGaji9"
-          tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
-        />
+        <TabsWrapper title="GAJ-i9" tabsList={tabsList} tab={tab} setTab={setTab} />
         <AcessoGaji9 item="gestao">
-          <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+          <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
         </AcessoGaji9>
       </Container>
     </Page>

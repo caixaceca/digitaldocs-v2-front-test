@@ -3,7 +3,7 @@ import { useMemo, useCallback } from 'react';
 import { useSnackbar } from 'notistack';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFormContext, useFieldArray } from 'react-hook-form';
+import { useForm, useWatch, useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
@@ -109,14 +109,14 @@ function Rendimento({ dados, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     try {
       dispatch(forwardStep());
       dispatch(updateFicha({ rendimento: values }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -188,7 +188,7 @@ function Despesas({ dados }) {
     try {
       dispatch(forwardStep());
       dispatch(updateFicha(values));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -242,7 +242,7 @@ function RespExterna({ dados }) {
     try {
       dispatch(forwardStep());
       dispatch(updateFicha(values));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -325,7 +325,7 @@ function Proposta({ dados, credito, onClose }) {
     try {
       dispatch(updateFicha({ proposta: values }));
       onClose();
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -366,14 +366,13 @@ export function FormParecer({ ficha, onClose }) {
   const formSchema = Yup.object().shape({ parecer: Yup.string().required().label('Parecer') });
   const defaultValues = useMemo(() => ({ parecer: textParecer(ficha) || '' }), [ficha]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       dispatch(updateFicha(values));
       onClose();
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

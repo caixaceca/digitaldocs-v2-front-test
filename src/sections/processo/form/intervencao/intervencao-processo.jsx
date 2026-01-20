@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo, useState } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -54,8 +54,8 @@ export function ConfidencialidadesForm({ processoId }) {
   );
 
   const methods = useForm({ defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     try {
@@ -74,7 +74,7 @@ export function ConfidencialidadesForm({ processoId }) {
           onClose: () => dispatch(getInfoProcesso('confidencialidades', { id: processoId })),
         })
       );
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -106,10 +106,12 @@ export function ColocarPendenteForm({ onClose }) {
   const { isSaving, selectedItem } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({ motivo: Yup.mixed().required('Motivo de pendência não pode ficar vazio') });
-  const defaultValues = useMemo(() => ({ pendenteLevantamento: false, mobs: '', motivo: null }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { pendenteLevantamento: false, mobs: '', motivo: null },
+  });
+  const { control, setValue, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   useEffect(() => {
     dispatch(getFromParametrizacao('motivosPendencia'));
@@ -130,7 +132,7 @@ export function ColocarPendenteForm({ onClose }) {
           { ...params, msg: action === 'eliminar' ? 'Pendência eliminada' : 'Processo colocado pendente' }
         )
       );
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -212,7 +214,7 @@ export function FinalizarNeForm({ id, onClose }) {
         const params = { id, msg: 'Processo finalizado' };
         dispatch(updateItem('finalizar', JSON.stringify({ cativos: selecionados.map(({ id }) => id) }), params));
       }
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -334,10 +336,9 @@ export function AnexosForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const formData = new FormData();
       appendAnexos(formData, values.anexos, outros, values.checklist);
@@ -345,7 +346,7 @@ export function AnexosForm({ onClose }) {
         const params = { id, estadoId: estadoPreso, anexos: formData };
         dispatch(updateItem('adicionar-anexos', null, { ...params, msg: 'Anexos adicionados' }));
       } else enqueueSnackbar('Introduza os anexos pretendidos', { variant: 'info' });
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

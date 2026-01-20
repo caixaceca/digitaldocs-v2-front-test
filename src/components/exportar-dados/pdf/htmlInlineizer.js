@@ -36,7 +36,7 @@ function removeQuillUIElements(doc) {
     const qlspans = doc.querySelectorAll('span.ql-ui');
     qlspans.forEach((s) => s.remove());
   } catch (e) {
-    // ignore
+    console.error(e);
   }
 }
 

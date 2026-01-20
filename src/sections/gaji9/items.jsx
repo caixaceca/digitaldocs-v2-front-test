@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -7,10 +7,9 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { setItemValue } from '../../utils/formatObject';
-// hooks
 import useToggle from '../../hooks/useToggle';
 import { usePermissao } from '../../hooks/useAcesso';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { openModal, setModal, getSuccess, getFromGaji9 } from '../../redux/slices/gaji9';
@@ -49,8 +48,6 @@ export default function TabGaji9({ item, label }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Parametrizacao({ inativos, setInativos }) {
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('gaji9Parametrizacao') || 'Utilizadores');
-
   const tabsList = useMemo(
     () => [
       { value: 'Utilizadores', component: <TableParamsGaji9 item="funcoes" inativos={inativos} /> },
@@ -62,25 +59,17 @@ function Parametrizacao({ inativos, setInativos }) {
     [inativos]
   );
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab)) {
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'gaji9Parametrizacao', false);
-    }
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'Utilizadores', 'tab-parametrizacao-gaj-i9');
 
   return (
     <>
       <HeaderBreadcrumbs
         sx={{ px: 1 }}
-        heading={`Parametrização - ${currentTab}`}
+        heading={`Parametrização - ${tab}`}
         action={<Actions inativos={inativos} setInativos={setInativos} />}
       />
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'gaji9Parametrizacao', false)}
-      />
-      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+      <TabsWrapperSimple tab={tab} tabsList={tabsList} setTab={setTab} />
+      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </>
   );
 }
@@ -89,7 +78,6 @@ function Parametrizacao({ inativos, setInativos }) {
 
 function Identificadores({ inativos, setInativos }) {
   const { temPermissao } = usePermissao();
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('gaji9Identificadores') || 'Produtos');
 
   const tabsList = useMemo(
     () => [
@@ -122,24 +110,17 @@ function Identificadores({ inativos, setInativos }) {
     [inativos, temPermissao]
   );
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'gaji9Identificadores', false);
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'Produtos', 'tab-identificadores-gaj-i9');
 
   return (
     <>
       <HeaderBreadcrumbs
         sx={{ px: 1 }}
-        heading={`Identificadores - ${currentTab}`}
-        action={<Actions inativos={inativos} setInativos={setInativos} label={currentTab} />}
+        heading={`Identificadores - ${tab}`}
+        action={<Actions inativos={inativos} setInativos={setInativos} label={tab} />}
       />
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'gaji9Identificadores', false)}
-      />
-      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+      <TabsWrapperSimple tab={tab} tabsList={tabsList} setTab={setTab} />
+      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </>
   );
 }

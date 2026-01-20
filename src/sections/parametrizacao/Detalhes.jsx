@@ -16,8 +16,9 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fPercent } from '../../utils/formatNumber';
-import { ptDateTime, ptDate } from '../../utils/formatTime';
 import { nomeacaoBySexo } from '../../utils/formatText';
+import { ptDateTime, ptDate } from '../../utils/formatTime';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // hooks
 import { getComparator, applySort } from '../../hooks/useTable';
 // redux
@@ -253,7 +254,6 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Notificacao({ dados }) {
-  const [currentTab, setCurrentTab] = useState('Info');
   const { destinatarios } = useSelector((state) => state.parametrizacao);
 
   const tabsList = [
@@ -261,15 +261,12 @@ function Notificacao({ dados }) {
     { value: 'Destinatários', component: <Notificacoes dados={dados} destinatarios={destinatarios || []} /> },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Info', '');
+
   return (
     <>
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
-        changeTab={(_, newValue) => setCurrentTab(newValue)}
-      />
-      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+      <TabsWrapperSimple tabsList={tabsList} tab={tab} sx={{ mt: 2, mb: 1, boxShadow: 'none' }} setTab={setTab} />
+      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </>
   );
 }

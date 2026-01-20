@@ -69,6 +69,10 @@ export default function TableParametrizacao({ item }) {
   });
 
   useEffect(() => {
+    dispatch(getFromParametrizacao(item));
+  }, [dispatch, item]);
+
+  useEffect(() => {
     if (done === 'Estado adicionado' || done === 'Fluxo adicionado')
       navigate(`${PATH_DIGITALDOCS.parametrizacao.root}/${item === 'fluxos' ? 'fluxo' : 'estado'}/${selectedItem?.id}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -253,6 +257,7 @@ function headerTable(item) {
       { id: 'linha', label: 'Designação' },
       { id: 'descricao', label: 'Segmento' },
     ]) ||
+      (item === 'despesas' && [{ id: 'linha', label: 'Designação' }]) ||
       (item === 'fluxos' && [
         { id: 'assunto', label: 'Assunto' },
         { id: 'modelo', label: 'Modelo' },

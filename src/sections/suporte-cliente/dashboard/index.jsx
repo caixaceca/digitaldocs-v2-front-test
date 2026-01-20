@@ -26,6 +26,8 @@ export default function AdminDashboardMetrics({ departamentos = [], department, 
   const [periodo, setPeriodo] = useState('Mensal');
 
   const { indicadores, isLoading } = useSelector((state) => state.suporte);
+  const mensal = indicadores?.indicators_by_day ?? [];
+  const anual = indicadores?.indicators_by_month ?? [];
 
   useEffect(() => {
     const year = data.getFullYear();
@@ -84,12 +86,7 @@ export default function AdminDashboardMetrics({ departamentos = [], department, 
 
           <Grid container spacing={3}>
             <GridItem md={7}>
-              <Evolucao
-                periodo={periodo}
-                dados={
-                  periodo === 'Mensal' ? indicadores?.indicators_by_day ?? [] : indicadores?.indicators_by_month ?? []
-                }
-              />
+              <Evolucao periodo={periodo} dados={periodo === 'Mensal' ? mensal : anual} />
             </GridItem>
             <GridItem md={5}>
               <PorDepartamento

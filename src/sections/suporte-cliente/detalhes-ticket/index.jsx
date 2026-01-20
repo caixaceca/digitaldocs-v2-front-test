@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 // @mui
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
@@ -11,6 +11,7 @@ import { getStatusLabel, useColaborador } from '../utils';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { updateInSuporte } from '../../../redux/slices/suporte-cliente';
+import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
 // components
 import { Criado } from '../../../components/Panel';
 import { TicketSkeleton } from '../../../components/skeleton';
@@ -27,7 +28,6 @@ import { Detalhes } from './detalhes';
 
 export default function DetalhesTicket({ onClose }) {
   const dispatch = useDispatch();
-  const [currentTab, setCurrentTab] = useState('Detalhes');
   const { isLoading, selectedItem, utilizador } = useSelector((state) => state.suporte);
   const atribuidoA = useColaborador({ userId: selectedItem?.current_user_id, nome: true });
   const admin = useMemo(() => utilizador?.role === 'ADMINISTRATOR' || utilizador?.role === 'COORDINATOR', [utilizador]);
@@ -92,6 +92,8 @@ export default function DetalhesTicket({ onClose }) {
       : []),
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Detalhes', '');
+
   return (
     <Dialog open fullWidth onClose={onClose} maxWidth="lg">
       <DialogTitleAlt
@@ -102,10 +104,10 @@ export default function DetalhesTicket({ onClose }) {
           selectedItem ? (
             <Stack>
               <TabsWrapperSimple
+                tab={tab}
+                setTab={setTab}
                 tabsList={tabsList}
-                currentTab={currentTab}
                 sx={{ mt: 2, mb: 0, boxShadow: 'none' }}
-                changeTab={(_, newValue) => setCurrentTab(newValue)}
               />
             </Stack>
           ) : null
@@ -118,7 +120,7 @@ export default function DetalhesTicket({ onClose }) {
           <>
             {selectedItem ? (
               <>
-                {currentTab === 'Detalhes' && (
+                {tab === 'Detalhes' && (
                   <Stack
                     useFlexGap
                     spacing={2}
@@ -147,7 +149,7 @@ export default function DetalhesTicket({ onClose }) {
                     />
                   </Stack>
                 )}
-                {tabsList?.find(({ value }) => value === currentTab)?.component}
+                {tabsList?.find(({ value }) => value === tab)?.component}
               </>
             ) : (
               <SearchNotFound message="Ticket não encontrado..." />

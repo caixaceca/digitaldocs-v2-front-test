@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { useMemo } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -41,8 +41,8 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
   const formSchema = Yup.object().shape({ item: Yup.mixed().required().label(label) });
   const defaultValues = useMemo(() => ({ item: null, resolved: false }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async (values) => {
     const params1 = { patch: true, getItem: 'selectedItem' };
@@ -75,11 +75,13 @@ export function MessageForm({ dados, onClose }) {
   const { isSaving } = useSelector((state) => state.suporte);
 
   const formSchema = Yup.object().shape({ message: Yup.string().required().label('Mensagem') });
-  const defaultValues = useMemo(() => ({ message: '', to_client: false, attachments: [] }), []);
 
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { message: '', to_client: false, attachments: [] },
+  });
+  const { control, setValue, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async (values) => {
     const formData = new FormData();

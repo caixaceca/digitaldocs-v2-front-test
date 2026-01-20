@@ -71,7 +71,7 @@ export default function FormParecer({ pId, fluxoId, estadoId, gestor, onClose })
       const formData = { favoravel: values.parecer === 'Favorável', descritivo: values?.descritivo };
       const params = { id: pId, msg: `Parecer ${isEdit ? 'atualizado' : 'enviado'}`, put: true, estadoId };
       dispatch(createItem('parecer-credito', JSON.stringify(formData), { ...params, anexo, onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -121,7 +121,7 @@ export function CondicoesForm({ ids, dados, onClose }) {
     try {
       const params = { ...ids, msg: 'Condições alteradas', put: true };
       dispatch(updateItem('condicoes-aprovacao', JSON.stringify(values), { ...params, onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

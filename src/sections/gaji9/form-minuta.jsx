@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { useMemo, useState, useEffect } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -29,10 +29,9 @@ export function PreviewForm({ id = 0, onClose }) {
   const { isSaving } = useSelector((state) => state.gaji9);
   const defaultValues = useMemo(() => ({ taxa: '', prazo: '', montante: '', isento: false, representante: false }), []);
   const methods = useForm({ defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     dispatch(getDocumento('minuta', { id, ...values }));
   };
 
@@ -108,8 +107,8 @@ export function PreviewMinutaForm({ onClose }) {
     [garantiaCl, garantiasList, segmentoCl, segmentosList, titularCl, titularesList]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const { control, setValue, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     const params = Object.fromEntries(

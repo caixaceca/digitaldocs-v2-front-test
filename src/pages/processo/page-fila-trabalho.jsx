@@ -14,9 +14,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fNumber } from '../../utils/formatNumber';
-import { setItemValue } from '../../utils/formatObject';
 import { colorLabel } from '../../utils/getColorPresets';
 import { pertencoAoEstado } from '../../utils/validarAcesso';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // hooks
 import useToggle from '../../hooks/useToggle';
 import useSettings from '../../hooks/useSettings';
@@ -50,7 +50,7 @@ export default function PageFilaTrabalho() {
     if (cc?.id && add(new Date(dateUpdate), { minutes: 10 }) < new Date()) dispatch(getInfoInicial(cc?.id, false));
   }, [dispatch, cc?.id, dateUpdate]);
 
-  const tabs = useMemo(() => {
+  const tabsList = useMemo(() => {
     const baseTabs = [
       { value: 'Tarefas', num: totalP?.total_tarefa || 0, component: <TableProcessos from="Tarefas" /> },
       { value: 'Retidos', num: totalP?.total_retido || 0, component: <TableProcessos from="Retidos" /> },
@@ -76,13 +76,9 @@ export default function PageFilaTrabalho() {
     return baseTabs;
   }, [totalP, meusAmbientes]);
 
-  const storedTab = localStorage.getItem('tabProcessos');
-  const defaultTab = tabs.map((tab) => tab.value).includes(storedTab) ? storedTab : tabs[0]?.value || 'Tarefas';
-  const [currentTab, setCurrentTab] = useState(defaultTab);
-
-  useEffect(() => {
-    if (!tabs.map((tab) => tab.value).includes(currentTab)) setItemValue(tabs[0]?.value, setCurrentTab, 'tabProcessos');
-  }, [tabs, currentTab]);
+  // const storedTab = localStorage.getItem('tabProcessos');
+  // const defaultTab = tabs.map((tab) => tab.value).includes(storedTab) ? storedTab : tabs[0]?.value || 'Tarefas';
+  const [tab, setTab] = useTabsSync(tabsList, 'Tarefas', 'tab-fila-trabalho');
 
   const refreshDados = () => dispatch(getSuccess({ item: 'dateUpdate', dados: sub(new Date(), { minutes: 10 }) }));
 
@@ -109,12 +105,8 @@ export default function PageFilaTrabalho() {
           </Stack>
 
           <TabsWrapperStyle>
-            <Tabs
-              value={currentTab}
-              allowScrollButtonsMobile
-              onChange={(event, newValue) => setItemValue(newValue, setCurrentTab, 'tabProcessos')}
-            >
-              {tabs.map(({ value, num }) => (
+            <Tabs value={tab} allowScrollButtonsMobile onChange={setTab}>
+              {tabsList.map(({ value, num }) => (
                 <Tab
                   disableRipple
                   key={value}
@@ -134,7 +126,7 @@ export default function PageFilaTrabalho() {
           </TabsWrapperStyle>
         </Card>
 
-        <Box>{tabs.find(({ value }) => value === currentTab)?.component}</Box>
+        <Box>{tabsList.find(({ value }) => value === tab)?.component}</Box>
 
         {open && <TotalProcessos onClose={() => onClose()} />}
         {isOpenModal === 'adicionar-processo' && <ProcessoForm processo={null} ambientId={meuAmbiente?.id} />}

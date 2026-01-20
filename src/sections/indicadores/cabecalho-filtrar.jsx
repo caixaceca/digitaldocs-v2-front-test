@@ -254,9 +254,7 @@ export function Cabecalho({ title, tab, top, vista, setTop, setVista, tabsList =
         }
       />
 
-      {currentTab && (
-        <TabsWrapperSimple tabsList={tabsList} currentTab={currentTab} changeTab={changeTab} sx={{ mb: 1.5 }} />
-      )}
+      {currentTab && <TabsWrapperSimple tabsList={tabsList} tab={currentTab} setTab={changeTab} sx={{ mb: 1.5 }} />}
 
       <Stack direction="row" justifyContent="center" sx={{ mb: 1.5 }}>
         <Stack direction="row" alignItems="center" justifyContent="center" flexWrap="wrap" gap={1}>

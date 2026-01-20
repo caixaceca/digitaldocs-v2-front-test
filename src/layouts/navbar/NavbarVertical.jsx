@@ -56,23 +56,23 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
           )}
           <Logo />
 
-          {isDesktop && !isCollapse && (
-            <>
-              <Typography
-                to="/"
-                component={RouterLink}
-                sx={{ textAlign: 'center', textDecoration: 'none', color: theme.palette.success.main }}
-              >
-                {(ambiente === 'local' && <Typography variant="h6">IntraNet - Local</Typography>) ||
-                  (ambiente === 'teste' && <Typography variant="h6">IntraNet - Teste</Typography>) || (
-                    <Typography variant="h3">IntraNet</Typography>
-                  )}
-                <Typography variant="subtitle2" sx={{ mt: ambiente === 'teste' || ambiente === 'local' ? 0 : -1 }}>
-                  DIGITALDOCS
-                </Typography>
+          {!isCollapse && (
+            <Typography
+              to="/"
+              component={RouterLink}
+              sx={{ textAlign: 'center', textDecoration: 'none', width: 1, color: theme.palette.success.main }}
+            >
+              {(ambiente === 'local' && <Typography variant="h6">IntraNet - Dev</Typography>) ||
+                (ambiente === 'teste' && <Typography variant="h6">IntraNet - Teste</Typography>) || (
+                  <Typography variant="h3">IntraNet</Typography>
+                )}
+              <Typography variant="subtitle2" sx={{ mt: ambiente === 'teste' || ambiente === 'local' ? 0 : -1 }}>
+                DIGITALDOCS
               </Typography>
-              <CollapseButton onToggleCollapse={onToggleCollapse} collapseClick={collapseClick} />
-            </>
+            </Typography>
+          )}
+          {isDesktop && !isCollapse && (
+            <CollapseButton onToggleCollapse={onToggleCollapse} collapseClick={collapseClick} />
           )}
         </Stack>
         <NavbarAcount isCollapse={isCollapse} />

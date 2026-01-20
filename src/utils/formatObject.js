@@ -163,7 +163,7 @@ export function getLocalStorageArray(key) {
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : [];
-  } catch (error) {
+  } catch {
     return [];
   }
 }

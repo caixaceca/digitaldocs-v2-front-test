@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useMemo, useCallback } from 'react';
 // hooks
 import useResponsive from '../hooks/useResponsive';
 
@@ -22,36 +22,34 @@ function CollapseDrawerProvider({ children }) {
 
   const [collapse, setCollapse] = useState({ click: false, hover: false });
 
-  useEffect(() => {
-    if (!isDesktop) setCollapse({ click: false, hover: false });
-  }, [isDesktop]);
+  const activeClick = isDesktop ? collapse.click : false;
+  const activeHover = isDesktop ? collapse.hover : false;
 
-  const handleToggleCollapse = () => {
-    setCollapse({ ...collapse, click: !collapse.click });
-  };
+  const handleToggleCollapse = useCallback(() => {
+    setCollapse((prev) => ({ ...prev, click: !prev.click }));
+  }, []);
 
-  const handleHoverEnter = () => {
-    if (collapse.click) setCollapse({ ...collapse, hover: true });
-  };
+  const handleHoverEnter = useCallback(() => {
+    setCollapse((prev) => (prev.click ? { ...prev, hover: true } : prev));
+  }, []);
 
-  const handleHoverLeave = () => {
-    setCollapse({ ...collapse, hover: false });
-  };
+  const handleHoverLeave = useCallback(() => {
+    setCollapse((prev) => ({ ...prev, hover: false }));
+  }, []);
 
-  return (
-    <CollapseDrawerContext.Provider
-      value={{
-        isCollapse: collapse.click && !collapse.hover,
-        collapseClick: collapse.click,
-        collapseHover: collapse.hover,
-        onToggleCollapse: handleToggleCollapse,
-        onHoverEnter: handleHoverEnter,
-        onHoverLeave: handleHoverLeave,
-      }}
-    >
-      {children}
-    </CollapseDrawerContext.Provider>
+  const value = useMemo(
+    () => ({
+      isCollapse: activeClick && !activeHover,
+      collapseClick: activeClick,
+      collapseHover: activeHover,
+      onToggleCollapse: handleToggleCollapse,
+      onHoverEnter: handleHoverEnter,
+      onHoverLeave: handleHoverLeave,
+    }),
+    [activeClick, activeHover, handleToggleCollapse, handleHoverEnter, handleHoverLeave]
   );
+
+  return <CollapseDrawerContext.Provider value={value}>{children}</CollapseDrawerContext.Provider>;
 }
 
 export { CollapseDrawerProvider, CollapseDrawerContext };

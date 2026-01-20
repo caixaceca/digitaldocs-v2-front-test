@@ -63,20 +63,19 @@ export function AcessoForm({ perfilIdA, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const formData = { ...values, objeto: values.objeto.id, acesso: values.acesso.id };
       const params = { id: selectedItem?.id, msg: `Acesso ${isEdit ? 'atualizado' : 'atribuido'}`, onClose };
       dispatch((isEdit ? updateItem : createItem)('acessos', JSON.stringify(formData), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -111,19 +110,18 @@ export function MotivoPendenciaForm({ onClose }) {
     [selectedItem]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const params = { id: selectedItem?.id, msg: `Motivo ${isEdit ? 'atualizado' : 'adicionado'}` };
       dispatch((isEdit ? updateItem : createItem)('motivosPendencia', JSON.stringify(values), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -189,20 +187,19 @@ export function MotivoTransicaoForm({ onClose }) {
     [selectedItem, isEdit]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const formData = { ...values, fluxos: fluxosAtribuidos.length > 0 ? fluxosAtribuidos.map(({ id }) => id) : null };
       const params = { id: selectedItem?.id, msg: `Motivo ${isEdit ? 'atualizado' : 'adicionado'}` };
       dispatch((isEdit ? updateItem : createItem)('motivosTransicao', JSON.stringify(formData), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -291,7 +288,7 @@ export function OrigemForm({ onClose }) {
     try {
       const params = { id: selectedItem?.id, msg: `Origem ${isEdit ? 'atualizada' : 'adicionada'}` };
       dispatch((isEdit ? updateItem : createItem)('origens', JSON.stringify(values), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -367,14 +364,13 @@ export function LinhaForm({ onClose }) {
     [selectedItem]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const params = { id: selectedItem?.id, msg: `Linha ${isEdit ? 'atualizada' : 'adicionada'}` };
       dispatch((isEdit ? updateItem : createItem)('linhas', JSON.stringify(values), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -427,19 +423,18 @@ export function DespesaForm({ onClose }) {
     [selectedItem, isEdit]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const params = { id: selectedItem?.id, msg: `Despesa ${isEdit ? 'atualizada' : 'adicionada'}` };
       dispatch((isEdit ? updateItem : createItem)('despesas', JSON.stringify(values), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -518,7 +513,7 @@ export function DocumentoForm({ onClose }) {
       };
       const params = { id: selectedItem?.id, msg: `Documento ${isEdit ? 'atualizado' : 'adicionado'}` };
       dispatch((isEdit ? updateItem : createItem)('documentos', JSON.stringify(formData), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

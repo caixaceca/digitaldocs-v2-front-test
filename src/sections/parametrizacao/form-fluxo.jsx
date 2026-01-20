@@ -75,7 +75,7 @@ export function FluxoForm({ onClose }) {
       const msg = `Fluxo ${isEdit ? 'atualizado' : 'adicionado'}`;
       const params = { id: selectedItem?.id, msg, getItem: 'selectedItem', onClose };
       dispatch((isEdit ? updateItem : createItem)('fluxo', JSON.stringify(values), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -141,19 +141,18 @@ export function ClonarFluxoForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     if (selectedItem) reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const transicoes = selectedItem?.transicoes?.filter((option) => option?.modo !== 'desarquivamento');
       dispatch(createItem('clonar fluxo', JSON.stringify(values), { msg: 'Fluxo clonado', transicoes, onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -212,15 +211,14 @@ export function TransicaoForm({ onClose, fluxoId }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const id = isEdit ? selectedItem?.id : fluxoId;
       const params = { item1: 'fluxo', msg: `Transição ${isEdit ? 'atualizada' : 'adicionada'}`, id, onClose };
@@ -228,7 +226,7 @@ export function TransicaoForm({ onClose, fluxoId }) {
       const formData = isEdit ? { ...values, ...ids } : [{ ...values, ...ids }];
 
       dispatch((isEdit ? updateItem : createItem)('transicoes', JSON.stringify(formData), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -319,7 +317,7 @@ export function ChecklistForm({ fluxo, onClose }) {
         : { fluxo_id: fluxo?.id, documentos: values?.documentos?.map((row) => docs(row)) };
       const params = { id: selectedItem?.id, msg: `Documento ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
       dispatch((isEdit ? updateItem : createItem)('checklist', JSON.stringify(formData), { ...params, getItem }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -408,19 +406,18 @@ export function NotificacaoForm({ fluxo, transicao, onClose }) {
     [selectedItem, transicao?.id]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const params = { id: selectedItem?.id, msg: `Notificação ${isEdit ? 'atualizada' : 'adicionada'}` };
       dispatch((isEdit ? updateItem : createItem)('notificacoes', JSON.stringify(values), { ...params, onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -494,7 +491,7 @@ export function DestinatarioForm({ id, onClose, selectedItem }) {
       const formData = isEdit ? destinatario(values) : values?.destinatarios?.map((row) => destinatario(row));
       const params = { id: selectedItem?.id || id, msg: `Destinatário ${isEdit ? 'atualizada' : 'adicionada'}` };
       dispatch((isEdit ? updateItem : createItem)('destinatarios', JSON.stringify(formData), { ...params, onClose }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

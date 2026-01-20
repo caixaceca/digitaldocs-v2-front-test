@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
@@ -23,7 +23,8 @@ import DetalhesProcesso from './detalhes';
 
 export default function Versoes({ id }) {
   const dispatch = useDispatch();
-  const [accord, setAccord] = useState('');
+
+  const [manualAccord, setManualAccord] = useState(null);
 
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, processo } = useSelector((state) => state.digitaldocs);
@@ -32,16 +33,12 @@ export default function Versoes({ id }) {
   const { versoes = [] } = hversoes;
 
   useEffect(() => {
-    if (versoes && versoes?.length > 0) setAccord(versoes?.[0]?.feito_em);
-  }, [dispatch, versoes]);
-
-  useEffect(() => {
     if (id) dispatch(getInfoProcesso('hversoes', { id }));
   }, [dispatch, id]);
 
-  const handleAccord = (panel) => (event, isExpanded) => {
-    setAccord(isExpanded ? panel : '');
-  };
+  const versoesOrdenadas = useMemo(() => applySort(versoes, getComparator('desc', 'feito_em')) || [], [versoes]);
+  const activeAccord = manualAccord ?? versoesOrdenadas[0]?.feito_em;
+  const handleAccord = (panel) => (event, isExpanded) => setManualAccord(isExpanded ? panel : '');
 
   return (
     <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>
@@ -49,10 +46,10 @@ export default function Versoes({ id }) {
         <SkeletonBar column={3} height={150} />
       ) : (
         <>
-          {!versoes || versoes?.length === 0 ? (
+          {versoesOrdenadas.length === 0 ? (
             <SearchNotFound message="O processo ainda não foi modificado..." />
           ) : (
-            applySort(versoes, getComparator('desc', 'feito_em'))?.map((row, index) => {
+            versoesOrdenadas.map((row, index) => {
               const colaborador = colaboradores?.find(
                 ({ email }) => email?.toLowerCase() === row?.feito_por?.toLowerCase()
               );
@@ -60,7 +57,7 @@ export default function Versoes({ id }) {
               return (
                 <Accordion
                   key={`vr_${index}`}
-                  expanded={accord === row?.feito_em}
+                  expanded={activeAccord === row?.feito_em}
                   onChange={handleAccord(row?.feito_em)}
                 >
                   <AccordionSummary>

@@ -3,7 +3,7 @@ import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
@@ -83,7 +83,7 @@ export function EstadoForm({ onClose }) {
       const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
       const formData = JSON.stringify({ ...values, balcao: values?.uo_id?.balcao, uo_id: values?.uo_id?.id });
       dispatch((isEdit ? updateItem : createItem)('estado', formData, { ...params, getItem: 'selectedItem' }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -147,15 +147,14 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const formData = JSON.stringify({
         ...values,
@@ -166,7 +165,7 @@ export function EstadosPerfilForm({ perfilIdE = 0, estadoId = 0, onClose }) {
       const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
       const params1 = { item: estadoId ? 'perfis' : '', item1: estadoId ? 'estado' : '', onClose };
       dispatch((isEdit ? updateItem : createItem)('estadosPerfil', formData, { ...params, ...params1 }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -223,8 +222,8 @@ export function PerfisEstadoForm({ onClose }) {
   });
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
   const { fields, append, remove } = useFieldArray({ control, name: 'perfis' });
 
   const onSubmit = async () => {
@@ -241,7 +240,7 @@ export function PerfisEstadoForm({ onClose }) {
         })
       );
       dispatch(createItem('perfis', JSON.stringify(formData), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -324,8 +323,7 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
     [isEdit, perfisList, selectedItem]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { reset, control, handleSubmit } = methods;
   const { fields, append, remove } = useFieldArray({ control, name: 'pesos' });
 
   useEffect(() => {
@@ -339,12 +337,12 @@ export function RegrasForm({ item, onClose, estado = false, selectedItem }) {
   };
   const action = estado ? 'regrasEstado' : 'regrasTransicao';
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       const formData = values?.pesos?.map((row) => ({ ...row, perfil_id: row?.perfil?.id }));
       const params = { ...paramsComum, msg: `Regra transição ${isEdit ? 'atualizada' : 'adicionada'}` };
       dispatch((isEdit ? updateItem : createItem)(action, JSON.stringify(isEdit ? formData[0] : formData), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

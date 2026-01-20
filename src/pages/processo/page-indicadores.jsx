@@ -1,13 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import { setItemValue } from '../../utils/formatObject';
-// redux
 import { useSelector } from '../../redux/store';
-// hooks
 import useSettings from '../../hooks/useSettings';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // components
 import Page from '../../components/Page';
 import TabsWrapper from '../../components/TabsWrapper';
@@ -21,7 +19,6 @@ import { TotalProcessos, Duracao, SGQ } from '../../sections/indicadores/Indicad
 export default function PageIndicadores() {
   const { themeStretch } = useSettings();
   const { isAdmin } = useSelector((state) => state.parametrizacao);
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tabIndicadores') || 'total');
 
   const tabsList = useMemo(
     () => [
@@ -34,10 +31,7 @@ export default function PageIndicadores() {
     [isAdmin]
   );
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'tabIndicadores', false);
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'total', 'tab-indicadores');
 
   // const handleNotificationClick = () => {
   //   if (Notification.permission === 'granted') {
@@ -61,14 +55,8 @@ export default function PageIndicadores() {
   return (
     <Page title="Indicadores | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
-        <TabsWrapper
-          title="Indicadores"
-          tab="tabIndicadores"
-          tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
-        />
-        <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+        <TabsWrapper title="Indicadores" tabsList={tabsList} tab={tab} setTab={setTab} />
+        <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
       </Container>
     </Page>
   );

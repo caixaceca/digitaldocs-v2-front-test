@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import { useMemo, useCallback } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 // @mui
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
@@ -101,8 +101,8 @@ export function OpcoesForm({ dados, options, onClose }) {
   });
   const defaultValues = useMemo(() => ({ items: [{ item: null }] }), []);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
 
   const onSubmit = async () => {
@@ -195,8 +195,8 @@ export function Condicao({ onClose, dados }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   return (
     <FormProvider
@@ -290,8 +290,8 @@ function Conteudo({ dados, onClose, id }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
   const { append, remove, fields } = useFieldArray({ control, name: 'sub_alineas' });
 
   const onSubmit = async () => {

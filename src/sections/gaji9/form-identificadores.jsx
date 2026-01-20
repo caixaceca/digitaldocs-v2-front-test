@@ -52,15 +52,14 @@ export function ProdutoForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { values, msg: `Produto ${isEdit ? 'rotulado' : 'importado'}`, onClose };
     if (isEdit) {
       const formData = JSON.stringify([{ id: values?.id, rotulo: values?.rotulo, ativo: values?.ativo }]);
@@ -194,15 +193,14 @@ export function TipoTitularForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { id: selectedItem?.id, msg: `Tipo de titular ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)('tiposTitulares', JSON.stringify(values), params));
   };
@@ -242,15 +240,14 @@ export function TipoForm({ item, label, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { id: selectedItem?.id, msg: `Item ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)(item, JSON.stringify(values), params));
   };
@@ -303,15 +300,14 @@ export function GarantiaForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const formData = { ...values, reais: values?.reais === 'Real' };
     const params = { id: selectedItem?.id, msg: `Tipo de garantia ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)('tiposGarantias', JSON.stringify(formData), params));
@@ -353,15 +349,14 @@ export function SeguroForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { id: selectedItem?.id, msg: `Tipo de seguro ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)('tiposSeguros', JSON.stringify(values), params));
   };
@@ -406,15 +401,14 @@ export function SubtiposForm({ id, item, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const formData = isEdit ? values : [values];
     const params = {
       ...{ id: item?.id, garantiaId: id, getItem: 'selectedItem' },
@@ -616,15 +610,14 @@ export function FreguesiaForm({ onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, watch, handleSubmit } = methods;
-  const values = watch();
+  const { reset, handleSubmit } = methods;
 
   useEffect(() => {
     reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItem]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = { id: selectedItem?.id, msg: `Freguesia ${isEdit ? 'atualizada' : 'adicionada'}`, onClose };
     dispatch((isEdit ? updateItem : createItem)('freguesias', JSON.stringify(values), params));
   };

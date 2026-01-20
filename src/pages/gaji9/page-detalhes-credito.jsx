@@ -1,14 +1,15 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-//
+// utils
 import useSettings from '../../hooks/useSettings';
 import { usePermissao } from '../../hooks/useAcesso';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, setModal, getSuccess, deleteItem } from '../../redux/slices/gaji9';
@@ -34,7 +35,6 @@ export default function PageCreditoDetalhes() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { temPermissao, isGerente } = usePermissao();
-  const [currentTab, setCurrentTab] = useState('Caracterização');
   const permissao = isGerente || temPermissao(['READ_CREDITO']);
 
   const { credito, previewFile, selectedItem, isLoading, isLoadingDoc, modalGaji9, isSaving } = useSelector(
@@ -70,6 +70,8 @@ export default function PageCreditoDetalhes() {
     { value: 'Contratos', component: <TableInfoCredito params={{ id, tab: 'contratos', contratado }} /> },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Caracterização', 'tab-detalhes-credito');
+
   const openForm = (item) => dispatch(setModal({ item: item || '', dados: null }));
 
   const onClose = () => {
@@ -82,38 +84,38 @@ export default function PageCreditoDetalhes() {
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           voltar
+          tab={tab}
+          setTab={setTab}
           tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
           title={credito ? `${credito?.rotulo || credito?.componente} - ${credito?.cliente}` : 'Detalhes do crédito'}
         />
 
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
-          heading={currentTab === 'Caracterização' ? 'Detalhes do crédito' : currentTab}
+          heading={tab === 'Caracterização' ? 'Detalhes do crédito' : tab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'GAJ-i9', href: PATH_DIGITALDOCS.gaji9.gestao },
-            { name: currentTab === 'Caracterização' ? 'Detalhes do crédito' : currentTab },
+            { name: tab === 'Caracterização' ? 'Detalhes do crédito' : tab },
           ]}
           action={
             credito?.ativo &&
             !credito?.contratado &&
             permissao && (
               <Stack direction="row" spacing={0.75} alignItems="center">
-                {currentTab === 'Caracterização' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
+                {tab === 'Caracterização' && (isGerente || temPermissao(['UPDATE_CREDITO'])) && (
                   <>
                     <DefaultAction small button label="Editar" onClick={() => openForm('form-credito')} />
                     <DefaultAction small button label="Eliminar" onClick={() => openForm('eliminar-credito')} />
                   </>
                 )}
-                {currentTab === 'Intervenientes' && (isGerente || temPermissao(['CREATE_CREDITO'])) && (
+                {tab === 'Intervenientes' && (isGerente || temPermissao(['CREATE_CREDITO'])) && (
                   <DefaultAction small button label="Adicionar" onClick={() => openForm('form-interveniente')} />
                 )}
-                {currentTab === 'Contratos' && (isGerente || temPermissao(['READ_CONTRATO'])) && (
+                {tab === 'Contratos' && (isGerente || temPermissao(['READ_CONTRATO'])) && (
                   <DefaultAction small button label="Pré-visualizar" onClick={() => openForm('preview-contrato')} />
                 )}
-                {currentTab === 'Contratos' && (isGerente || temPermissao(['CREATE_CONTRATO'])) && (
+                {tab === 'Contratos' && (isGerente || temPermissao(['CREATE_CONTRATO'])) && (
                   <DefaultAction small button label="Gerar contrato" onClick={() => openForm('gerar-contrato')} />
                 )}
               </Stack>
@@ -126,7 +128,7 @@ export default function PageCreditoDetalhes() {
             <SearchNotFound404 message="Crédito não encontrado..." />
           ) : (
             <>
-              <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+              <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
 
               {(isLoadingDoc || previewFile) && (
                 <DialogPreviewDoc

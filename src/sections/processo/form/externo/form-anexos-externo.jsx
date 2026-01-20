@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { useSnackbar } from 'notistack';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -34,8 +34,8 @@ export default function FormAnexosExterno({ dados }) {
   const formSchema = shapeAnexos(outros, checkList);
   const defaultValues = useMemo(() => defaultAnexos(dadosStepper, checkList, []), [dadosStepper, checkList]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     try {
@@ -64,7 +64,7 @@ export default function FormAnexosExterno({ dados }) {
       appendAnexos(formData, values.anexos, outros, values.checklist);
 
       dispatch(createProcesso('processo', formData, { onClose, msg: 'Processo adicionado', id, ex: true }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

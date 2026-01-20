@@ -16,6 +16,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { ptDateTime } from '../../utils/formatTime';
 import { colorLabel } from '../../utils/getColorPresets';
 import { sortPermissoes } from '../../utils/formatObject';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
 import { updateItem, deleteItem } from '../../redux/slices/gaji9';
@@ -34,7 +35,6 @@ import { BalcaoForm, RecursoGrupoForm, UtilizadorGrupoForm } from './form-gaji9'
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function GrupoDetail({ dados }) {
-  const [currentTab, setCurrentTab] = useState('Info');
   const { colaboradores } = useSelector((state) => state.intranet);
 
   const tabsList = [
@@ -60,15 +60,12 @@ export function GrupoDetail({ dados }) {
     },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Info', '');
+
   return (
     <>
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        sx={{ mt: 2, mb: 1, boxShadow: 'none' }}
-        changeTab={(_, newValue) => setCurrentTab(newValue)}
-      />
-      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+      <TabsWrapperSimple tabsList={tabsList} tab={tab} sx={{ mt: 2, mb: 1, boxShadow: 'none' }} setTab={setTab} />
+      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </>
   );
 }

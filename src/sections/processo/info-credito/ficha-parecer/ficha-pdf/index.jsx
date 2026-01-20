@@ -27,6 +27,7 @@ export default function FichaPdf({ dados }) {
     try {
       return inlineStylesFromClasses(parecer);
     } catch (e) {
+      console.log(e);
       return parecer;
     }
   }, [parecer]);

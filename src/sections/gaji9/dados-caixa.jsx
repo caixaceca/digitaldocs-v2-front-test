@@ -86,10 +86,9 @@ export function InfoForm({ onClose }) {
     [infoCaixa]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { handleSubmit } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     const params = {
       onClose,
       id: infoCaixa?.id,

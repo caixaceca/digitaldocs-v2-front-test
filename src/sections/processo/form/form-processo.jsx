@@ -32,18 +32,42 @@ import ProcessoCON from './comunicacao-op-num';
 export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [fluxo, setFluxo] = useState(null);
-  const [estado, setEstado] = useState(null);
-  const id = useMemo(() => processo?.id || '', [processo?.id]);
 
   const { activeStep } = useSelector((state) => state.stepper);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { done, processo: newProcesso } = useSelector((state) => state.digitaldocs);
 
+  const inicialEstado = useMemo(() => {
+    if (!meusAmbientes?.length) return null;
+    if (isEdit) {
+      return meusAmbientes.find((item) => item.id === ambientId) || null;
+    }
+    return (
+      meusAmbientes.find((item) => item.id === ambientId && item.isinicial) ||
+      meusAmbientes.find((item) => item.isinicial) ||
+      null
+    );
+  }, [meusAmbientes, ambientId, isEdit]);
+
+  const inicialFluxo = useMemo(() => {
+    if (!meusAmbientes || !processo?.fluxo_id) return null;
+    const f = meusAmbientes.flatMap((item) => item.fluxos || []).find((f) => f.fluxo_id === processo?.fluxo_id);
+
+    return f ? { ...f, id: processo?.fluxo_id, nome: f?.assunto } : null;
+  }, [meusAmbientes, processo?.fluxo_id]);
+
+  const [selectedEstado, setSelectedEstado] = useState(null);
+  const [selectedFluxo, setSelectedFluxo] = useState(null);
+
+  const estado = selectedEstado || inicialEstado;
+  const fluxo = selectedFluxo || inicialFluxo;
+
+  const id = useMemo(() => processo?.id || '', [processo?.id]);
+
   const fluxosList = useMemo(() => {
     if (!estado?.fluxos) return [];
     return meusFluxos(estado.fluxos).map((row) => ({ ...row, nome: row?.assunto }));
-  }, [estado?.fluxos]);
+  }, [estado]);
 
   const estadosList = useMemo(() => meusAmbientes?.filter(({ isinicial }) => isinicial) || [], [meusAmbientes]);
 
@@ -52,35 +76,15 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!meusAmbientes?.length) return;
-
-    let estadoSelecionado = null;
-
-    if (isEdit) {
-      estadoSelecionado = meusAmbientes.find(({ id }) => id === ambientId) || null;
-    } else {
-      estadoSelecionado =
-        meusAmbientes.find(({ id, isinicial }) => id === ambientId && isinicial) ||
-        meusAmbientes.find(({ isinicial }) => isinicial) ||
-        null;
+    if (!isEdit && fluxo?.id) {
+      dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo.id, reset: { val: [] } }));
     }
-
-    if (estadoSelecionado) setEstado(estadoSelecionado);
-  }, [ambientId, meusAmbientes, isEdit]);
-
-  useEffect(() => {
-    const fluxoAlt = meusAmbientes
-      .flatMap((estado) => estado.fluxos)
-      .find((fluxo) => fluxo.fluxo_id === processo?.fluxo_id);
-    if (fluxoAlt) setFluxo({ ...fluxoAlt, id: processo?.fluxo_id, nome: fluxoAlt?.assunto });
-  }, [dispatch, meusAmbientes, processo?.fluxo_id]);
-
-  useEffect(() => {
-    if (!isEdit && fluxo?.id) dispatch(getFromParametrizacao('checklist', { fluxoId: fluxo?.id, reset: { val: [] } }));
   }, [dispatch, isEdit, fluxo?.id]);
 
   useEffect(() => {
-    if (done === 'Processo adicionado') navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${newProcesso?.id}`);
+    if (done === 'Processo adicionado' && newProcesso?.id) {
+      navigate(`${PATH_DIGITALDOCS.filaTrabalho.root}/${newProcesso.id}`);
+    }
   }, [done, navigate, newProcesso?.id]);
 
   const onClose = () => {
@@ -89,13 +93,14 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   };
 
   const changeFluxo = (newValue) => {
-    setFluxo(newValue);
+    setSelectedFluxo(newValue);
     dispatch(resetDados());
   };
 
   const changeEstado = (newValue) => {
-    setEstado(newValue);
-    changeFluxo(null);
+    setSelectedEstado(newValue);
+    setSelectedFluxo(null);
+    dispatch(resetDados());
   };
 
   return (
@@ -109,6 +114,7 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
           <EstadoAssunto dados={{ value: estado, setValue: changeEstado, options: estadosList, isEdit }} />
           <EstadoAssunto dados={{ value: fluxo, setValue: changeFluxo, options: fluxosList, label: 'Assunto' }} />
         </Stack>
+
         {!!fluxo?.iscon && (
           <Steps
             sx={{ mt: 1, mb: 0 }}
@@ -116,13 +122,16 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
             steps={isEdit ? ['Operação', 'Depositante'] : ['Operação', 'Depositante', 'Anexos']}
           />
         )}
+
         {!isEdit && fluxo && !fluxo?.iscon && (
           <Steps sx={{ mt: 1, mb: 0 }} activeStep={activeStep} steps={['Dados gerais', 'Anexos']} />
         )}
+
         <Box sx={{ top: 15, right: 15, position: 'absolute' }}>
-          <Fechar onClick={() => onClose()} />
+          <Fechar onClick={onClose} />
         </Box>
       </DialogTitle>
+
       <DialogContent sx={{ pt: 0 }}>
         {isEdit && !fluxo ? (
           <FormLoading />
@@ -139,8 +148,8 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
             ) : (
               <SearchNotFoundSmall
                 message={
-                  (!estado && 'Seleciona um assunto...') ||
-                  (!fluxo && 'Seleciona um assunto...') ||
+                  (!estado && 'Selecione um ambiente...') ||
+                  (!fluxo && 'Selecione um assunto...') ||
                   (isEdit && 'Estado atual não permite editar o processo...') ||
                   ''
                 }
@@ -153,8 +162,6 @@ export default function ProcessoForm({ isEdit = false, processo, ambientId }) {
   );
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function EstadoAssunto({ dados }) {
   const { value = null, setValue, options = [], label = 'Estado', isEdit = false } = dados;
   return (
@@ -165,9 +172,9 @@ export function EstadoAssunto({ dados }) {
       disableClearable
       options={options}
       disabled={isEdit}
-      getOptionLabel={(option) => option?.nome}
+      getOptionLabel={(option) => option?.nome || ''}
       onChange={(event, newValue) => setValue(newValue)}
-      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+      isOptionEqualToValue={(option, val) => option?.id === val?.id || option?.fluxo_id === val?.id}
       renderInput={(params) => <TextField {...params} label={label} color="success" variant="filled" />}
     />
   );

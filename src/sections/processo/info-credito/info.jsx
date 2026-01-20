@@ -12,6 +12,7 @@ import { ptDate } from '../../../utils/formatTime';
 import { colorLabel } from '../../../utils/getColorPresets';
 import { fCurrency, fPercent } from '../../../utils/formatNumber';
 import { formatPrazoAmortizacao } from '../../../utils/formatText';
+import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
 //
 import { useDispatch } from '../../../redux/store';
 import { getFromGaji9 } from '../../../redux/slices/gaji9';
@@ -36,7 +37,6 @@ const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent
 
 export default function InfoCredito({ dados }) {
   const dispatch = useDispatch();
-  const [currentTab, setCurrentTab] = useState('Caracterização');
 
   const modificar = dados?.estado?.preso && dados?.estado?.atribuidoAMim;
   const emAnalise = (dados?.estado?.estado || '')?.toLowerCase()?.includes('análise de crédito');
@@ -72,15 +72,12 @@ export default function InfoCredito({ dados }) {
     { value: 'Pareceres', component: <PareceresCredito infoCredito /> },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Caracterização', '');
+
   return (
     <Stack sx={{ p: { xs: 1, sm: 3 } }}>
-      <TabsWrapperSimple
-        sx={{ mb: 3 }}
-        tabsList={tabsList}
-        currentTab={currentTab}
-        changeTab={(event, newValue) => setCurrentTab(newValue)}
-      />
-      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+      <TabsWrapperSimple sx={{ mb: 3 }} tabsList={tabsList} tab={tab} setTab={setTab} />
+      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </Stack>
   );
 }

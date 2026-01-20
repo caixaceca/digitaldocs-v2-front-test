@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
-import { setItemValue } from '../../../utils/formatObject';
-// redux
 import { useDispatch } from '../../../redux/store';
 import { setModal } from '../../../redux/slices/suporte-cliente';
+import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
 // Components
 import { DefaultAction } from '../../../components/Actions';
 import { TabsWrapperSimple } from '../../../components/TabsWrapper';
@@ -17,7 +16,6 @@ import TableConfiguracoes from './table-configuracoes';
 
 export default function Configuracoes() {
   const dispatch = useDispatch();
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('suporte-config') || 'Assuntos');
 
   const tabsList = useMemo(
     () => [
@@ -33,31 +31,24 @@ export default function Configuracoes() {
     []
   );
 
-  useEffect(() => {
-    if (!currentTab || !tabsList?.map(({ value }) => value)?.includes(currentTab))
-      setItemValue(tabsList?.[0]?.value, setCurrentTab, 'suporte-config', false);
-  }, [tabsList, currentTab]);
+  const [tab, setTab] = useTabsSync(tabsList, 'Assuntos', 'tab-suporte-cliente-config');
 
   return (
     <>
       <HeaderBreadcrumbs
         sx={{ px: 1 }}
-        heading={`Configurações - ${currentTab}`}
+        heading={`Configurações - ${tab}`}
         action={
           <Stack direction="row" spacing={1}>
-            {currentTab === 'FAQ' && (
+            {tab === 'FAQ' && (
               <DefaultAction button label="Categorias" onClick={() => dispatch(setModal({ modal: 'categories' }))} />
             )}
             <DefaultAction button label="Adicionar" onClick={() => dispatch(setModal({ modal: 'add' }))} />
           </Stack>
         }
       />
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        changeTab={(event, newValue) => setItemValue(newValue, setCurrentTab, 'suporte-config', false)}
-      />
-      <>{tabsList?.find(({ value }) => value === currentTab)?.component}</>
+      <TabsWrapperSimple tab={tab} tabsList={tabsList} setTab={setTab} />
+      {tabsList?.find(({ value }) => value === tab)?.component}
     </>
   );
 }

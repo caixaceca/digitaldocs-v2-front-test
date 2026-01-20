@@ -1,4 +1,3 @@
-import { useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -9,11 +8,11 @@ import Skeleton from '@mui/material/Skeleton';
 import TableBody from '@mui/material/TableBody';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { useSelector } from '../../redux/store';
 import { colorLabel } from '../../utils/getColorPresets';
 import { sortPermissoes } from '../../utils/formatObject';
 import { ptDate, ptDateTime } from '../../utils/formatTime';
-// redux
-import { useSelector } from '../../redux/store';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // components
 import Label from '../../components/Label';
 import { newLineText } from '../../components/Panel';
@@ -49,8 +48,6 @@ export default function DetalhesGaji9({ closeModal, item, opcao = false }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function DetalhesTab({ item, dados }) {
-  const [currentTab, setCurrentTab] = useState('Info');
-
   const tabsList = [
     { value: 'Info', component: <DetalhesContent dados={dados} item={item} /> },
     ...((item === 'segmentos' && [
@@ -83,15 +80,12 @@ function DetalhesTab({ item, dados }) {
       []),
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Info');
+
   return (
     <>
-      <TabsWrapperSimple
-        tabsList={tabsList}
-        currentTab={currentTab}
-        sx={{ my: 2, boxShadow: 'none' }}
-        changeTab={(_, newValue) => setCurrentTab(newValue)}
-      />
-      <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+      <TabsWrapperSimple tabsList={tabsList} tab={tab} sx={{ my: 2, boxShadow: 'none' }} setTab={setTab} />
+      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </>
   );
 }

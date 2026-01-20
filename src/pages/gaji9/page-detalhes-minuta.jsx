@@ -9,6 +9,7 @@ import Container from '@mui/material/Container';
 import useSettings from '../../hooks/useSettings';
 import { usePermissao } from '../../hooks/useAcesso';
 import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
 import { getFromGaji9, getSuccess, openModal, closeModal } from '../../redux/slices/gaji9';
@@ -33,7 +34,6 @@ export default function PageMinutaDetalhes() {
   const { temPermissao } = usePermissao();
   const [action, setAction] = useState('');
   const permissao = temPermissao(['READ_MINUTA']);
-  const [currentTab, setCurrentTab] = useState('Dados');
 
   const { minuta, isLoading, isLoadingDoc, isOpenModal, previewFile } = useSelector((state) => state.gaji9);
 
@@ -64,30 +64,32 @@ export default function PageMinutaDetalhes() {
     },
   ];
 
+  const [tab, setTab] = useTabsSync(tabsList, 'Dados', 'tab-detalhes-minuta');
+
   return (
     <Page title="Minuta | DigitalDocs">
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <TabsWrapper
           voltar
+          tab={tab}
+          setTab={setTab}
           tabsList={tabsList}
-          currentTab={currentTab}
-          changeTab={setCurrentTab}
           title={minuta?.titulo || 'Detalhes da minuta'}
         />
 
         <HeaderBreadcrumbs
           sx={{ px: 1 }}
-          heading={currentTab === 'Dados' ? 'Detalhes da minuta' : currentTab}
+          heading={tab === 'Dados' ? 'Detalhes da minuta' : tab}
           links={[
             { name: 'Indicadores', href: PATH_DIGITALDOCS.root },
             { name: 'GAJ-i9', href: PATH_DIGITALDOCS.gaji9.gestao },
-            { name: currentTab === 'Dados' ? 'Detalhes da minuta' : currentTab },
+            { name: tab === 'Dados' ? 'Detalhes da minuta' : tab },
           ]}
           action={
             !!minuta &&
             temPermissao(['READ_MINUTA']) && (
               <Stack direction="row" spacing={0.75} alignItems="center">
-                {minuta?.clausulas?.length > 0 && currentTab !== 'Tipos de garantia' && (
+                {minuta?.clausulas?.length > 0 && tab !== 'Tipos de garantia' && (
                   <DefaultAction button label="Pré-visualizar" onClick={() => handleAction('preview')} />
                 )}
               </Stack>
@@ -100,7 +102,7 @@ export default function PageMinutaDetalhes() {
             <SearchNotFound404 message="Minuta não encontrada..." />
           ) : (
             <>
-              <Box>{tabsList?.find(({ value }) => value === currentTab)?.component}</Box>
+              <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
               {isOpenModal && action === 'preview' && <PreviewForm onClose={() => handleClose()} id={id} />}
             </>
           )}

@@ -70,7 +70,7 @@ export default function Fincc() {
       Packer.toBlob(doc).then((blob) => {
         saveAs(blob, `FINCC - Simulação - ${mutuario || 'Proponente'}.docx`);
       });
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao gerar FINCC', { variant: 'error' });
     } finally {
       setLoading(false);

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFormContext, useFieldArray } from 'react-hook-form';
+import { useForm, useWatch, useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -212,8 +212,8 @@ function Conteudo({ clausula }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   return (
     <FormProvider
@@ -262,8 +262,8 @@ export function Numeros({ clausula }) {
     [dadosStepper, clausula]
   );
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, control, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
   const { fields, append, remove } = useFieldArray({ control, name: 'alineas' });
 
   const eliminarNumero = async () => {

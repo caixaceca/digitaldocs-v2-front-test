@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import { useMemo } from 'react';
 import { useSnackbar } from 'notistack';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -62,8 +62,8 @@ export function FormSituacao({ dados, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, handleSubmit } = methods;
-  const values = watch();
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     try {
@@ -81,7 +81,7 @@ export function FormSituacao({ dados, onClose }) {
       };
       const params = { id: dados?.processoId, creditoId: dados?.id, msg: 'Situação atualizada' };
       dispatch(updateItem('situacaoCredito', JSON.stringify(formData), { ...params, onClose, fillCredito: true }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };

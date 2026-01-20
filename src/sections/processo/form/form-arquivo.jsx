@@ -3,7 +3,7 @@ import { format, add } from 'date-fns';
 import { useSnackbar } from 'notistack';
 import { useEffect, useMemo } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -73,8 +73,8 @@ export function ArquivarForm({ naoFinal, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const { control, setValue, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   const onSubmit = async () => {
     try {
@@ -95,7 +95,7 @@ export function ArquivarForm({ naoFinal, onClose }) {
 
       const params = { id: processo?.id, msg: 'Processo arquivado', anexos: values?.anexos?.length ? anexos : null };
       dispatch(updateItem('arquivar', JSON.stringify(formData), { estadoId: processo?.estado?.estado_id, ...params }));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
@@ -157,10 +157,12 @@ export function DesarquivarForm({ id, colaboradores }) {
     perfil: Yup.mixed().required('Colaborador não pode ficar vazio'),
     observacao: Yup.string().required('Observação não pode ficar vazio'),
   });
-  const defaultValues = useMemo(() => ({ estado: null, perfil: null, observacao: '' }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { watch, setValue, handleSubmit } = methods;
-  const values = watch();
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { estado: null, perfil: null, observacao: '' },
+  });
+  const { control, setValue, handleSubmit } = methods;
+  const values = useWatch({ control });
 
   useEffect(() => {
     if (id) dispatch(getInfoProcesso('destinosDesarquivamento', { id }));
@@ -183,7 +185,7 @@ export function DesarquivarForm({ id, colaboradores }) {
       };
       const params = { id, msg: 'Processo desarquivado', onClose: () => dispatch(setModal()) };
       dispatch(updateItem('desarquivar', JSON.stringify(dados), params));
-    } catch (error) {
+    } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
   };
