@@ -85,19 +85,19 @@ export default function DialogPreviewDoc({ params, onClose }) {
                 {!url ? (
                   <SearchNotFound message="Documento não encontrado..." />
                 ) : (
-                  <object
-                    data={url}
+                  <iframe
+                    src={url}
                     width="100%"
                     height="100%"
                     title={titulo}
-                    type="application/pdf"
-                    style={{ colorScheme: theme.palette.mode }}
+                    key="iframe-preview"
+                    style={{ border: 'none', colorScheme: theme.palette.mode }}
                   >
                     <p>
                       Seu navegador não suporta a visualização de PDFs.
                       <a href={url}>Clique aqui para baixar o arquivo.</a>
                     </p>
-                  </object>
+                  </iframe>
                 )}
               </>
             )}

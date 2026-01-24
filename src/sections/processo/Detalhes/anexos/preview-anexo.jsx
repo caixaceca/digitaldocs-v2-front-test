@@ -13,33 +13,22 @@ export function PdfPreview({ url, title }) {
   const heightContent =
     document?.getElementById('detalhes')?.clientHeight - document?.getElementById('anexos')?.clientHeight - 52;
 
-  // const containerRef = useRef(null);
-
-  // const toggleFullScreen = () => {
-  //   if (containerRef.current) {
-  //     if (!document.fullscreenElement) containerRef.current.requestFullscreen();
-  //     else document.exitFullscreen();
-  //   }
-  // };
-
   return (
     <Box sx={{ height: `${heightContent}px`, minHeight: '660px', boxShadow: 3 }}>
-      {/* <button onClick={toggleFullScreen} style={{ position: 'absolute', zIndex: 10, right: 0 }}>
-        Expandir Tela Cheia
-      </button> */}
-      <object
-        data={url}
-        title={title}
+      <iframe
+        src={url}
         width="100%"
         height="100%"
+        title={title}
+        key="pdf-viewer"
         type="application/pdf"
-        style={{ colorScheme: theme.palette.mode, minHeight: '660px' }}
+        style={{ border: 'none', colorScheme: theme.palette.mode, minHeight: '660px' }}
       >
         <p>
           Seu navegador não suporta a visualização de PDFs.
           <a href={url}>Clique aqui para baixar o arquivo.</a>
         </p>
-      </object>
+      </iframe>
     </Box>
   );
 }
