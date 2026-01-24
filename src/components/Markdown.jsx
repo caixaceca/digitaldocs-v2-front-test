@@ -15,12 +15,16 @@ const MarkdownStyle = styled('div')(({ theme }) => {
   const isLight = theme.palette.mode === 'light';
 
   return {
+    // Segurança para evitar que o texto ultrapasse o container
+    wordBreak: 'break-word',
+    overflowWrap: 'break-word',
+
     // Listas UL normais
     '& ul': {
       ...theme.typography.body1,
       paddingLeft: theme.spacing(5),
       listStyleType: 'disc',
-      '& li': { lineHeight: 1.5 },
+      '& li': { lineHeight: 2 },
     },
 
     // Listas OL normais
@@ -28,7 +32,39 @@ const MarkdownStyle = styled('div')(({ theme }) => {
       ...theme.typography.body1,
       paddingLeft: theme.spacing(5),
       listStyleType: 'decimal',
-      '& li': { lineHeight: 1.5 },
+      '& li': { lineHeight: 2 },
+    },
+
+    // Caso o Quill coloque o atributo no <li> (ex.: <li data-list="bullet">), converte visualmente
+    '& ol li[data-list="bullet"]': {
+      listStyleType: 'disc !important',
+      display: 'list-item',
+      marginLeft: theme.spacing(0),
+      paddingLeft: theme.spacing(0),
+    },
+
+    // Se Quill usar data-list no próprio OL
+    '& ol[data-list="bullet"]': { listStyleType: 'disc !important' },
+
+    // Remove os spans de UI que o Quill injeta
+    '& span.ql-ui': { display: 'none !important' },
+
+    // Caso existam bullets "checked"/"unchecked"
+    '& li[data-list="checked"], & li[data-list="unchecked"]': {
+      listStyleType: 'none',
+      '&::before': { content: '""' },
+      display: 'flex',
+      alignItems: 'center',
+    },
+    '& li[data-list="checked"]::before': {
+      content: '"\\2713\\00a0"', // ✓
+      marginRight: theme.spacing(1),
+      fontSize: '0.9em',
+    },
+    '& li[data-list="unchecked"]::before': {
+      content: '"\\25A1\\00a0"', // □
+      marginRight: theme.spacing(1),
+      fontSize: '0.9em',
     },
 
     // Blockquote
@@ -37,6 +73,7 @@ const MarkdownStyle = styled('div')(({ theme }) => {
       fontSize: '1.5em',
       margin: '40px auto',
       position: 'relative',
+      fontFamily: 'Georgia, serif',
       padding: theme.spacing(3, 3, 3, 8),
       borderRadius: Number(theme.shape.borderRadius) * 2,
       backgroundColor: theme.palette.background.neutral,
@@ -45,7 +82,9 @@ const MarkdownStyle = styled('div')(({ theme }) => {
         width: '80%',
       },
       '& p, & span': {
+        marginBottom: '0 !important',
         fontSize: 'inherit !important',
+        fontFamily: 'Georgia, serif !important',
         color: `${theme.palette.text.secondary} !important`,
       },
       '&:before': {
@@ -59,11 +98,11 @@ const MarkdownStyle = styled('div')(({ theme }) => {
       },
     },
 
-    // Code Block
     '& pre, & pre > code': {
       fontSize: 16,
       overflowX: 'auto',
-      whiteSpace: 'pre',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-all',
       padding: theme.spacing(2),
       color: theme.palette.common.white,
       borderRadius: theme.shape.borderRadius,
@@ -72,7 +111,8 @@ const MarkdownStyle = styled('div')(({ theme }) => {
     '& code': {
       fontSize: 14,
       borderRadius: 4,
-      whiteSpace: 'pre',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-all',
       padding: theme.spacing(0.2, 0.5),
       color: theme.palette.warning[isLight ? 'darker' : 'lighter'],
       backgroundColor: theme.palette.warning[isLight ? 'lighter' : 'darker'],
@@ -91,6 +131,26 @@ export default function Markdown({ ...other }) {
   );
 }
 
+export function MarkdownCaption({ children }) {
+  return (
+    <MarkdownStyle>
+      <ReactMarkdown
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          p: ({ ...props }) => <Typography variant="caption" {...props} />,
+          h1: ({ ...props }) => <Typography variant="caption" {...props} />,
+          h2: ({ ...props }) => <Typography variant="caption" {...props} />,
+          h3: ({ ...props }) => <Typography variant="caption" {...props} />,
+          li: ({ ...props }) => <Typography component="li" variant="caption" {...props} />,
+          span: ({ ...props }) => <Typography component="span" variant="caption" {...props} />,
+        }}
+      >
+        {children}
+      </ReactMarkdown>
+    </MarkdownStyle>
+  );
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 const components = {
@@ -103,11 +163,11 @@ const components = {
   hr: ({ ...props }) => <Divider sx={{ my: 3 }} {...props} />,
   img: ({ ...props }) => <Image alt={props.alt} ratio="16/9" sx={{ borderRadius: 2, my: 5 }} {...props} />,
   a: ({ ...props }) =>
-    props.href.includes('http') ? <Link target="_blank" rel="noopener" {...props} /> : <Link {...props} />,
+    props.href?.includes('http') ? <Link target="_blank" rel="noopener" {...props} /> : <Link {...props} />,
 
   p: ({ ...props }) => {
     if (props.style) return <p {...props} />;
-    return <Typography variant="body1" sx={{ m: 0 }} {...props} />;
+    return <Typography variant="body1" {...props} />;
   },
 
   li: ({ node, className, style, ...props }) => {
