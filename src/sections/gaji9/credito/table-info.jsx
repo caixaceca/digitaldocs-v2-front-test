@@ -13,7 +13,7 @@ import { usePermissao } from '../../../hooks/useAcesso';
 import useTable, { getComparator } from '../../../hooks/useTable';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { getDocumento, getFromGaji9, deleteItem, setModal } from '../../../redux/slices/gaji9';
+import { getDocumentoGaji9, getFromGaji9, deleteItem, setModal } from '../../../redux/slices/gaji9';
 // Components
 import Scrollbar from '../../../components/Scrollbar';
 import { DefaultAction } from '../../../components/Actions';
@@ -69,7 +69,8 @@ export function TableInfoCredito({ params, dados = [] }) {
   const isNotFound = !dataFiltered.length;
 
   const openModal = (item, dados) => dispatch(setModal({ item, dados }));
-  const downloadContrato = (codigo) => dispatch(getDocumento('contrato', { codigo, titulo: `CONTRATO: ${codigo}` }));
+  const downloadContrato = (codigo) =>
+    dispatch(getDocumentoGaji9('contrato', { codigo, titulo: `CONTRATO: ${codigo}` }));
 
   const eliminarInterveniente = () => {
     const params = { numero: selectedItem?.participante_id, getItem: 'credito', onClose: () => openModal() };

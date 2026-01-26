@@ -5,10 +5,10 @@ import { msalInstance, loginRequest } from '../config';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [error, setError] = useState(null);
   const [account, setAccount] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const loadActiveAccount = async () => {
     await msalInstance.initialize();
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
 
     setLoginLoading(true);
     try {
-      const response = await msalInstance.loginPopup(loginRequest);
+      const response = await msalInstance.loginRedirect(loginRequest);
       msalInstance.setActiveAccount(response.account);
       setAccount(response.account);
     } catch (err) {

@@ -15,7 +15,7 @@ import { getItem } from './clausulas/form-clausula';
 import { listaTitrulares, listaGarantias, subTiposGarantia } from './applySortFilter';
 // redux
 import { useSelector, useDispatch } from '../../redux/store';
-import { getDocumento, getSuccess, getFromGaji9 } from '../../redux/slices/gaji9';
+import { getDocumentoGaji9, getSuccess, getFromGaji9 } from '../../redux/slices/gaji9';
 // components
 import GridItem from '../../components/GridItem';
 import { DialogButons } from '../../components/Actions';
@@ -32,7 +32,7 @@ export function PreviewForm({ id = 0, onClose }) {
   const { handleSubmit } = methods;
 
   const onSubmit = async (values) => {
-    dispatch(getDocumento('minuta', { id, ...values }));
+    dispatch(getDocumentoGaji9('minuta', { id, ...values }));
   };
 
   return (
@@ -120,7 +120,7 @@ export function PreviewMinutaForm({ onClose }) {
         sub_tipo_garantia_id: values?.sub_tipo_garantia_id?.id,
       }).filter(([, v]) => !!v)
     );
-    dispatch(getDocumento('minutav2', { restrito: values.restrito, rascunho: values.rascunho, ...params }));
+    dispatch(getDocumentoGaji9('minutav2', { restrito: values.restrito, rascunho: values.rascunho, ...params }));
   };
 
   useEffect(() => {

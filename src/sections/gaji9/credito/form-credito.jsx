@@ -14,7 +14,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { formatDate, fillData } from '../../../utils/formatTime';
 // redux
 import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromGaji9, getDocumento, createItem, updateItem } from '../../../redux/slices/gaji9';
+import { getFromGaji9, getDocumentoGaji9, createItem, updateItem } from '../../../redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -343,7 +343,7 @@ export function PreviewForm({ item, onClose }) {
 
   const onSubmit = async () => {
     const titulo = `${item === 'preview-contrato' ? 'Pré-visualização de ' : ''}Contrato: Cliente ${cliente}`;
-    dispatch(getDocumento(item, { ...{ creditoId: id, representanteId: values?.representante?.id }, titulo }));
+    dispatch(getDocumentoGaji9(item, { ...{ creditoId: id, representanteId: values?.representante?.id }, titulo }));
   };
 
   return (

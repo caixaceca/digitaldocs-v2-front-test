@@ -163,7 +163,10 @@ export function EncaminharEmSerie({ dados }) {
   const onSubmit = async () => dispatch(updateDados({ forward: true, dados: values }));
 
   useEffect(() => {
-    if (indicarMotivo) dispatch(getFromParametrizacao('motivosTransicao', { fluxoId, modo: 'Seguimento' }));
+    if (indicarMotivo) {
+      const modo = acao === 'DEVOLVER' ? 'Devolução' : 'Seguimento';
+      dispatch(getFromParametrizacao('motivosTransicao', { fluxoId, modo }));
+    }
   }, [acao, dispatch, indicarMotivo, fluxoId]);
 
   useEffect(() => {
@@ -439,7 +442,7 @@ export function EncaminharEmParalelo({ destinos, onClose }) {
   );
 }
 
-// --- CONFIDENCILAIDADES --------------------------------------------------------------------------------------
+// --- CONFIDENCILAIDADES ----------------------------------------------------------------------------------------------
 
 export function Confidencialidade({ estadosIncluidos, estadosExcluidos, perfisIncluidos, perfisExcluidos }) {
   const { colaboradores } = useSelector((state) => state.intranet);

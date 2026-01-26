@@ -127,7 +127,7 @@ export function getFromGaji9(item, params) {
 
     try {
       const accessToken = await getAccessToken();
-      console.log(accessToken);
+      // console.log(accessToken);
       const apiUrl =
         // DETALHES
         (item === 'infoCaixa' && `/v1/suportes/instituicao`) ||
@@ -232,7 +232,7 @@ export function getFromGaji9(item, params) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function getDocumento(item, params) {
+export function getDocumentoGaji9(item, params) {
   return async (dispatch) => {
     dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: null }));
     dispatch(slice.actions.getSuccess({ item: 'isLoadingDoc', dados: true }));
@@ -256,22 +256,15 @@ export function getDocumento(item, params) {
           }&isento_comissao=${params?.isento}&com_representante=${params?.representante}`) ||
         '';
       if (apiUrl) {
-        const headers = {
-          responseType: 'arraybuffer',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            ...(item === 'minutav2' ? { 'content-type': 'application/json' } : {}),
-          },
-        };
+        const ct = item === 'minutav2' ? { 'content-type': 'application/json' } : null;
+        const headers = { responseType: 'arraybuffer', headers: { Authorization: `Bearer ${accessToken}`, ...ct } };
+        const dados = item === 'minutav2' ? JSON.stringify(params) : null;
         const response =
           item === 'gerar-contrato' || item === 'minutav2'
-            ? await axios.post(
-                `${API_GAJI9_URL}${apiUrl}`,
-                item === 'minutav2' ? JSON.stringify(params) : null,
-                headers
-              )
+            ? await axios.post(`${API_GAJI9_URL}${apiUrl}`, dados, headers)
             : await axios.get(`${API_GAJI9_URL}${apiUrl}`, headers);
-        const blob = new Blob([response.data], { type: params?.tipo_conteudo });
+
+        const blob = new Blob([response.data], { type: 'application/pdf' });
         const fileUrl = URL.createObjectURL(blob);
         dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: fileUrl }));
         if (item === 'gerar-contrato') {
