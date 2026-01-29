@@ -26,8 +26,7 @@ export default function FichaPdf({ dados }) {
   const parecerInline = useMemo(() => {
     try {
       return inlineStylesFromClasses(parecer);
-    } catch (e) {
-      console.log(e);
+    } catch {
       return parecer;
     }
   }, [parecer]);

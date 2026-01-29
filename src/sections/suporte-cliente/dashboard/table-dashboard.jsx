@@ -12,8 +12,9 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
+import { getColorRating } from '../utils';
 import { noDados } from '../../../components/Panel';
-import { LabelStatus, getColorRating } from '../utils';
+import { fNumber, fPercent } from '@/utils/formatNumber';
 import { ptDateTime, toHourLabel } from '../../../utils/formatTime';
 //
 import { TableSearchNotFound } from '../../../components/table/SearchNotFound';
@@ -46,34 +47,6 @@ export function Asuntos({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Recentes({ dados }) {
-  return (
-    <TableDashboard
-      title="Tickets recentes"
-      headLabel={[
-        { id: 'subject_name', label: 'Assunto' },
-        { id: 'customer_name', label: 'Requerente' },
-        { id: 'created_at', label: 'Data', align: 'center' },
-        { id: 'status', label: 'Estado', align: 'center' },
-      ]}
-      body={dados.map((row) => (
-        <TableRow key={row.id} hover>
-          <TableCell>{row.subject_name}</TableCell>
-          <TableCell>{row.customer_name}</TableCell>
-          <TableCell align="center" sx={{ typography: 'caption' }}>
-            {ptDateTime(row.created_at)}
-          </TableCell>
-          <TableCell align="center">
-            <LabelStatus label={row?.status} />
-          </TableCell>
-        </TableRow>
-      ))}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function Desempenho({ dados }) {
   return (
     <TableDashboard
@@ -90,6 +63,32 @@ export function Desempenho({ dados }) {
           <TableCell align="center">{row.closed}</TableCell>
           <TableCell align="center">{row.resolved}</TableCell>
           <Avaliacao rating={row.rating} />
+        </TableRow>
+      ))}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function Departamentos({ dados }) {
+  return (
+    <TableDashboard
+      title="Desempenho por departamento"
+      headLabel={[
+        { id: 'department_name', label: 'Departamento' },
+        { id: 'check_in_count', label: 'Entradas', align: 'right' },
+        { id: 'check_out_count', label: 'Saídas', align: 'right' },
+        { id: 'check_out_rate', label: 'Taxa de Saída', align: 'right' },
+        { id: 'sla_compliance_rate', label: 'Conformidade SLA', align: 'right' },
+      ]}
+      body={dados.map((row) => (
+        <TableRow key={row.id} hover>
+          <TableCell>{row.department_name}</TableCell>
+          <TableCell align="right">{fNumber(row.check_in_count)}</TableCell>
+          <TableCell align="right">{fNumber(row.check_out_count)}</TableCell>
+          <TableCell align="right">{fPercent(row?.check_out_rate * 100)}</TableCell>
+          <TableCell align="right">{fPercent(row?.sla_compliance_rate * 100)}</TableCell>
         </TableRow>
       ))}
     />

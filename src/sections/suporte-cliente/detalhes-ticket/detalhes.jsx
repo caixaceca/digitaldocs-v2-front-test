@@ -112,7 +112,7 @@ function Avaliacao({ avaliacao }) {
         <Typography variant="subtitle1" sx={{ color: getColorRating(rating), lineHeight: 1.5, px: 1 }}>
           {ratingList?.find(({ id }) => id === avaliacao?.rating)?.label}
         </Typography>
-        <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.5 }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.5, pb: 0.05 }}>
           {ptDateTime(date)}
         </Typography>
       </Stack>

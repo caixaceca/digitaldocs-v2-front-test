@@ -115,8 +115,8 @@ function TimelineRowItem({ row, isLast, isDesktop }) {
           )}
           {action === 'Encaminhamento' && (
             <Typography variant="body2">
-              Ticket encaminhado de <strong>{row?.from_department_name}</strong> para{' '}
-              <strong>{row?.to_department_name}</strong>
+              Ticket encaminhado {row?.from_department_name ? ' de' : ``} <strong>{row?.from_department_name}</strong>{' '}
+              para <strong>{row?.to_department_name}</strong>
             </Typography>
           )}
           {action === 'Enceramento' && (

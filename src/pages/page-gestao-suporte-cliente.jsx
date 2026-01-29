@@ -24,29 +24,35 @@ export default function PageGestaoSuporteCliente() {
   const [department, setDepartment] = useState(null);
 
   const { departamentos, utilizador } = useSelector((state) => state.suporte);
-  const admin = useMemo(() => utilizador?.role === 'ADMINISTRATOR', [utilizador]);
 
   const tabsList = useMemo(
     () => [
-      { value: 'Tickets', component: <Tickets department={department} setDepartment={setDepartment} admin={admin} /> },
       {
-        value: 'Dashboard',
-        component: <Dashboard department={department} setDepartment={setDepartment} departamentos={departamentos} />,
+        value: 'Tickets',
+        component: (
+          <Tickets department={department} setDepartment={setDepartment} admin={utilizador?.role === 'ADMINISTRATOR'} />
+        ),
       },
-      ...(admin ? [{ value: 'Configurações', component: <Configuracoes /> }] : []),
+      ...(utilizador?.role === 'ADMINISTRATOR' || utilizador?.role === 'COORDINATOR'
+        ? [
+            { value: 'Dashboard', component: <Dashboard params={{ department, setDepartment, departamentos }} /> },
+            { value: 'Configurações', component: <Configuracoes role={utilizador?.role} /> },
+          ]
+        : []),
+
       { value: 'Procurar', icon: <SearchIcon sx={{ width: 20, height: 20 }} />, component: <ProcurarPedidos /> },
     ],
-    [department, admin, departamentos]
+    [department, utilizador?.role, departamentos]
   );
 
   useEffect(() => {
-    if (!department?.id && departamentos?.length > 0 && !admin) {
+    if (!department?.id && departamentos?.length > 0 && utilizador?.role !== 'ADMINISTRATOR') {
       const idSel = localStorage.getItem('departmentTicket') || utilizador?.department_id;
       const dep = departamentos.find(({ id }) => Number(id) === Number(idSel));
       if (dep) setDepartment({ id: dep.id, abreviation: dep.abreviation });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [admin, departamentos, utilizador]);
+  }, [departamentos, utilizador]);
 
   const [tab, setTab] = useTabsSync(tabsList, 'Tickets', 'tab-suporte-cliente');
 

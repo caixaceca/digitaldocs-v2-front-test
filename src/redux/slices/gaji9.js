@@ -264,7 +264,8 @@ export function getDocumentoGaji9(item, params) {
             ? await axios.post(`${API_GAJI9_URL}${apiUrl}`, dados, headers)
             : await axios.get(`${API_GAJI9_URL}${apiUrl}`, headers);
 
-        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const contentType = response.headers['content-type'] || 'application/pdf';
+        const blob = new Blob([response.data], { type: contentType });
         const fileUrl = URL.createObjectURL(blob);
         dispatch(slice.actions.getSuccess({ item: 'previewFile', dados: fileUrl }));
         if (item === 'gerar-contrato') {

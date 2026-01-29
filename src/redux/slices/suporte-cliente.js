@@ -192,7 +192,7 @@ export function updateInSuporte(item, body, params) {
 
       if (item === 'core-validation') {
         // const response = await axios.patch(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
-        body = JSON.stringify({ coreBankingAccountValidation: null, coreBankingEmailValition: null, ...body });
+        body = JSON.stringify({ coreBankingAccountValidation: false, coreBankingEmailValidation: false, ...body });
       }
 
       const apiUrl =
@@ -212,7 +212,7 @@ export function updateInSuporte(item, body, params) {
         (item === 'toggle-prompts' && `/api/v1/mail-scan-presets/toggle-active/${params?.id}`) ||
         // ticket
         (item === 'assign' && `/api/v1/tickets/assign/${params?.id}/${params?.value?.id}`) ||
-        // (item === 'core-validation' && `/api/v1/customers/validate-core-bank/${params?.id}`) ||
+        (item === 'core-validation' && `/api/v1/customers/validate-core-bank/${params?.id}`) ||
         (item === 'change-department' && `/api/v1/tickets/change-department/${params?.id}/${params?.value?.id}`) ||
         (item === 'change-status' &&
           `/api/v1/tickets/change-status/${params?.id}/${params?.value?.id}?resolved=${!!params?.resolved}`) ||

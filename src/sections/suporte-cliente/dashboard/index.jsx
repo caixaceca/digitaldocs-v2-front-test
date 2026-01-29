@@ -16,14 +16,15 @@ import { DashboardTicketSkeleton } from '../../../components/skeleton';
 //
 import KPI from './kpi';
 import { Evolucao, PorDepartamento } from './chart-dasboard';
-import { Asuntos, Recentes, Avaliacoes, Desempenho } from './table-dashboard';
+import { Asuntos, Departamentos, Avaliacoes, Desempenho } from './table-dashboard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function AdminDashboardMetrics({ departamentos = [], department, setDepartment }) {
+export default function AdminDashboardMetrics({ params }) {
   const dispatch = useDispatch();
   const [data, setData] = useState(new Date());
   const [periodo, setPeriodo] = useState('Mensal');
+  const { departamentos = [], department, setDepartment } = params;
 
   const { indicadores, isLoading } = useSelector((state) => state.suporte);
   const mensal = indicadores?.indicators_by_day ?? [];
@@ -109,7 +110,13 @@ export default function AdminDashboardMetrics({ departamentos = [], department, 
               <Desempenho dados={indicadores?.indicators_by_employee?.filter(({ closed }) => closed) ?? []} />
             </GridItem>
             <GridItem md={6}>
-              <Recentes dados={indicadores?.recent_tickets ?? []} />
+              <Departamentos
+                dados={
+                  indicadores?.indicators_by_department?.filter(
+                    ({ check_in_count, check_out_count }) => check_in_count || check_out_count
+                  ) ?? []
+                }
+              />
             </GridItem>
             <GridItem md={6}>
               <Avaliacoes dados={indicadores?.recent_evaluations ?? []} />

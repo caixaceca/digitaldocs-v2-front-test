@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
@@ -7,10 +7,9 @@ import Typography from '@mui/material/Typography';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { useSelector } from '../../../redux/store';
 import { getStatusLabel, useColaborador } from '../utils';
 import { colorLabel } from '../../../utils/getColorPresets';
-import { useDispatch, useSelector } from '../../../redux/store';
-import { updateInSuporte } from '../../../redux/slices/suporte-cliente';
 import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
 // components
 import { Criado } from '../../../components/Panel';
@@ -27,25 +26,25 @@ import { Detalhes } from './detalhes';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesTicket({ onClose }) {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const { isLoading, selectedItem, utilizador } = useSelector((state) => state.suporte);
   const atribuidoA = useColaborador({ userId: selectedItem?.current_user_id, nome: true });
   const admin = useMemo(() => utilizador?.role === 'ADMINISTRATOR' || utilizador?.role === 'COORDINATOR', [utilizador]);
-  const { customer = null, status = '' } = selectedItem || {};
+  // const { customer = null, status = '' } = selectedItem || {};
 
-  useEffect(() => {
-    if (
-      status !== 'DRAFT' &&
-      status !== 'CLOSED' &&
-      customer?.account_number &&
-      customer?.core_banking_account_validation === null
-    ) {
-      const formData = { coreBankingAccountValidation: null, coreBankingEmailValition: null };
-      dispatch(updateInSuporte('core-validation', formData, { id: customer?.id, patch: true }));
-    }
-    // if (customer?.account_number && customer?.core_banking_account_validation === null)
-    //   dispatch(updateInSuporte('core-validation', null, { id: customer?.id, patch: true }));
-  }, [dispatch, customer?.account_number, customer?.core_banking_account_validation, customer?.id, status]);
+  // useEffect(() => {
+  //   if (
+  //     status !== 'DRAFT' &&
+  //     status !== 'CLOSED' &&
+  //     customer?.account_number &&
+  //     customer?.core_banking_account_validation === null
+  //   ) {
+  //     const formData = { coreBankingAccountValidation: null, coreBankingEmailValition: null };
+  //     dispatch(updateInSuporte('core-validation', formData, { id: customer?.id, patch: true }));
+  //   }
+  //   if (customer?.account_number && customer?.core_banking_account_validation === null)
+  //     dispatch(updateInSuporte('core-validation', null, { id: customer?.id, patch: true }));
+  // }, [dispatch, customer?.account_number, customer?.core_banking_account_validation, customer?.id, status]);
 
   const tabsList = [
     { value: 'Detalhes', component: <Detalhes ticket={selectedItem} /> },
@@ -142,11 +141,20 @@ export default function DetalhesTicket({ onClose }) {
                         <Criado sx={{ color: 'success.main' }} tipo="user" value={atribuidoA} />
                       </Stack>
                     </Stack>
-                    <Chip
-                      sx={{ typography: 'overline' }}
-                      label={getStatusLabel(selectedItem?.status)}
-                      color={colorLabel(getStatusLabel(selectedItem?.status), 'default')}
-                    />
+                    <Stack direction="row" spacing={1}>
+                      <Chip
+                        sx={{ typography: 'overline' }}
+                        label={getStatusLabel(selectedItem?.status)}
+                        color={colorLabel(getStatusLabel(selectedItem?.status), 'default')}
+                      />
+                      {selectedItem?.status === 'CLOSED' && (
+                        <Chip
+                          sx={{ typography: 'overline' }}
+                          color={selectedItem?.resolved ? 'success' : 'error'}
+                          label={selectedItem?.resolved ? 'Resolvido' : 'Não resolvido'}
+                        />
+                      )}
+                    </Stack>
                   </Stack>
                 )}
                 {tabsList?.find(({ value }) => value === tab)?.component}
