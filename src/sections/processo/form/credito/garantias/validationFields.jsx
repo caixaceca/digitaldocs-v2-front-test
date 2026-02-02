@@ -42,7 +42,7 @@ export const shapeGarantia = () =>
         // nura: Yup.string().required().label('NURA'),
         marca: Yup.string().required().label('Marca'),
         modelo: Yup.string().required().label('Modelo'),
-        ano_fabrico: shapeNumberStd('Ano de fabricação'),
+        // ano_fabrico: shapeNumberStd('Ano de fabricação'),
         percentagem_cobertura: shapePercentagem('Cobertura'),
         // matricula: Yup.string().required().label('Matrícula'),
       })
