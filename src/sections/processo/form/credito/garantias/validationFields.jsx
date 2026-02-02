@@ -39,12 +39,12 @@ export const shapeGarantia = () =>
         seguros: shapeSeguros(true),
         valor: shapeNumberStd('Valor'),
         valor_pvt: shapeNumberStd('Valor PVT'),
-        nura: Yup.string().required().label('NURA'),
+        // nura: Yup.string().required().label('NURA'),
         marca: Yup.string().required().label('Marca'),
         modelo: Yup.string().required().label('Modelo'),
         ano_fabrico: shapeNumberStd('Ano de fabricação'),
         percentagem_cobertura: shapePercentagem('Cobertura'),
-        matricula: Yup.string().required().label('Matrícula'),
+        // matricula: Yup.string().required().label('Matrícula'),
       })
     ),
   });
@@ -61,8 +61,8 @@ const shapeSeguros = (tipo) =>
       apolice: Yup.string().required().label('Apólice'),
       percentagem_cobertura: shapePercentagem('Cobertura'),
       seguradora: Yup.mixed().required().label('Seguradora'),
-      periodicidade: Yup.string().required().label('Periodicidade'),
       tipo: validacao(tipo, Yup.mixed().required().label('Tipo')),
+      periodicidade: Yup.string().required().label('Periodicidade'),
     })
   );
 
