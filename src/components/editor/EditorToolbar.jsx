@@ -25,6 +25,14 @@ export const formats = [
   ...['header', 'image', 'indent', 'italic', 'link', 'list', 'script', 'size', 'strike', 'table', 'underline', 'video'],
 ];
 
+const baseColor = ['#000000', '#454F5B', '#C4CDD5', '#DFE3E8', '#FFFFFF'];
+const darkerColor = ['#275110', '#103399', '#005B6B', '#994F00', '#992926', '#D6D6D6'];
+const darkColor = ['#3E7A1B', '#1A4FCC', '#0089A0', '#CC7700', '#CC3833', '#4D4D4D'];
+const mainColor = ['#5AAA28', '#3366FF', '#00B8D9', '#FF9800', '#FF4842', '#AAAAAA'];
+const ligthColor = ['#A3D98A', '#809FFF', '#66D9EB', '#FFD966', '#FF8A85', '#826AF9'];
+const ligtherColor = ['#E6F4DB', '#DDE5FF', '#D2F4FA', '#FFF3CC', '#FFDADA', '#FFE700'];
+const CUSTOM_COLORS = [...baseColor, ...darkerColor, ...darkColor, ...mainColor, ...ligthColor, ...ligtherColor];
+
 // Undo/Redo handlers
 export function undoChange() {
   this.quill.history.undo();
@@ -73,8 +81,21 @@ export default function EditorToolbar({ id, isSimple, ...other }) {
 
         {/* Colors */}
         <div className="ql-formats">
-          <select className="ql-color" />
-          {!isSimple && <select className="ql-background" />}
+          <select className="ql-color">
+            <option selected />
+            {CUSTOM_COLORS.map((color) => (
+              <option key={color} value={color} />
+            ))}
+          </select>
+
+          {!isSimple && (
+            <select className="ql-background">
+              <option selected />
+              {CUSTOM_COLORS.map((color) => (
+                <option key={color} value={color} />
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Lists & Indentation */}
