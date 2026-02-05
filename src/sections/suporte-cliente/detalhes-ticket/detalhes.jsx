@@ -9,10 +9,8 @@ import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 import { ptDateTime } from '../../../utils/formatTime';
 import { getCustomerTypeLabel, getColorRating, ratingList } from '../utils';
 // components
-import { newLineText } from '../../../components/Panel';
-import Label, { LabelSN } from '../../../components/Label';
-//
 import Mensagens from './mensagens';
+import Label, { LabelSN } from '../../../components/Label';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -30,21 +28,22 @@ export const Detalhes = React.memo(({ ticket }) => {
     <>
       <Stack useFlexGap flexWrap="wrap" direction="row" spacing={5}>
         <Stack spacing={1}>
-          <ItemDesc label="Cliente da Caixa" value={<LabelSN val={customer?.is_cliente} />} />
           <ItemDesc label="Nome" value={customer?.fullname} />
           <ItemDesc label="E-mail" value={customer?.email} />
           <ItemDesc label="Telefone" value={customer?.phone} />
-          {!customer?.is_cliente && <ItemDesc label="Emigrante" value={<LabelSN val={customer?.is_emigrant} />} />}
         </Stack>
 
-        {customer?.is_cliente && (
-          <Stack spacing={1}>
-            <ItemDesc label="Emigrante" value={<LabelSN val={customer?.is_emigrant} />} />
-            <ItemDesc label="Tipo de cliente" value={getCustomerTypeLabel(customer?.customer_type)} />
-            <ItemDesc label="Agência" value={customer?.agency_name} />
-            <ItemDesc label="Número de conta" value={customer?.account_number} />
-          </Stack>
-        )}
+        <Stack spacing={1}>
+          <ItemDesc label="Cliente da Caixa" value={<LabelSN val={customer?.is_cliente} />} />
+          {customer?.is_cliente && (
+            <>
+              {/* <ItemDesc label="Emigrante" value={<LabelSN val={customer?.is_emigrant} />} /> */}
+              <ItemDesc label="Tipo de cliente" value={getCustomerTypeLabel(customer?.customer_type)} />
+              <ItemDesc label="Agência" value={customer?.agency_name} />
+              <ItemDesc label="Número de conta" value={customer?.account_number} />
+            </>
+          )}
+        </Stack>
         {res?.created_by_email || (status !== 'DRAFT' && customer?.is_cliente && customer?.account_number) ? (
           <Stack spacing={1}>
             {res?.created_by_email && (
@@ -119,7 +118,7 @@ function Avaliacao({ avaliacao }) {
 
       {comments && (
         <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-wrap', mt: 1 }}>
-          {newLineText(comments)}
+          {comments}
         </Typography>
       )}
     </>

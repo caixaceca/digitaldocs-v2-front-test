@@ -195,6 +195,11 @@ export function updateInSuporte(item, body, params) {
         body = JSON.stringify({ coreBankingAccountValidation: false, coreBankingEmailValidation: false, ...body });
       }
 
+      if (params?.message && (item === 'assign' || item === 'change-department' || item === 'change-status')) {
+        const opt = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
+        await axios.post(`${API_SUPORTE_CLIENTE_URL}/api/v1/ticket-messages/create/${params?.id}`, params.message, opt);
+      }
+
       const apiUrl =
         (item === 'faq' && `/api/v1/faqs/update/${params?.id}`) ||
         (item === 'slas' && `/api/v1/slas/update/${params?.id}`) ||

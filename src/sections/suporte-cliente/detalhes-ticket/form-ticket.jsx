@@ -31,7 +31,7 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
   const { isEdit, isSaving, departamentos, utilizadores } = useSelector((state) => state.suporte);
 
   const title = (item === 'assign' && 'Atribuir') || (item === 'change-department' && 'Encaminhar') || 'Alterar';
-  const label = (item === 'assign' && 'Utilizador') || (item === 'change-department' && 'Departamento') || 'Estado';
+  const label = (item === 'assign' && 'Colaborador') || (item === 'change-department' && 'Departamento') || 'Estado';
 
   const itemList = useMemo(
     () => buildItemList({ item, colaboradores, utilizadores, departamentos, dados }),
@@ -39,27 +39,53 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
   );
 
   const formSchema = Yup.object().shape({ item: Yup.mixed().required().label(label) });
-  const defaultValues = useMemo(() => ({ item: null, resolved: false }), []);
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { control, handleSubmit } = methods;
+  const methods = useForm({
+    resolver: yupResolver(formSchema),
+    defaultValues: { item: null, resolved: false, message: '', to_client: false, attachments: [] },
+  });
+  const { control, setValue, handleSubmit } = methods;
   const values = useWatch({ control });
+  const { dropMultiple, removeOne } = useAnexos('', 'attachments', setValue, values?.attachments);
 
   const onSubmit = async (values) => {
-    const params1 = { patch: true, getItem: 'selectedItem' };
+    const formData = new FormData();
+    const hasMsg = values?.message && values.message.trim() !== '';
+
+    if (hasMsg) {
+      const messagePayload = { content: values.message, visibility: values?.to_client ? 'BOTH' : 'INTERNAL' };
+      formData.append('message', new Blob([JSON.stringify(messagePayload)], { type: 'application/json' }));
+      values?.attachments?.forEach((file) => formData.append('attachments', file));
+    }
+
     const onClose = item === 'change-department' ? closeTicket : onClose1;
+    const params1 = { id: dados?.id, patch: true, status: dados?.status, getItem: 'selectedItem' };
     const msg = (item === 'assign' && 'atribuido') || (item === 'change-department' && 'encaminhado') || '';
-    const params = { id: dados?.id, value: values?.item, status: dados?.status, resolved: values.resolved, ...params1 };
+    const params = { value: values?.item, resolved: values.resolved, message: hasMsg ? formData : null, ...params1 };
+
     dispatch(updateInSuporte(item, null, { ...params, msg: msg ? `Ticket ${msg}` : 'Estado alterado', onClose }));
   };
 
   return (
-    <Dialog open onClose={onClose1} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose1} fullWidth maxWidth={item === 'assign' ? 'xs' : 'sm'}>
       <DialogTitle>{`${title} ${item === 'change-status' ? ' estado' : 'ticket'}`}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
-            <RHFAutocompleteObj name="item" label={label} options={itemList} />
-            {values?.item?.id === 'CLOSED' && <RHFSwitch name="resolved" label="Resolvido" />}
+            <Stack direction="row" spacing={3}>
+              <RHFAutocompleteObj name="item" label={label} options={itemList} />
+              {values?.item?.id === 'CLOSED' && <RHFSwitch name="resolved" label="Resolvido" />}
+            </Stack>
+            {item !== 'assign' && (
+              <>
+                <RHFTextField name="message" label="Mensagem" multiline rows={4} />
+                {values?.message && values.message.trim() !== '' && (
+                  <>
+                    <RHFUploadMultiFile small name="attachments" onDrop={dropMultiple} onRemove={removeOne} />
+                    <RHFSwitch name="to_client" label="Mostrar mensagem ao cliente" />
+                  </>
+                )}
+              </>
+            )}
           </Stack>
           <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose1} />
         </FormProvider>
