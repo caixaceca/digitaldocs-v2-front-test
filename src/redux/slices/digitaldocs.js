@@ -448,6 +448,7 @@ export function createItem(item, body, params) {
         const response = await axios.post(apiUrl, body, options);
         if (item === 'garantias' || item === 'seguros')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
+        if (item === 'aplicar') dispatch(getProcesso('processo', { id: params?.id }));
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {

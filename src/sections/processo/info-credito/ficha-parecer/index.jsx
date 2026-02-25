@@ -72,7 +72,7 @@ export default function FichaAnalise() {
         </Stack>
       ) : (
         <>
-          {!fichaInformativa?.entidade ? (
+          {fichaInformativa?.entidade ? (
             <Ficha
               cliente={cliente}
               ficha={fichaInformativa}

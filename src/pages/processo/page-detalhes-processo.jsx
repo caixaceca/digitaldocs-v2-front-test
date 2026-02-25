@@ -105,6 +105,7 @@ export default function PageProcesso() {
         !done.includes('Seguro') &&
         !done.includes('Situação') &&
         !done.includes('Garantia') &&
+        !done.includes('Processo aplicado') &&
         !done.includes('Escalão de decisão') &&
         done !== 'Ficha anexado' &&
         done !== 'Processo aceitado' &&
