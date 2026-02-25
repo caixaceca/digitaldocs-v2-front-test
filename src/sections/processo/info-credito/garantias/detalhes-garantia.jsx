@@ -7,14 +7,14 @@ import Divider from '@mui/material/Divider';
 import TableBody from '@mui/material/TableBody';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fCurrency, fPercent } from '../../../../utils/formatNumber';
-import { useTabsSync } from '../../../../hooks/minimal-hooks/use-tabs-sync';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import { noDados } from '../../../../components/Panel';
-import Label, { LabelSN } from '../../../../components/Label';
-import { SearchNotFoundSmall } from '../../../../components/table';
-import { DialogTitleAlt } from '../../../../components/CustomDialog';
-import { TabsWrapperSimple } from '../../../../components/TabsWrapper';
+import { noDados } from '@/components/Panel';
+import Label, { LabelSN } from '@/components/Label';
+import { SearchNotFoundSmall } from '@/components/table';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
 import ImoveisGarantia from './imoveis-garantia';
 import TableInfoGarantias from './table-info-garantias';

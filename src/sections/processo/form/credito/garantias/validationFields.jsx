@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 //
-import { validacao, shapeNumberStd, shapePercentagem } from '../../../../../components/hook-form/yup-shape';
+import { validacao, shapeNumberStd, shapePercentagem } from '@/components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

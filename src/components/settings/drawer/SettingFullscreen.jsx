@@ -6,7 +6,7 @@ import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
 import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';
 // hooks
-import useSettings from '../../../hooks/useSettings';
+import useSettings from '@/hooks/useSettings';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

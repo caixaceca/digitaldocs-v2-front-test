@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 // redux
-import { useDispatch, useSelector } from '../../../../redux/store';
-import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // components
 import FormInfoCredito from './form-info-credito';
 import FormAnexosCredito from './form-anexos-credito';

@@ -8,14 +8,13 @@ import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { shapeNumberZero } from '../../../components/hook-form/yup-shape';
-// redux
-import { createItem } from '../../../redux/slices/gaji9';
-import { useDispatch, useSelector } from '../../../redux/store';
+import { createItem } from '@/redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
+import { shapeNumberZero } from '@/components/hook-form/yup-shape';
 // components
-import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { AddItem, DefaultAction, DialogButons } from '../../../components/Actions';
-import { FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteSmp } from '../../../components/hook-form';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { AddItem, DefaultAction, DialogButons } from '@/components/Actions';
+import { FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteSmp } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

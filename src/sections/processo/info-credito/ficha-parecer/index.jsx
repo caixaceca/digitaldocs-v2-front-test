@@ -5,14 +5,14 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 // utils
 import { calcValorPrestacao } from './calculos';
-import { setModal } from '../../../../redux/slices/intranet';
-import { useDispatch, useSelector } from '../../../../redux/store';
+import { setModal } from '@/redux/slices/intranet';
+import { useDispatch, useSelector } from '@/redux/store';
 //
 import Ficha from './conteudos';
 import FormFicha from './form-ficha';
 import { SearchEntidade } from './procurar';
-import { DefaultAction } from '../../../../components/Actions';
-import SearchNotFound from '../../../../components/table/SearchNotFound';
+import { DefaultAction } from '@/components/Actions';
+import SearchNotFound from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -25,19 +25,14 @@ export default function FichaAnalise() {
   const entidades = useMemo(() => entidade?.split(';')?.map((row) => row) || [], [entidade]);
   const valorPrestacao = useMemo(
     () =>
-      fichaInformativa?.proposta
-        ? calcValorPrestacao({
-            componente: credito?.componente,
-            taxa: fichaInformativa?.proposta?.taxa_juro,
-            montante: fichaInformativa?.proposta?.montante,
-            prazo: fichaInformativa?.proposta?.prazo_amortizacao,
-          })
-        : calcValorPrestacao({
-            taxa: credito?.taxa_juro,
-            componente: credito?.componente,
-            prazo: credito?.prazo_amortizacao,
-            montante: credito?.montante_solicitado,
-          }),
+      credito?.gaji9_metadados?.valor_prestacao ||
+      calcValorPrestacao({
+        componente: credito?.componente,
+        taxa: fichaInformativa?.proposta?.taxa_juro || credito?.taxa_juro,
+        taxa_equivalente: fichaInformativa?.proposta?.modo_taxa_equivalente,
+        montante: fichaInformativa?.proposta?.montante || credito?.montante_solicitado,
+        prazo: fichaInformativa?.proposta?.prazo_amortizacao || credito?.prazo_amortizacao,
+      }),
     [credito, fichaInformativa]
   );
 
@@ -58,13 +53,14 @@ export default function FichaAnalise() {
           Ficha de Análise e Parecer
         </Typography>
         <Stack direction="row" spacing={2} alignItems="center">
-          <DefaultAction
-            small
-            button
-            icon="adicionar"
-            label="Info. adicional"
-            onClick={() => actionModal({ modal: 'form-ficha' })}
-          />
+          {fichaInformativa && (
+            <DefaultAction
+              button
+              icon="adicionar"
+              label="Info. adicional"
+              onClick={() => actionModal({ modal: 'form-ficha' })}
+            />
+          )}
           <SearchEntidade entidades={entidades} />
         </Stack>
       </Stack>
@@ -76,19 +72,16 @@ export default function FichaAnalise() {
         </Stack>
       ) : (
         <>
-          {fichaInformativa?.entidade ? (
-            <>
-              <Ficha
-                titular={titular}
-                cliente={cliente}
-                ficha={fichaInformativa}
-                credito={credito || null}
-                actionModal={actionModal}
-                modalIntranet={modalIntranet}
-                valorPrestacao={valorPrestacao}
-                estadoId={processo?.estado?.estado_id}
-              />
-            </>
+          {!fichaInformativa?.entidade ? (
+            <Ficha
+              cliente={cliente}
+              ficha={fichaInformativa}
+              actionModal={actionModal}
+              modalIntranet={modalIntranet}
+              valorPrestacao={valorPrestacao}
+              credito={{ titular, ...credito }}
+              estadoId={processo?.estado?.estado_id}
+            />
           ) : (
             <SearchNotFound message="Informação da entidade não encontrada..." />
           )}

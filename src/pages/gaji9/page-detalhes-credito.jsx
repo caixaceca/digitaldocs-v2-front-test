@@ -6,26 +6,26 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import useSettings from '../../hooks/useSettings';
-import { usePermissao } from '../../hooks/useAcesso';
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import useSettings from '@/hooks/useSettings';
+import { usePermissao } from '@/hooks/useAcesso';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, setModal, getSuccess, deleteItem } from '../../redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromGaji9, setModal, getSuccess, deleteItem } from '@/redux/slices/gaji9';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
-import { DefaultAction } from '../../components/Actions';
-import { SearchNotFound404 } from '../../components/table';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import DialogPreviewDoc, { DialogConfirmar } from '../../components/CustomDialog';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
+import { DefaultAction } from '@/components/Actions';
+import { SearchNotFound404 } from '@/components/table';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import DialogPreviewDoc, { DialogConfirmar } from '@/components/CustomDialog';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
-import InfoCredito from '../../sections/gaji9/credito/info-credito';
-import { TableInfoCredito } from '../../sections/gaji9/credito/table-info';
-import CreditoForm, { PreviewForm } from '../../sections/gaji9/credito/form-credito';
-import MetadadosCredito from '../../sections/processo/info-credito/metadados-credito';
+import InfoCredito from '@/sections/gaji9/credito/info-credito';
+import { TableInfoCredito } from '@/sections/gaji9/credito/table-info';
+import CreditoForm, { PreviewForm } from '@/sections/gaji9/credito/form-credito';
+import MetadadosCredito from '@/sections/processo/info-credito/metadados-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

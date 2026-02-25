@@ -8,18 +8,19 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // hooks
-import { usePermissao } from '../../hooks/useAcesso';
-import useTable, { getComparator } from '../../hooks/useTable';
+import { usePermissao } from '@/hooks/useAcesso';
+import useTable, { getComparator } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, getSuccess, openModal, closeModal } from '../../redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromGaji9, getSuccess, openModal, closeModal } from '@/redux/slices/gaji9';
 // Components
-import Scrollbar from '../../components/Scrollbar';
-import { DefaultAction } from '../../components/Actions';
-import { SkeletonTable } from '../../components/skeleton';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, Colaborador, noDados } from '../../components/Panel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Scrollbar from '@/components/Scrollbar';
+import { CellUoBalcao } from '@/components/Panel';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { CellChecked, Colaborador, noDados } from '@/components/Panel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import {
   TipoForm,
@@ -180,11 +181,7 @@ export default function TableIdentificadores({ item, inativos }) {
                             <TableCell>{row?.regiao}</TableCell>
                           </>
                         )) ||
-                        (item === 'representantes' && (
-                          <TableCell>
-                            {row?.uo} ({row?.balcao})
-                          </TableCell>
-                        )) ||
+                        (item === 'representantes' && <CellUoBalcao uo={row?.uo} balcao={row?.balcao} />) ||
                         (item === 'tiposTitulares' && <CellChecked check={row.consumidor} />)}
                       {item === 'tiposGarantias' && <CellChecked check={row.reais} />}
                       <TableCell align="center" width={10}>
@@ -256,7 +253,7 @@ function headerTable(item) {
       ]) ||
       (item === 'representantes' && [{ id: 'nome', label: 'Nome' }]) ||
       []),
-    ...(item === 'representantes' ? [{ id: 'uo', label: 'U.O' }] : []),
+    ...(item === 'representantes' ? [{ id: 'uo', label: 'Unidade orgânica' }] : []),
     ...(item === 'tiposImoveis' || item === 'finalidades' ? [{ id: 'tipo', label: 'Tipo' }] : []),
     ...(item === 'componentes'
       ? [

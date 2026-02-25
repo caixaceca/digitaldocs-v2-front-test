@@ -9,32 +9,30 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime } from '../../utils/formatTime';
-import { emailCheck } from '../../utils/validarAcesso';
-// hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import { idCheck } from '@/utils/formatObject';
+import { ptDateTime } from '@/utils/formatTime';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import useTable, { getComparator } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { setModal, deleteItem } from '../../redux/slices/parametrizacao';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useDispatch, useSelector } from '@/redux/store';
+import { setModal, deleteItem } from '@/redux/slices/parametrizacao';
 // components
-import Scrollbar from '../../components/Scrollbar';
-import { DefaultAction } from '../../components/Actions';
-import { SkeletonTable } from '../../components/skeleton';
-import { DialogConfirmar } from '../../components/CustomDialog';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, DataLabel, noDados } from '../../components/Panel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { CellChecked, DataLabel, noDados } from '@/components/Panel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 // guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 //
 import { AcessoForm } from './ParametrizacaoForm';
 import { EstadosPerfilForm } from './form-estado';
 import { applySortFilter } from './applySortFilter';
 // _mock
-import { codacessos, objetos } from '../../_mock';
+import { codacessos, objetos } from '@/_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -55,7 +53,7 @@ export default function TableAcessos({ tab }) {
 
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { mail } = useSelector((state) => state.intranet);
+  const { idAd } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem('filterAcesso') || '');
   const { isLoading, isSaving, acessos, modalParams, estados, estadosPerfil, selectedItem } = useSelector(
     (state) => state.parametrizacao
@@ -158,9 +156,9 @@ export default function TableAcessos({ tab }) {
                           </>
                         )}
                         <TableCell align="center" width={10}>
-                          {(emailCheck(mail) || dataVal(row?.datalimite || row?.data_limite)) && (
+                          {(idCheck(idAd) || dataVal(row?.datalimite || row?.data_limite)) && (
                             <Stack direction="row" spacing={0.5} justifyContent="right">
-                              {emailCheck(mail) && (
+                              {idCheck(idAd) && (
                                 <DefaultAction
                                   small
                                   label="ELIMINAR"

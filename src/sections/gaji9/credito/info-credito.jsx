@@ -7,11 +7,9 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 // utils
-import { ptDate } from '../../../utils/formatTime';
-import { useSelector } from '../../../redux/store';
-import { fCurrency, fPercent } from '../../../utils/formatNumber';
-// Components
-import { newLineText } from '../../../components/Panel';
+import { ptDate } from '@/utils/formatTime';
+import { useSelector } from '@/redux/store';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
 //
 import { labelTitular } from '../applySortFilter';
 import { Resgisto, LabelSN } from '../../parametrizacao/Detalhes';
@@ -53,7 +51,7 @@ export default function InfoCredito() {
         { label: 'Vencimento da 1ª prestação', value: ptDate(credito?.data_vencimento_prestacao1) },
         { label: 'Prazo contratual', value: credito?.prazo_contratual },
         { label: 'Meses vencimento', value: credito?.meses_vencimento },
-        { label: 'Finalidade', value: newLineText(credito?.finalidade) },
+        { label: 'Finalidade', value: credito?.finalidade },
       ],
     },
     {
@@ -64,7 +62,7 @@ export default function InfoCredito() {
         { label: 'Taxa juro desconto', value: fPercent(credito?.taxa_juro_desconto) },
         { label: 'Isento de comissão', value: credito?.isento_comissao ? 'Sim' : 'Não' },
         { label: 'Taxa imposto de selo', value: fPercent(credito?.taxa_imposto_selo) },
-        { label: 'TAEG', value: fPercent(credito?.taxa_taeg) },
+        { label: 'TAEG', value: fPercent(credito?.taxa_taeg, 3) },
         { label: 'Taxa comissão de abertura', value: fPercent(credito?.taxa_comissao_abertura) },
         { label: 'Valor total de comissões', value: fCurrency(credito?.valor_comissao) },
         { label: 'Valor total de imposto selo', value: fCurrency(credito?.valor_imposto_selo) },
@@ -157,7 +155,10 @@ export default function InfoCredito() {
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         {label}:&nbsp;
                       </Typography>
-                      <Typography variant="body2" sx={{ ...(!value && { fontStyle: 'italic', color: 'error.main' }) }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ whiteSpace: 'pre-line', ...(!value && { fontStyle: 'italic', color: 'error.main' }) }}
+                      >
                         {value || '(Não definido)'}
                       </Typography>
                     </Stack>

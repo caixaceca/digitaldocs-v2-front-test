@@ -6,22 +6,17 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+// utils
+import { listaFreguesias } from '@/_mock';
+import { imovelSchema } from './schemaFileds';
+import { applySort, getComparator } from '@/hooks/useTable';
 // components
-import {
-  RHFTextField,
-  RHFNumberField,
-  RHFAutocompleteObj,
-  RHFAutocompleteSmp,
-} from '../../../../../components/hook-form';
 import FormSeguros from './form-seguros';
 import FormEntidades from './form-entidades';
-import GridItem from '../../../../../components/GridItem';
-import { SemDados } from '../../../../../components/Panel';
-import { AddItem, DefaultAction } from '../../../../../components/Actions';
-//
-import { imovelSchema } from './schemaFileds';
-import { listaFreguesias } from '../../../../../_mock';
-import { applySort, getComparator } from '../../../../../hooks/useTable';
+import GridItem from '@/components/GridItem';
+import { SemDados } from '@/components/Panel';
+import { AddItem, DefaultAction } from '@/components/Actions';
+import { RHFTextField, RHFNumberField, RHFAutocompleteObj, RHFAutocompleteSmp } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

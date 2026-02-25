@@ -18,13 +18,13 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { findColaboradores } from '../../../../utils/validarAcesso';
+import { findColaboradores } from '@/utils/validarAcesso';
 import { shapeAnexos, defaultAnexos, appendAnexos } from '../anexos/utils-anexos';
 // redux
-import { updateItem } from '../../../../redux/slices/digitaldocs';
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
-import { backStep, resetStep, updateDados } from '../../../../redux/slices/stepper';
+import { updateItem } from '@/redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
+import { backStep, resetStep, updateDados } from '@/redux/slices/stepper';
 // components
 import {
   FormProvider,
@@ -33,10 +33,10 @@ import {
   RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
-} from '../../../../components/hook-form';
-import Steps from '../../../../components/Steps';
-import GridItem from '../../../../components/GridItem';
-import { DefaultAction, ButtonsStepper, Fechar } from '../../../../components/Actions';
+} from '@/components/hook-form';
+import Steps from '@/components/Steps';
+import GridItem from '@/components/GridItem';
+import { DefaultAction, ButtonsStepper, Fechar } from '@/components/Actions';
 //
 import Anexos from '../anexos';
 
@@ -57,9 +57,9 @@ export default function EncaminharStepper({ dados }) {
   const dispatch = useDispatch();
   const { acao, destinos, gerencia = false, onClose } = dados;
   const { activeStep } = useSelector((state) => state.stepper);
-  const destinosParalelo = useMemo(() => destinos?.filter(({ paralelo }) => paralelo), [destinos]);
-  const destinosSingulares = useMemo(() => destinos?.filter(({ paralelo }) => !paralelo), [destinos]);
-  const [inParalelo, setInParalelo] = useState(destinosParalelo?.length > 0 && destinosSingulares?.length === 0);
+  const emparalelo = useMemo(() => destinos?.filter(({ paralelo }) => paralelo), [destinos]);
+  const emserie = useMemo(() => destinos?.filter(({ paralelo }) => !paralelo), [destinos]);
+  const [inParalelo, setInParalelo] = useState(emparalelo?.length > 0 && emserie?.length === 0);
 
   return (
     <Dialog open fullWidth maxWidth="md">
@@ -67,7 +67,7 @@ export default function EncaminharStepper({ dados }) {
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
           {acao?.charAt(0)?.toUpperCase() + acao?.slice(1)?.toLowerCase()} processo
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={3}>
-            {destinosParalelo?.length > 0 && destinosSingulares?.length > 0 && (
+            {emparalelo?.length > 0 && emserie?.length > 0 && (
               <FormControlLabel
                 label="Envio em paralelo"
                 sx={{ justifyContent: 'center' }}
@@ -85,14 +85,14 @@ export default function EncaminharStepper({ dados }) {
       </DialogTitle>
       <DialogContent>
         <Box sx={{ pt: 1 }}>
-          {activeStep === 0 && (
+          {inParalelo ? (
+            <EncaminharEmParalelo destinos={emparalelo} onClose={onClose} />
+          ) : (
             <>
-              {(inParalelo && <EncaminharEmParalelo destinos={destinosParalelo} onClose={onClose} />) || (
-                <EncaminharEmSerie dados={{ acao, onClose, gerencia, destinos: destinosSingulares }} />
-              )}
+              {activeStep === 0 && <EncaminharEmSerie dados={{ acao, onClose, gerencia, destinos: emserie }} />}
+              {activeStep === 1 && <OutrosEmSerie acao={acao} />}
             </>
           )}
-          {activeStep === 1 && <OutrosEmSerie acao={acao} />}
         </Box>
       </DialogContent>
     </Dialog>
@@ -125,6 +125,15 @@ export function EncaminharEmSerie({ dados }) {
     }),
   });
 
+  const estadoSugerido = (() => {
+    if (!destinos || destinos.length === 0) return null;
+    if (destinos.length === 1) return destinos[0];
+
+    const todosIniciais = destinos.every((item) => item.inicial);
+    if (todosIniciais) return destinos.find((item) => item.uo_id === processo?.uo_origem_id) || null;
+    return null;
+  })();
+
   const defaultValues = useMemo(
     () => ({
       mobs: dadosStepper?.mobs || '',
@@ -132,9 +141,9 @@ export function EncaminharEmSerie({ dados }) {
       parecer: dadosStepper?.parecer || null,
       observacao: dadosStepper?.observacao || '',
       noperacao: dadosStepper?.noperacao || numOp || '',
-      estado: dadosStepper?.estado || (destinos?.length === 1 && destinos?.[0]) || null,
+      estado: dadosStepper?.estado || estadoSugerido || null,
     }),
-    [dadosStepper, destinos, numOp]
+    [dadosStepper, numOp, estadoSugerido]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
@@ -265,18 +274,18 @@ export function OutrosEmSerie({ acao }) {
   const { isSaving, processo } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes, colaboradoresEstado, checklist } = useSelector((state) => state.parametrizacao);
   const { id, estado, estadoPreso, criador: criadorP } = processo;
+  const para = dadosStepper?.estado;
 
   const outros = useMemo(() => checklist?.find(({ designacao }) => designacao === 'OUTROS'), [checklist]);
   const mesmaUo = useMemo(
-    () => meusAmbientes?.find(({ id }) => id === estado?.estado_id)?.uo_id === dadosStepper?.estado?.uo_id,
-    [dadosStepper?.estado?.uo_id, estado?.estado_id, meusAmbientes]
+    () =>
+      meusAmbientes?.find(({ id }) => id === estado?.estado_id)?.uo_id === para?.uo_id &&
+      !para?.label?.includes('Comité'),
+    [meusAmbientes, para?.uo_id, para?.label, estado?.estado_id]
   );
   const checkList = useMemo(
-    () =>
-      checklist.filter(
-        ({ transicao_id: trId, designacao }) => trId === dadosStepper?.estado?.id && designacao !== 'OUTROS'
-      ),
-    [checklist, dadosStepper?.estado?.id]
+    () => checklist.filter(({ transicao_id: trId, designacao }) => trId === para?.id && designacao !== 'OUTROS'),
+    [checklist, para?.id]
   );
 
   const colaboradoresList = useMemo(
@@ -284,9 +293,9 @@ export function OutrosEmSerie({ acao }) {
     [colaboradores, colaboradoresEstado]
   );
   const criador = useMemo(() => {
-    if (acao !== 'DEVOLVER' || !dadosStepper?.estado?.inicial) return null;
+    if (acao !== 'DEVOLVER' || !para?.inicial) return null;
     return colaboradoresList?.find((c) => c.mail?.toLowerCase() === criadorP?.toLowerCase()) || null;
-  }, [acao, colaboradoresList, dadosStepper?.estado?.inicial, criadorP]);
+  }, [acao, colaboradoresList, para?.inicial, criadorP]);
 
   const formSchema = shapeAnexos(outros, checkList, true);
   const defaultValues = useMemo(
@@ -304,7 +313,7 @@ export function OutrosEmSerie({ acao }) {
   const onSubmit = async () => {
     try {
       const formData = new FormData();
-      formData.append('transicao_id', dadosStepper?.estado?.id);
+      formData.append('transicao_id', para?.id);
       if (dadosStepper?.noperacao) formData.append('noperacao', dadosStepper.noperacao);
       if (dadosStepper?.observacao) formData.append('observacao', dadosStepper.observacao);
       if (dadosStepper?.motivo?.id) formData.append('motivo_id', dadosStepper?.motivo?.id);

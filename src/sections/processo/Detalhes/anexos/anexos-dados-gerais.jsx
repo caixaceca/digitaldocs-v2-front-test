@@ -10,18 +10,17 @@ import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 // utils
-import { emailCheck } from '../../../../utils/validarAcesso';
-import { findColaborador } from '../../../../utils/formatObject';
-import { getFileThumb, canPreview } from '../../../../utils/formatFile';
-import { ptTime, ptDate, ptDateTime } from '../../../../utils/formatTime';
+import { getFileThumb, canPreview } from '@/utils/formatFile';
+import { ptTime, ptDate, ptDateTime } from '@/utils/formatTime';
+import { findColaborador, idCheck } from '@/utils/formatObject';
 // redux
-import { getAnexo } from '../../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../../redux/store';
+import { getAnexo } from '@/redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
 // components
-import { Criado } from '../../../../components/Panel';
-import { SearchNotFound } from '../../../../components/table';
-import { Loading } from '../../../../components/LoadingScreen';
-import { DefaultAction } from '../../../../components/Actions';
+import { Criado } from '@/components/Panel';
+import { SearchNotFound } from '@/components/table';
+import { Loading } from '@/components/LoadingScreen';
+import { DefaultAction } from '@/components/Actions';
 //
 import ModelosRespostas from './modelos-resposta';
 import { PdfPreview, ImagemPreview } from './preview-anexo';
@@ -40,7 +39,7 @@ const sx1 = {
 
 export default function Anexos({ anexos }) {
   const dispatch = useDispatch();
-  const { mail } = useSelector((state) => state.intranet);
+  const { idAd } = useSelector((state) => state.intranet);
   const { filePreview, isLoadingPreview, processo } = useSelector((state) => state.digitaldocs);
 
   const { id, estado = {}, status = '', origem_id: origemId } = processo;
@@ -97,7 +96,7 @@ export default function Anexos({ anexos }) {
             </Stack>
           </Stack>
         ))}
-        {((emailCheck(mail) && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
+        {((idCheck(idAd) && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
           <ModelosRespostas />
         )}
       </Stack>
@@ -133,6 +132,7 @@ export function AnexoItem({ anexo, preview, parecer = false, viewAnexo = null, e
       }}
     >
       <ListItemText
+        secondaryTypographyProps={{ component: 'div' }}
         primaryTypographyProps={{ variant: 'subtitle2', p: 0, lineHeight: 1.25 }}
         primary={
           !tipo || tipo === 'OUTROS' ? (
@@ -149,7 +149,7 @@ export function AnexoItem({ anexo, preview, parecer = false, viewAnexo = null, e
         secondary={
           (criador || criado || emissao || validade || (eliminado && (modificador || mod))) && (
             <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 0.5 }}>
-              <Criado caption tipo="user" value={findColaborador(criador, colaboradores)} baralhar />
+              <Criado caption tipo="user" value={findColaborador(criador, colaboradores)} />
               <Criado
                 caption
                 tipo={eliminado || parecer ? 'data' : 'time'}

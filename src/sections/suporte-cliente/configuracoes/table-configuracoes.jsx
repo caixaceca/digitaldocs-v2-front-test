@@ -7,21 +7,22 @@ import Switch from '@mui/material/Switch';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { normalizeText } from '../../../utils/formatText';
-import useTable, { getComparator, applySort } from '../../../hooks/useTable';
+import { normalizeText } from '@/utils/formatText';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getInSuporte, updateInSuporte, setModal } from '../../../redux/slices/suporte-cliente';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getInSuporte, updateInSuporte, setModal } from '@/redux/slices/suporte-cliente';
 // Components
-import Scrollbar from '../../../components/Scrollbar';
-import { DefaultAction } from '../../../components/Actions';
-import { SkeletonTable } from '../../../components/skeleton';
-import { SearchToolbarSimple } from '../../../components/SearchToolbar';
-import { CellChecked, Colaborador, newLineText, noDados } from '../../../components/Panel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { CellChecked, Colaborador, noDados } from '@/components/Panel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import {
   FaqForm,
@@ -153,18 +154,36 @@ export default function TableConfiguracoes({ item }) {
                       )}
 
                       {/* SLA */}
-                      {item === 'slas' && <TableCell>{newLineText(row?.description)}</TableCell>}
+                      {item === 'slas' && (
+                        <TableCell>
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                            {row?.description}
+                          </Typography>
+                        </TableCell>
+                      )}
                       {item === 'slasUo' && <TableCell>{row?.department_name}</TableCell>}
                       {item === 'slasUo' && <TableCell>{row?.subject_name}</TableCell>}
                       {item === 'slas' && <TableCell>{row?.response_time_mn} min</TableCell>}
                       {(item === 'slas' || item === 'slasUo') && <TableCell>{row?.resolution_time_mn} min</TableCell>}
 
                       {/* RESPOSTAS */}
-                      {item === 'respostas' && <TableCell>{newLineText(row?.content)}</TableCell>}
+                      {item === 'respostas' && (
+                        <TableCell>
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                            {row?.content}
+                          </Typography>
+                        </TableCell>
+                      )}
                       {item === 'respostas' && <TableCell align="center">{getPhasesLabel(row?.phase)}</TableCell>}
 
                       {/* FAQ */}
-                      {item === 'faq' && <TableCell>{newLineText(row?.response)}</TableCell>}
+                      {item === 'faq' && (
+                        <TableCell>
+                          <Typography variant="body2" sx={{ textAlign: 'justify', whiteSpace: 'pre-line' }}>
+                            {row?.response}
+                          </Typography>
+                        </TableCell>
+                      )}
                       {item === 'faq' && <CellChecked check={row?.highlighted} />}
 
                       {(item === 'prompts' || item === 'utilizadores' || item === 'respostas' || item === 'faq') && (

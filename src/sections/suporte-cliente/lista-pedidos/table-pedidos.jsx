@@ -7,17 +7,17 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { LabelStatus } from '../utils';
-import { ptDateTime } from '../../../utils/formatTime';
+import { ptDateTime } from '@/utils/formatTime';
 // redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getInSuporte, setModal } from '../../../redux/slices/suporte-cliente';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getInSuporte, setModal } from '@/redux/slices/suporte-cliente';
 // Components
-import { noDados } from '../../../components/Panel';
+import { noDados } from '@/components/Panel';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
 import DetalhesTicket from '../detalhes-ticket/index';
-import Scrollbar from '../../../components/Scrollbar';
-import { DefaultAction } from '../../../components/Actions';
-import { SkeletonTable } from '../../../components/skeleton';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

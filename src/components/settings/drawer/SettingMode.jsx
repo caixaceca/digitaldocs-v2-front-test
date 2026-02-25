@@ -6,7 +6,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 // hooks
-import useSettings from '../../../hooks/useSettings';
+import useSettings from '@/hooks/useSettings';
 //
 import BoxMask from './BoxMask';
 import GridItem from '../../GridItem';

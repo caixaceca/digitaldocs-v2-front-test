@@ -5,20 +5,19 @@ import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 // utils
-import { ptDate, getIdade } from '../../../../utils/formatTime';
-import { fNumber, fPercent, fCurrency } from '../../../../utils/formatNumber';
+import { ptDate, getIdade } from '@/utils/formatTime';
+import { fNumber, fCurrency } from '@/utils/formatNumber';
+import { dataNascimento, estadoCivil, docInfo, colorDoc } from './calculos';
 //
-import Label from '../../../../components/Label';
-import { noDados } from '../../../../components/Panel';
-import { responsabilidadesInfo, dataNascimento, estadoCivil, docInfo, colorDoc } from './calculos';
+import { noDados } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function Identificcao({ entidade }) {
   return (
     <TableBody>
-      {rowInfo('Nº de entidade', entidade?.numero, false)}
-      {rowInfo('Nome', entidade?.nome)}
+      {rowInfo('Nº de entidade', entidade?.numero || '(Não definido...)', false)}
+      {rowInfo('Nome', entidade?.nome || '(Não definido...)')}
       {rowInfo(
         'Doc. Identificação',
         docInfo(entidade?.documento, entidade?.tipo_documento),
@@ -29,15 +28,15 @@ export function Identificcao({ entidade }) {
           </Typography>
         ) : null
       )}
-      {rowInfo('NIF', entidade?.nif || ' ', false)}
+      {rowInfo('NIF', entidade?.nif || '(Não definido...)', false)}
       {rowInfo('Telefone', entidade?.telefone || '', false)}
       {rowInfo('Email', entidade?.email || '', false)}
       {rowInfo('Sexo', entidade?.sexo || '', false)}
       {rowInfo('Data de nascimento', dataNascimento(entidade?.data_nascimento), false)}
       {rowInfo('Filiação', [entidade?.nome_pai, entidade?.nome_mae].filter(Boolean).join(' e ') || '', false)}
       {rowInfo('Morada', entidade?.morada || '', false)}
-      {rowInfo('Código de risco', entidade?.codigo_risco || 'Não definido...', false)}
-      {rowInfo('Nível de risco', entidade?.nivel_risco || 'Não definido...', false)}
+      {rowInfo('Código de risco', entidade?.codigo_risco || '(Não definido...)', false)}
+      {rowInfo('Nível de risco', entidade?.nivel_risco || '(Não definido...)', false)}
       {rowInfo('Estado civil', estadoCivil(entidade?.estado_civil, entidade?.regime_casamento), false)}
       {entidade?.conjuge && (
         <>
@@ -201,154 +200,6 @@ export function Movimentos({ dados, totaisConta }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Responsabilidades({ responsabilidades }) {
-  const { dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas } = responsabilidades;
-
-  const rowInfo = (row, incidente) => (
-    <TableRow hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
-      <TableCell>{row?.totais || row?.tipo || row?.classe || ' '}</TableCell>
-      <TableCell align="center">{row?.conta || ' '}</TableCell>
-      <CellValor valor={row?.valor} moeda={row?.moeda} total={row?.totais} />
-      <CellValor valor={row?.saldo_divida} moeda={row?.moeda} total={row?.totais} />
-      <CellValor valor={row?.valor_prestacao} moeda={row?.moeda} total={row?.totais} />
-      <TableCell align="right">{row?.taxa_juros ? fPercent(row?.taxa_juros, 2) : ' '}</TableCell>
-      <TableCell align="center">
-        {row?.data_abertura_credito === row?.data_vencimento || !row?.data_vencimento
-          ? ptDate(row?.data_abertura_credito)
-          : `${ptDate(row?.data_abertura_credito)} - ${ptDate(row?.data_vencimento)}`}
-      </TableCell>
-      <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
-        {row?.situacao && (
-          <Label color={(incidente && 'warning') || (row?.situacao === 'Normal' && 'success') || 'error'}>
-            {(incidente && row?.maior_irregularidade) || row?.situacao || ' '}
-          </Label>
-        )}
-      </TableCell>
-    </TableRow>
-  );
-
-  return dividas?.length > 0 ? (
-    <>
-      <Cabecalho
-        item="responsabilidades"
-        headLabel={[
-          { label: 'Dívidas na caixa', color: 'success.main' },
-          { label: 'Conta', align: 'center' },
-          { label: 'Capital inicial', align: 'right' },
-          { label: 'Saldo em dívida', align: 'right' },
-          { label: 'Prestação', align: 'right' },
-          { label: 'Taxa', align: 'right' },
-          { label: 'Data', align: 'center' },
-          { label: 'Situação', align: 'center' },
-        ]}
-      />
-      <TableBody>
-        {dividas?.map((row) => rowInfo(row))}
-        {dividas?.length > 1 && rowInfo(responsabilidadesInfo(dividas))}
-        {dividas?.length === 0 && <EmptyRow empty cells={7} message="Nenhum registo encontrado..." />}
-
-        {/* Dívidas externas  */}
-        {dividasExternas?.length > 0 && (
-          <>
-            <EmptyRow cells={8} message="Dívidas externas" variant="head" />
-            {dividasExternas?.map((row) => rowInfo(row))}
-            {dividasExternas?.length > 1 && rowInfo(responsabilidadesInfo(dividasExternas))}
-          </>
-        )}
-
-        {dividas?.length > 0 && dividasExternas?.length > 0 && (
-          <>
-            <EmptyRow cells={8} message="Dívidas consolidadas" variant="head" />
-            {rowInfo(responsabilidadesInfo([...dividas, ...dividasExternas]))}
-          </>
-        )}
-
-        {/* Outras responsabilidades */}
-        {(garantiasRecebidas?.length > 0 || garantiasPrestadas?.length > 0) && (
-          <>
-            <EmptyRow cells={8} message="Outras responsabilidades" variant="head" />
-            {garantiasRecebidas?.map((row) => rowInfo(row))}
-            {garantiasRecebidas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasRecebidas))}
-            {garantiasPrestadas?.map((row) => rowInfo(row))}
-            {garantiasPrestadas?.length > 1 && rowInfo(responsabilidadesInfo(garantiasPrestadas))}
-          </>
-        )}
-
-        {/* Irregularidades */}
-        {irregularidades?.length > 0 && (
-          <>
-            <EmptyRow cells={8} message="Histórico de incidentes" variant="head" war />
-            {irregularidades?.map((row) => rowInfo(row, true))}
-          </>
-        )}
-      </TableBody>
-    </>
-  ) : (
-    <NadaConsta />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function AvalesFiancas({ dados }) {
-  const { fiancas, avalesExternos } = dados;
-
-  const rowInfo = (row) => (
-    <TableRow hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
-      <TableCell>{(row?.totais && 'Total') || row?.tipo_credito || ' '}</TableCell>
-      <TableCell align="center">{row?.cliente || ' '}</TableCell>
-      <TableCell align="center">{row?.tipo_interveniente}</TableCell>
-      <CellValor valor={row?.valor} moeda={row?.moeda} total={row?.totais} />
-      <CellValor valor={row?.saldo_divida} moeda={row?.moeda} total={row?.totais} />
-      <CellValor valor={row?.valor_prestacao} moeda={row?.moeda} total={row?.totais} />
-      <TableCell align="center">
-        {row?.situacao && <Label color={(row?.situacao === 'Normal' && 'success') || 'error'}>{row?.situacao}</Label>}
-      </TableCell>
-    </TableRow>
-  );
-
-  return fiancas?.length > 0 || avalesExternos?.length > 0 ? (
-    <>
-      <Cabecalho
-        item="avales-fiancas"
-        headLabel={[
-          { label: 'Avales/Fianças na caixa', color: 'success.main' },
-          { label: 'Nº cliente', align: 'center' },
-          { label: 'Resp.', align: 'center' },
-          { label: 'Capital inicial', align: 'right' },
-          { label: 'Saldo em dívida', align: 'right' },
-          { label: 'Prestação', align: 'right' },
-          { label: 'Situação', align: 'center' },
-        ]}
-      />
-      <TableBody>
-        {fiancas?.map((row) => rowInfo(row))}
-        {fiancas?.length > 1 && rowInfo(responsabilidadesInfo(fiancas))}
-        {fiancas?.length === 0 && <EmptyRow empty cells={7} message="Nenhum registo encontrado..." />}
-
-        {/* Avales/Fianças externas  */}
-        {avalesExternos?.length > 0 && (
-          <>
-            <EmptyRow cells={8} message="Avales/Fianças externas" variant="head" />
-            {avalesExternos?.map((row) => rowInfo(row))}
-            {avalesExternos?.length > 1 && rowInfo(responsabilidadesInfo(avalesExternos))}
-          </>
-        )}
-        {fiancas?.length > 0 && avalesExternos?.length > 0 && (
-          <>
-            <EmptyRow cells={8} message="Avales/Fianças consolidadas" variant="head" />
-            {rowInfo(responsabilidadesInfo([...fiancas, ...avalesExternos]))}
-          </>
-        )}
-      </TableBody>
-    </>
-  ) : (
-    <NadaConsta />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function CentralRisco({ cr }) {
   const dif = cr?.saldo_centralizado - cr?.saldo_comunicado > 1000;
   const rowInfo = (title, saldo, data, mora, dif) => (
@@ -448,6 +299,7 @@ export function Cabecalho({ item, headLabel }) {
 
 export const rowInfo = (title, value, total, extra = null) => {
   const isTitle = value === '*title*';
+  const notSet = value === '(Não definido...)';
   return value ? (
     <TableRow hover={!isTitle} sx={{ whiteSpace: 'nowrap' }}>
       <TableCell
@@ -459,7 +311,14 @@ export const rowInfo = (title, value, total, extra = null) => {
       </TableCell>
       {!isTitle ? (
         <TableCell sx={{ width: '100%' }}>
-          <Typography component="span" variant="body2" sx={{ fontWeight: total ? 'bold' : 'normal' }}>
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{
+              fontWeight: total ? 'bold' : 'normal',
+              ...((notSet && { typography: 'caption', fontStyle: 'italic', color: 'text.secondary' }) || {}),
+            }}
+          >
             {value}
           </Typography>
           {extra}
@@ -471,7 +330,7 @@ export const rowInfo = (title, value, total, extra = null) => {
   ) : null;
 };
 
-function CellValor({ valor = 0, moeda = 'CVE', total = false }) {
+export function CellValor({ valor = 0, moeda = 'CVE', total = false }) {
   return (
     <TableCell align="right">
       <Typography noWrap variant="body2" sx={{ fontWeight: total ? 'bold' : 'normal' }}>{`${fNumber(
@@ -502,7 +361,7 @@ export function EmptyRow({ cells = 4, message = ' ', variant = '', empty }) {
   );
 }
 
-function NadaConsta() {
+export function NadaConsta() {
   return (
     <Typography variant="body2" sx={{ p: 1.5, fontStyle: 'italic', color: 'text.secondary' }}>
       Nada consta

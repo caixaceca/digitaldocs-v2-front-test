@@ -1,9 +1,9 @@
 import { View, Text } from '@react-pdf/renderer';
 //
-import { ptDate } from '../../../../../utils/formatTime';
-import { fNumber, fPercent } from '../../../../../utils/formatNumber';
+import { ptDate } from '@/utils/formatTime';
+import { fNumber, fPercent } from '@/utils/formatNumber';
 // components
-import { styles } from '../../../../../components/exportar-dados/pdf';
+import { styles } from '@/components/exportar-dados/pdf';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ export function RowFicha({ title = '', value = '', options = null, valueAlt = nu
         <Text style={[styles.textCellFicha, { color: '#444' }]}>
           <Text
             style={
-              value === 'Não definido...'
+              value === '(Não definido...)'
                 ? [{ color: '#666', fontSize: 8 }]
                 : [{ fontWeight: options?.bold ? 'bold' : 'normal', color: options?.color || '#444' }]
             }

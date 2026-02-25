@@ -14,10 +14,9 @@ import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { estadoFixo } from '../../utils/validarAcesso';
-// redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
+import { estadoFixo } from '@/utils/validarAcesso';
+import { useSelector, useDispatch } from '@/redux/store';
+import { createItem, updateItem, deleteItem } from '@/redux/slices/parametrizacao';
 // components
 import {
   RHFSwitch,
@@ -27,11 +26,11 @@ import {
   RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
-} from '../../components/hook-form';
-import GridItem from '../../components/GridItem';
-import { DialogTitleAlt } from '../../components/CustomDialog';
-import { shapeNumber } from '../../components/hook-form/yup-shape';
-import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
+} from '@/components/hook-form';
+import GridItem from '@/components/GridItem';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { shapeNumber } from '@/components/hook-form/yup-shape';
+import { AddItem, DefaultAction, DialogButons } from '@/components/Actions';
 //
 import { listaPerfis } from './applySortFilter';
 import { ItemComponent } from './ParametrizacaoForm';
@@ -51,7 +50,7 @@ export function EstadoForm({ onClose }) {
   const formSchema = Yup.object().shape({
     nome: Yup.string().required().label('Nome'),
     uo_id: Yup.mixed().required().label('Unidade orgânica'),
-    nivel_decisao: shapeNumber('Nível de decisão', true, '', 'is_decisao'),
+    nivel_decisao: shapeNumber('Escalão de decisão', true, '', 'is_decisao'),
   });
 
   const defaultValues = useMemo(
@@ -111,7 +110,7 @@ export function EstadoForm({ onClose }) {
             <GridItem xs={values?.is_decisao ? 6 : 4} children={<RHFSwitch name="is_final" label="Final" />} />
             <GridItem xs={values?.is_decisao ? 6 : 4} children={<RHFSwitch name="is_decisao" label="Decisão" />} />
             {values?.is_decisao && (
-              <GridItem sm={6} children={<RHFNumberField name="nivel_decisao" label="Nível de decisão" />} />
+              <GridItem sm={6} children={<RHFNumberField name="nivel_decisao" label="Escalão de decisão" />} />
             )}
             <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
           </Grid>

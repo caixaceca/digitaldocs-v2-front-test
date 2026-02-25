@@ -1,11 +1,11 @@
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
-import { ptDate } from '../../../utils/formatTime';
-import { fNumber } from '../../../utils/formatNumber';
+import { ptDate } from '@/utils/formatTime';
+import { fNumber } from '@/utils/formatNumber';
 // components
 import { TableRowItem } from '../../parametrizacao/Detalhes';
-import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
+import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

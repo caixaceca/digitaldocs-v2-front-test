@@ -22,7 +22,7 @@ export function Ambiente({ ...other }) {
       renderInput={(params) => <TextField {...params} label="Estado" />}
       onChange={(event, newValue) => {
         dispatch(changeMeuAmbiente(newValue));
-        localStorage.setItem('meuAmbiente', newValue?.id);
+        localStorage.setItem('meuAmbiente', newValue?.id || '');
       }}
       {...other}
     />
@@ -46,7 +46,7 @@ export function Fluxo({ ...other }) {
       renderInput={(params) => <TextField {...params} label="Fluxo" />}
       onChange={(event, newValue) => {
         dispatch(getSuccess({ item: 'meuFluxo', dados: newValue }));
-        localStorage.setItem('meuFluxo', newValue?.id);
+        localStorage.setItem('meuFluxo', newValue?.id || '');
       }}
       {...other}
     />

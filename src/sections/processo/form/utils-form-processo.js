@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 // redux
-import { updateDados } from '../../../redux/slices/stepper';
-import { updateItem } from '../../../redux/slices/digitaldocs';
+import { updateDados } from '@/redux/slices/stepper';
+import { updateItem } from '@/redux/slices/digitaldocs';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

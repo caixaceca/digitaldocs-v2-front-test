@@ -4,18 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 //
-import { useSelector } from '../../redux/store';
-import useSettings from '../../hooks/useSettings';
-import { usePermissao } from '../../hooks/useAcesso';
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useSelector } from '@/redux/store';
+import useSettings from '@/hooks/useSettings';
+import { usePermissao } from '@/hooks/useAcesso';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
-import TabGaji9 from '../../sections/gaji9/items';
+import TabGaji9 from '@/sections/gaji9/items';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

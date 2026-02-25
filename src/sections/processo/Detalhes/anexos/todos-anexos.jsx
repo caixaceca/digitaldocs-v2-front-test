@@ -5,22 +5,23 @@ import Divider from '@mui/material/Divider';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 // utils
-import { canPreview } from '../../../../utils/formatFile';
-import { eliminarAnexo, emailCheck } from '../../../../utils/validarAcesso';
+import { idCheck } from '@/utils/formatObject';
+import { canPreview } from '@/utils/formatFile';
+import { eliminarAnexo } from '@/utils/validarAcesso';
 // redux
-import { useDispatch, useSelector } from '../../../../redux/store';
-import { getAnexo, setModal } from '../../../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getAnexo, setModal } from '@/redux/slices/digitaldocs';
 //
 import ModelosRespostas from './modelos-resposta';
 import { AnexoItem } from './anexos-dados-gerais';
-import { SearchNotFound } from '../../../../components/table';
-import RoleBasedGuard from '../../../../guards/RoleBasedGuard';
+import { SearchNotFound } from '@/components/table';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function TodosAnexos() {
   const dispatch = useDispatch();
-  const { mail } = useSelector((state) => state.intranet);
+  const { idAd } = useSelector((state) => state.intranet);
   const { processo } = useSelector((state) => state.digitaldocs);
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
 
@@ -50,7 +51,7 @@ export default function TodosAnexos() {
           <>
             {renderAnexos(anexosEntidades, 'Anexos das entidades')}
             {anexosList?.map(({ estado, anexos }) => renderAnexos(anexos, estado))}
-            {((emailCheck(mail) && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
+            {((idCheck(idAd) && origemId) || (estado?.estado?.includes('Notas Externas') && status !== 'A')) && (
               <ModelosRespostas />
             )}
           </>

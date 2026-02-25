@@ -10,21 +10,20 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { normalizeText } from '../../../utils/formatText';
-import { ptDateTime, fDistance, fToNow } from '../../../utils/formatTime';
-// hooks
-import useTable, { getComparator, applySort } from '../../../hooks/useTable';
+import { normalizeText } from '@/utils/formatText';
+import { ptDateTime, fDistance, fToNow } from '@/utils/formatTime';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { getInfoProcesso, setModal } from '../../../redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getInfoProcesso, setModal } from '@/redux/slices/digitaldocs';
 // components
-import Label from '../../../components/Label';
-import Scrollbar from '../../../components/Scrollbar';
-import { DefaultAction } from '../../../components/Actions';
-import { SkeletonTable } from '../../../components/skeleton';
-import { SearchToolbarSimple } from '../../../components/SearchToolbar';
-import { Criado, ColaboradorInfo, noDados } from '../../../components/Panel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
+import Label from '@/components/Label';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { Criado, ColaboradorInfo, noDados } from '@/components/Panel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 // import { ConfidencialidadesForm } from '../form/intervencao';
 
@@ -142,7 +141,7 @@ export default function TableDetalhes({ id, item }) {
                             <Criado sx={{ color: 'text.success' }} caption value="Ainda está a trabalhar no processo" />
                           )}
                           {row?.solto_em && row?.por && (
-                            <Criado tipo="user" value={row?.por === 'system' ? 'Pelo sistema' : row?.por} baralhar />
+                            <Criado tipo="user" value={row?.por === 'system' ? 'Pelo sistema' : row?.por} />
                           )}
                         </TableCell>
                       </>
@@ -152,7 +151,7 @@ export default function TableDetalhes({ id, item }) {
                           <TableCell>{row?.estado}</TableCell>
                           <TableCell>
                             <Criado caption tipo="data" value={ptDateTime(row?.atribuido_em)} />
-                            <Criado caption tipo="user" value={row?.atribuidor} baralhar />
+                            <Criado caption tipo="user" value={row?.atribuidor} />
                           </TableCell>
                         </>
                       )) ||
@@ -171,7 +170,7 @@ export default function TableDetalhes({ id, item }) {
                             <Criado caption tipo="data" value={ptDateTime(row?.data_libertado)} />
                           </TableCell>
                           <TableCell>
-                            <Criado caption tipo="user" value={row?.nome} baralhar />
+                            <Criado caption tipo="user" value={row?.nome} />
                             <Criado caption tipo="data" value={ptDateTime(row?.data_pendente)} />
                           </TableCell>
                         </>
@@ -187,7 +186,7 @@ export default function TableDetalhes({ id, item }) {
                             </Label>
                           </TableCell>
                           <TableCell>
-                            {row?.criador && <Criado caption tipo="user" value={row?.criador} baralhar />}
+                            {row?.criador && <Criado caption tipo="user" value={row?.criador} />}
                             {row?.criado_em && <Criado caption tipo="data" value={ptDateTime(row?.criado_em)} />}
                           </TableCell>
                           <TableCell>

@@ -7,19 +7,18 @@ import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 // utils
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import useSettings from '@/hooks/useSettings';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
-// hooks
-import useSettings from '../../hooks/useSettings';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // components
-import Page from '../../components/Page';
-import { TabsWrapperStyle } from '../../components/Panel';
-import { SearchNotFound404 } from '../../components/table';
+import Page from '@/components/Page';
+import { TabsWrapperStyle } from '@/components/Panel';
+import { SearchNotFound404 } from '@/components/table';
 // sections
-import PerfilCover from '../../sections/sobre/PerfilCover';
-import TableAcessos from '../../sections/parametrizacao/TableAcessos';
+import PerfilCover from '@/sections/sobre/PerfilCover';
+import TableAcessos from '@/sections/parametrizacao/TableAcessos';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

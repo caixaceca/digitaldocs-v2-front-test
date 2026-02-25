@@ -6,11 +6,11 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import CardHeader from '@mui/material/CardHeader';
 // utils
-import { meses } from '../../../_mock';
-import { fNumber, fPercent } from '../../../utils/formatNumber';
+import { meses } from '@/_mock';
+import { fNumber, fPercent } from '@/utils/formatNumber';
 // components
-import { SearchNotFoundSmall } from '../../../components/table';
-import Chart, { useChart, getChartColors } from '../../../components/chart';
+import { SearchNotFoundSmall } from '@/components/table';
+import Chart, { useChart, getChartColors } from '@/components/chart';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -7,14 +7,14 @@ import Grid from '@mui/material/Grid';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { vdt } from '../../../../../utils/formatObject';
-import { useSelector, useDispatch } from '../../../../../redux/store';
-import { createItem, updateItem } from '../../../../../redux/slices/digitaldocs';
+import { vdt } from '@/utils/formatObject';
+import { useSelector, useDispatch } from '@/redux/store';
+import { createItem, updateItem } from '@/redux/slices/digitaldocs';
 // components
-import GridItem from '../../../../../components/GridItem';
-import { DialogButons } from '../../../../../components/Actions';
-import { DialogTitleAlt } from '../../../../../components/CustomDialog';
-import { FormProvider, RHFNumberField, RHFAutocompleteObj } from '../../../../../components/hook-form';
+import GridItem from '@/components/GridItem';
+import { DialogButons } from '@/components/Actions';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { FormProvider, RHFNumberField, RHFAutocompleteObj } from '@/components/hook-form';
 //
 import FormContas from './form-contas';
 import FormImoveis from './form-imoveis';
@@ -75,10 +75,10 @@ export default function FormGarantias({ dados, processoId, onClose }) {
   const chaveMeta = useMemo(() => extrairChaveMeta(tipo, subtipo) ?? null, [tipo, subtipo]);
 
   const onSubmit = async (values) => {
-    const formData = composeGarantiaPayload(values, chaveMeta);
     const msg = isEdit ? 'Garantia atualizada' : 'Garantia adicionada';
     const params = { id: dados?.id || '', fillCredito: true, processoId, msg, put: true };
-    dispatch((isEdit ? updateItem : createItem)('garantias', JSON.stringify([formData]), { ...params, onClose }));
+    const formData = isEdit ? composeGarantiaPayload(values, chaveMeta) : [composeGarantiaPayload(values, chaveMeta)];
+    dispatch((isEdit ? updateItem : createItem)('garantias', JSON.stringify(formData), { ...params, onClose }));
   };
 
   return (

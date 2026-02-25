@@ -97,9 +97,12 @@ export default function TableTransicoes() {
                       <TableCell>{row.estado_inicial}</TableCell>
                       <TableCell>{row.estado_final}</TableCell>
                       <TableCell align="center">
-                        <Label color={row?.modo === 'Seguimento' ? 'success' : 'error'}>
-                          {row?.modo}
-                          {row?.is_after_devolucao ? ' - DD' : ''}
+                        <Label
+                          color={
+                            (row?.is_after_devolucao && 'info') || (row?.modo === 'Seguimento' && 'success') || 'error'
+                          }
+                        >
+                          {`${row?.modo}${row?.is_after_devolucao ? ' - DD' : ''}`}
                         </Label>
                       </TableCell>
                       <TableCell align="center">

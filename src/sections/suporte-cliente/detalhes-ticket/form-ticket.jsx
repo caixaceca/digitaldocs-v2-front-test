@@ -9,19 +9,13 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import useAnexos from '../../../hooks/useAnexos';
-import { applySort, getComparator } from '../../../hooks/useTable';
-import { useSelector, useDispatch } from '../../../redux/store';
-import { createInSuporte, updateInSuporte } from '../../../redux/slices/suporte-cliente';
+import useAnexos from '@/hooks/useAnexos';
+import { applySort, getComparator } from '@/hooks/useTable';
+import { useSelector, useDispatch } from '@/redux/store';
+import { createInSuporte, updateInSuporte } from '@/redux/slices/suporte-cliente';
 // components
-import {
-  RHFSwitch,
-  FormProvider,
-  RHFTextField,
-  RHFAutocompleteObj,
-  RHFUploadMultiFile,
-} from '../../../components/hook-form';
-import { DialogButons } from '../../../components/Actions';
+import { DialogButons } from '@/components/Actions';
+import { RHFSwitch, FormProvider, RHFTextField, RHFAutocompleteObj, RHFUploadMultiFile } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

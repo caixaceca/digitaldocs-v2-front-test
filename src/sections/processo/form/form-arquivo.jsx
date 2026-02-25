@@ -15,11 +15,10 @@ import CircleIcon from '@mui/icons-material/Circle';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromParametrizacao } from '../../../redux/slices/parametrizacao';
-import { getInfoProcesso, updateItem, setModal } from '../../../redux/slices/digitaldocs';
-// hooks
-import useAnexos from '../../../hooks/useAnexos';
+import useAnexos from '@/hooks/useAnexos';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
+import { getInfoProcesso, updateItem, setModal } from '@/redux/slices/digitaldocs';
 // components
 import {
   FormProvider,
@@ -28,9 +27,9 @@ import {
   RHFNumberField,
   RHFUploadMultiFile,
   RHFAutocompleteObj,
-} from '../../../components/hook-form';
-import GridItem from '../../../components/GridItem';
-import { DialogButons } from '../../../components/Actions';
+} from '@/components/hook-form';
+import GridItem from '@/components/GridItem';
+import { DialogButons } from '@/components/Actions';
 
 // --- ARQUIVAR PROCESSO -----------------------------------------------------------------------------------------------
 

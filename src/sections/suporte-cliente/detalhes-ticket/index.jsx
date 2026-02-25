@@ -7,16 +7,16 @@ import Typography from '@mui/material/Typography';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { useSelector } from '../../../redux/store';
+import { useSelector } from '@/redux/store';
 import { getStatusLabel, useColaborador } from '../utils';
-import { colorLabel } from '../../../utils/getColorPresets';
-import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
+import { colorLabel } from '@/utils/getColorPresets';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import { Criado } from '../../../components/Panel';
-import { TicketSkeleton } from '../../../components/skeleton';
-import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { TabsWrapperSimple } from '../../../components/TabsWrapper';
-import SearchNotFound from '../../../components/table/SearchNotFound';
+import { Criado } from '@/components/Panel';
+import { TicketSkeleton } from '@/components/skeleton';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
+import SearchNotFound from '@/components/table/SearchNotFound';
 //
 import { SLA } from './sla';
 import Actions from './actions';

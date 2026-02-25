@@ -2,13 +2,13 @@
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // hooks
-import useSettings from '../../hooks/useSettings';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import useSettings from '@/hooks/useSettings';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
 // sections
-import TableArquivo from '../../sections/arquivo/TableArquivo';
+import TableArquivo from '@/sections/arquivo/TableArquivo';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

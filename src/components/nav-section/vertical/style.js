@@ -5,9 +5,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import ListItemButton from '@mui/material/ListItemButton';
 // utils
-// import cssStyles from '../../../utils/cssStyles';
-// config
-import { ICON, NAVBAR } from '../../../config';
+import { ICON, NAVBAR } from '@/config';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

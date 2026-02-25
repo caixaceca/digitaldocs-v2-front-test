@@ -69,25 +69,25 @@ const slice = createSlice({
   name: 'parametrizacao',
   initialState,
   reducers: {
-    getMeusAmbientesSuccess(state, action) {
-      if (action?.payload?.length === 0) return;
-      const ambientes = applySort(action?.payload, getComparator('asc', 'nome')).map((item) => ({
-        ...item,
-        id: item.estado_id,
-      }));
-      const meuAmbiente =
-        ambientes.find(({ id }) => id === Number(localStorage.getItem('meuAmbiente'))) ||
-        ambientes.find(({ padrao }) => padrao) ||
-        ambientes[0];
-      const fluxosAmbiente = meusFluxos(meuAmbiente?.fluxos ?? []);
+    getMeusAmbientes(state, { payload }) {
+      const { dados = [], params = null } = payload;
+      if (!dados?.length) return;
+      let meuAmbiente = null;
+      const estados = applySort(dados, getComparator('asc', 'nome')).map((item) => ({ ...item, id: item.estado_id }));
 
-      state.meusAmbientes = ambientes;
-      state.meuAmbiente = meuAmbiente;
-      state.meusFluxos = fluxosAmbiente;
-      state.meuFluxo = fluxosAmbiente.find(({ id }) => id === Number(localStorage.getItem('meuFluxo'))) ?? null;
+      const idAmbienteSalvo = Number(localStorage.getItem('meuAmbiente'));
+      if (idAmbienteSalvo) meuAmbiente = estados.find((a) => a.id === idAmbienteSalvo) || null;
+      if (!meuAmbiente && params?.inicial) meuAmbiente = estados.find((a) => a.padrao) || null;
+      if (meuAmbiente?.id) localStorage.setItem('meuAmbiente', meuAmbiente.id);
+      const fluxosDoAmbiente = meusFluxos(meuAmbiente?.fluxos ?? []);
+
+      const idFluxoSalvo = Number(localStorage.getItem('meuFluxo'));
+      const meuFluxo = fluxosDoAmbiente.find((f) => f.id === idFluxoSalvo) || null;
+
+      Object.assign(state, { meusAmbientes: estados, meuAmbiente, meusFluxos: fluxosDoAmbiente, meuFluxo });
     },
 
-    getMeusAcessosSuccess(state, action) {
+    getMeusAcessos(state, action) {
       if (!action.payload || action.payload?.length === 0) return;
 
       action.payload?.forEach(({ objeto, acesso }) => {
@@ -135,10 +135,10 @@ const slice = createSlice({
       state.selectedItem = action?.payload?.dados || null;
     },
 
-    changeMeuAmbiente(state, action) {
+    changeMeuAmbiente(state, { payload }) {
       state.meuFluxo = null;
-      state.meuAmbiente = action.payload;
-      state.meusFluxos = meusFluxos(action.payload?.fluxos ?? []);
+      state.meuAmbiente = payload || null;
+      state.meusFluxos = meusFluxos(payload?.fluxos || []);
     },
   },
 });
@@ -207,8 +207,9 @@ export function getFromParametrizacao(item, params) {
           (item === 'motivosPendencia' && 'motivo') ||
           ((item === 'motivosTransicao' || item === 'despesas' || item === 'documentos') && 'designacao') ||
           '';
-        if (item === 'meusacessos') dispatch(slice.actions.getMeusAcessosSuccess(response.data));
-        else if (item === 'meusambientes') dispatch(slice.actions.getMeusAmbientesSuccess(response.data.objeto));
+        if (item === 'meusacessos') dispatch(slice.actions.getMeusAcessos(response.data));
+        else if (item === 'meusambientes')
+          dispatch(slice.actions.getMeusAmbientes({ dados: response.data?.objeto || [], params }));
         else if (item === 'colaboradoresEstado') {
           dispatch(slice.actions.getSuccess({ item, dados: response?.data?.objeto?.perfis || [] }));
           dispatch(slice.actions.getSuccess({ item: 'decisor', dados: !!response?.data?.objeto?.is_decisao }));
@@ -232,7 +233,7 @@ export function getFromParametrizacao(item, params) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function createItem(item, dados, params) {
+export function createItem(item, body, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
 
@@ -264,7 +265,7 @@ export function createItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.post(`${API_FORMINGA_URL}${apiUrl}`, dados, options);
+        const response = await axios.post(`${API_FORMINGA_URL}${apiUrl}`, body, options);
         if (item === 'clonar fluxo') {
           if (params?.transicoes?.length > 0) {
             const id = response?.data?.id;
@@ -276,12 +277,11 @@ export function createItem(item, dados, params) {
         } else if (item === 'transicoes' || item === 'destinatarios') {
           dispatch(getFromParametrizacao(item === 'transicoes' ? 'fluxo' : item, { id: params?.id }));
         } else if (params?.getItem) {
-          dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data?.objeto ?? null }));
-        } else if (item === 'acessos') {
-          dispatch(slice.actions.createSuccess({ item, dados: response.data }));
-        } else if (item === 'perfis') {
-          dispatch(getFromParametrizacao('estado', { id: params?.id }));
-        } else {
+          const data = response.data?.objeto || response.data || null;
+          dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: data }));
+        } else if (item === 'acessos') dispatch(slice.actions.createSuccess({ item, dados: response.data }));
+        else if (item === 'perfis') dispatch(getFromParametrizacao('estado', { id: params?.id }));
+        else {
           const dados = response.data?.objeto || response.data;
           dispatch(slice.actions.createSuccess({ item, item1: params?.item1 || '', dados }));
         }
@@ -297,7 +297,7 @@ export function createItem(item, dados, params) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function updateItem(item, dados, params) {
+export function updateItem(item, body, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
 
@@ -328,7 +328,7 @@ export function updateItem(item, dados, params) {
         '';
 
       if (apiUrl) {
-        const response = await axios.put(`${API_FORMINGA_URL}${apiUrl}`, dados, options);
+        const response = await axios.put(`${API_FORMINGA_URL}${apiUrl}`, body, options);
         const dadosR = (item === 'acessos' && response.data) || response.data?.objeto || response.data || null;
         if (item === 'fluxo' || item === 'estado' || params?.getItem)
           dispatch(slice.actions.getSuccess({ item: params?.getItem || item, dados: dadosR }));
@@ -373,14 +373,11 @@ export function deleteItem(item, params) {
       if (apiUrl) {
         const response = await axios.delete(`${API_FORMINGA_URL}${apiUrl}`, options);
         if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados: response.data.objeto }));
-        dispatch(
-          slice.actions.deleteSuccess({
-            id: params?.id,
-            item: params?.item || item,
-            item1: params?.item1 || '',
-            destaivar: item === 'destinatario',
-          })
-        );
+        {
+          const item1 = params?.item1 || '';
+          const desativar = item === 'destinatario';
+          dispatch(slice.actions.deleteSuccess({ id: params?.id, item: params?.item || item, item1, desativar }));
+        }
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {

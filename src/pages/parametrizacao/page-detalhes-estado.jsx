@@ -5,29 +5,28 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
+// utils
+import useSettings from '@/hooks/useSettings';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
 // hooks
-import { useNotificacao } from '../../hooks/useNotificacao';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import { useNotificacao } from '@/hooks/useNotificacao';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, setModal, deleteItem } from '../../redux/slices/parametrizacao';
-// routes
-import useSettings from '../../hooks/useSettings';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromParametrizacao, setModal, deleteItem } from '@/redux/slices/parametrizacao';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
-import { ActionButton } from '../../components/Actions';
-import { SearchNotFound404 } from '../../components/table';
-import { DialogConfirmar } from '../../components/CustomDialog';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
+import { ActionButton } from '@/components/Actions';
+import { SearchNotFound404 } from '@/components/table';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 // sections
-import TableInfoEstado from '../../sections/parametrizacao/table-info-estado';
-import { Detalhes, DetalhesContent } from '../../sections/parametrizacao/Detalhes';
-import { EstadoForm, PerfisEstadoForm, RegrasForm, EstadosPerfilForm } from '../../sections/parametrizacao/form-estado';
+import TableInfoEstado from '@/sections/parametrizacao/table-info-estado';
+import { Detalhes, DetalhesContent } from '@/sections/parametrizacao/Detalhes';
+import { EstadoForm, PerfisEstadoForm, RegrasForm, EstadosPerfilForm } from '@/sections/parametrizacao/form-estado';
 // guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -62,7 +61,9 @@ export default function PageDetalhesEstado() {
       ),
     },
     { value: 'Colaboradores', component: <TableInfoEstado item="colaboradores" dados={estado?.perfis || []} /> },
-    { value: 'Regras parecer', component: <TableInfoEstado item="regrasEstado" dados={estado?.regras || []} /> },
+    ...(estado?.is_decisao
+      ? [{ value: 'Regras parecer', component: <TableInfoEstado item="regrasEstado" dados={estado?.regras || []} /> }]
+      : []),
   ];
 
   const [tab, setTab] = useTabsSync(tabsList, 'Dados', 'tab-detalhes-estado');

@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react';
 // utils
-import { useSelector } from '../../../redux/store';
-import { UosAcesso } from '../../../utils/validarAcesso';
-import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
+import { useSelector } from '@/redux/store';
+import { UosAcesso } from '@/utils/validarAcesso';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import { TabsWrapperSimple } from '../../../components/TabsWrapper';
-import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 //
 import ResumoEstatisticaCredito from './resumo';
 import FiltrosEstatisticaCredito from './filtros';

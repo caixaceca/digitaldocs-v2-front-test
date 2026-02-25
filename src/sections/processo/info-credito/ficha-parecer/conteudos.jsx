@@ -11,17 +11,6 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import { extractClientes, movimentosConta } from './calculos';
 //
 import {
-  Saldos,
-  Clientes,
-  Mensagens,
-  Movimentos,
-  Identificcao,
-  CentralRisco,
-  AvalesFiancas,
-  Restruturacoes,
-  Responsabilidades,
-} from './dados-ficha';
-import {
   Dsti,
   Parecer,
   Despesas,
@@ -33,26 +22,29 @@ import {
 } from './info-solvabilidade';
 import { FormParecer } from './form-ficha';
 import AnexarFicha from './ficha-pdf/anexar-ficha';
-import { DefaultAction } from '../../../../components/Actions';
+import { AddItem, DefaultAction } from '@/components/Actions';
+import Responsabilidades, { AvalesFiancas, Liquidacoes } from './responsabilidades';
+import { Saldos, Clientes, Mensagens, Movimentos, Identificcao, CentralRisco, Restruturacoes } from './dados-ficha';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Ficha({ credito, ficha, valorPrestacao, titular, cliente, modalIntranet, actionModal }) {
+export default function Ficha({ credito, ficha, valorPrestacao, cliente, modalIntranet, actionModal }) {
   const {
     saldos,
     titulos,
     dividas,
+    clientes,
     restruturacoes,
     irregularidades,
     garantiasPrestadas,
     garantiasRecebidas,
     totalSaldoPorMoeda,
-    clientes: clientesList,
   } = useMemo(() => extractClientes(ficha?.clientes || []), [ficha?.clientes]);
 
-  const { rendimento = null, despesas = [], parecer = '' } = ficha || {};
+  const { rendimento = null, despesas = [], liquidacoes = [], parecer = '' } = ficha || {};
   const { dividas_externas: dividasExternas = [], avales_externas: avalesExternos = [] } = ficha || {};
   const { numero, fiancas, entidade, mensagens, central_risco: cr, movimentos = [], proposta = null } = ficha || {};
+  const divEf = useMemo(() => dividas?.filter((r) => !liquidacoes?.includes(r?.conta)), [dividas, liquidacoes]);
   const { movimentosDebito, movimentosCredito, totaisDebConta, totaisCredConta } = useMemo(
     () => movimentosConta(movimentos),
     [movimentos]
@@ -65,7 +57,7 @@ export default function Ficha({ credito, ficha, valorPrestacao, titular, cliente
         title="1. Identificação"
         children={<Identificcao entidade={{ numero, ...entidade, ...rendimento }} />}
       />
-      <AccordionItem title="2. Clientes associados" children={<Clientes dados={clientesList} />} />
+      <AccordionItem title="2. Clientes associados" children={<Clientes dados={clientes} />} />
       <AccordionItem
         title="3. Saldos e Aplicações"
         children={<Saldos dados={saldos} titulos={titulos} totalMoedas={totalSaldoPorMoeda} />}
@@ -80,12 +72,19 @@ export default function Ficha({ credito, ficha, valorPrestacao, titular, cliente
       />
       <AccordionItem
         title="6. Crédito e outras responsabilidades"
-        children={
-          <Responsabilidades
-            responsabilidades={{ dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas }}
-          />
+        action={
+          dividas?.length > 0 ? (
+            <AddItem
+              dados={{ small: true, label: 'Liquidação' }}
+              onClick={() => actionModal({ modal: 'liquidacao' })}
+            />
+          ) : null
         }
-      />
+      >
+        <Responsabilidades
+          responsabilidades={{ dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas }}
+        />
+      </AccordionItem>
       <AccordionItem
         title="7. Responsabilidades como Fiador/Avalista"
         children={<AvalesFiancas dados={{ fiancas, avalesExternos }} />}
@@ -97,34 +96,33 @@ export default function Ficha({ credito, ficha, valorPrestacao, titular, cliente
         children={<SituacaoProfissional dados={rendimento} />}
         title="11. Situação profissional e Rendimento do agregado familiar (mensal)"
       />
-      <AccordionItem
-        title="12. Novo financiamento"
-        children={
-          <NovoFinanciamento dados={{ valorPrestacao, proposta, credito, rendimento, dividas, dividasExternas }} />
-        }
-      />
+      <AccordionItem title="12. Novo financiamento">
+        <NovoFinanciamento dados={{ valorPrestacao, proposta, credito, rendimento, dividas: divEf, dividasExternas }} />
+      </AccordionItem>
       <AccordionItem
         title="13. DSTI - Debt Service To Income (<=50%)"
-        children={<Dsti dados={{ valorPrestacao, dividas, dividasExternas, rendimento, credito }} />}
+        children={<Dsti dados={{ valorPrestacao, dividas: divEf, dividasExternas, rendimento, credito }} />}
       />
       <AccordionItem title="14. Outras despesas regulares (média mensal)" children={<Despesas dados={despesas} />} />
       <AccordionItem
         title="15. DSTI corrigido (<=70%)"
-        children={<DstiCorrigido dados={{ valorPrestacao, dividas, dividasExternas, rendimento, credito, despesas }} />}
+        children={
+          <DstiCorrigido dados={{ valorPrestacao, dividas: divEf, dividasExternas, rendimento, credito, despesas }} />
+        }
       />
       <AccordionItem title="16. Limite máximo Aval/Fiança" children={<LimiteAval rendimento={rendimento} />} />
       <AccordionItem
         title="17. Parecer"
         children={<Parecer parecer={ficha?.parecer || ''} />}
         action={
-          proposta && (
+          proposta ? (
             <DefaultAction
               small
               button
               label={parecer ? 'Editar' : 'Adicionar'}
               onClick={() => actionModal({ modal: 'form-parecer' })}
             />
-          )
+          ) : null
         }
       />
       <AccordionItem
@@ -133,16 +131,17 @@ export default function Ficha({ credito, ficha, valorPrestacao, titular, cliente
       />
 
       {ficha?.parecer && (
-        <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
-          <AnexarFicha dados={{ valorPrestacao, titular, dividas, cliente, credito, parecer, ...ficha }} />
-        </Stack>
+        <AnexarFicha dados={{ valorPrestacao, dividas, divEf, cliente, credito, parecer, ...ficha }} />
       )}
 
       {modalIntranet === 'form-parecer' && (
         <FormParecer
-          onClose={() => actionModal({ modal: '' })}
-          ficha={{ valorPrestacao, titular, cliente, dividas, credito, ...ficha }}
+          onClose={() => actionModal({})}
+          ficha={{ valorPrestacao, cliente, dividas, divEf, credito, liquidacoes, ...ficha }}
         />
+      )}
+      {modalIntranet === 'liquidacao' && (
+        <Liquidacoes dividas={dividas} liquidacoes={liquidacoes} onClose={() => actionModal({})} />
       )}
     </Stack>
   );
@@ -166,8 +165,8 @@ function AccordionItem({ open = false, title, action = null, children }) {
           justifyContent="space-between"
         >
           {title}
-          {title === '17. Parecer' && (
-            <Box sx={{ pr: 1 }} onClick={(e) => e.stopPropagation()}>
+          {action && (
+            <Box component="div" sx={{ pr: 1 }} onClick={(e) => e.stopPropagation()}>
               {action}
             </Box>
           )}

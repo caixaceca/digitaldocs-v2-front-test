@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 // utils
-import { formatDate } from '../../../../utils/formatTime';
+import { formatDate } from '@/utils/formatTime';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
-import { fMonthYear } from '../../../../utils/formatTime';
-import { fCurrency, fNumber, fShortenNumber, fPercent } from '../../../../utils/formatNumber';
+import { fMonthYear } from '@/utils/formatTime';
+import { fCurrency, fNumber, fShortenNumber, fPercent } from '@/utils/formatNumber';
 import { calcRendimento, percentagemDsti, dstiCorrigido, idadeCliente, idadeReforma } from './calculos';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ export function textParecer(ficha) {
     clientes = [],
   } = ficha || {};
 
-  const titularCliente = clientes.find((c) => c?.titular === ficha?.titular) || clientes[0];
+  const titularCliente = clientes.find((c) => c?.titular === ficha?.credito?.titular) || clientes[0];
 
   const dataAbertura = fMonthYear(titularCliente?.data_abertura) ?? 'DATA DE ABERTURA';
   const historicoReestruturacao = titularCliente?.com_historico_restruturacao
@@ -33,10 +33,6 @@ export function textParecer(ficha) {
     avalesExterna,
   });
 
-  const regras = avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, proposta, ficha });
-
-  const conclusao = gerarConclusao(regras, credito);
-
   const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
   const reforma = idadeReforma(ficha?.entidade?.sexo);
 
@@ -51,10 +47,12 @@ export function textParecer(ficha) {
     )}, refletindo a expectativa de redução após a aposentadoria.`;
   }
 
-  const riscoProspectivo = gerarRiscoProspectivo(ficha, rendimento, proposta);
+  const regras = avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, proposta, ficha });
+  const riscoProspectivo = gerarRiscoProspectivo(regras);
+  const conclusao = gerarConclusao(regras);
 
   return `
-    <p><strong>${ficha?.titular ?? 'NOME DO CLIENTE'}</strong>${
+    <p><strong>${ficha?.credito?.titular ?? 'NOME DO CLIENTE'}</strong>${
       rendimento?.nome_conjuge ? ` e <strong>${rendimento?.nome_conjuge}</strong>` : ''
     }, cliente nº <strong>${
       ficha?.cliente ?? 'Nº DE CLIENTE'
@@ -66,7 +64,7 @@ export function textParecer(ficha) {
       calcRendimento(rendimento, true)
     )}</strong>.</p>
 
-    <br>
+    <br/>
     <p>O cliente, com <strong>${idadeTitular} anos</strong>, solicita um crédito <strong>${
       credito?.componente
     }</strong> no valor de <strong>${fCurrency(proposta?.montante)}</strong>, correspondente a <strong>${fShortenNumber(
@@ -79,25 +77,26 @@ export function textParecer(ficha) {
       <li>Taxa de juros: <strong>${fPercent(proposta?.taxa_juro)}</strong></li>
       <li>Prestação mensal: <strong>${fCurrency(ficha?.valorPrestacao)}</strong></li>
     </ul>
-    
-    <br>
-    <p><strong style="font-size: 18px;">Situação Financeira</strong></p>
+
+    <br/>
+    <p><strong>SITUAÇÃO FINANCEIRA:</strong></p>
     ${resumoResponsa}
     ${detalheResponsa}
 
-    <br>
-    <p><strong style="font-size: 18px;">Análise das Regras de Solvabilidade</strong></p>
+    <br/>
+    <p><strong>ANÁLISE DAS REGRAS DE SOLVABILIDADE:</strong></p>
+    <p>A presente análise de solvabilidade é efetuada nos termos da <b>Normativa Interna IS - 007/2020</b>.</p>
     <ul>
-      ${regras.map((r) => `<li>${r.regra}: ${r.valor} - ${r.status}</li>`).join('')}
+      ${regras.map((r) => `<li><b>${r.regra}</b>: ${r.status}</li>`).join('')}
       ${ajusteRendimentoTexto ? `<li>${ajusteRendimentoTexto}</li>` : ''}
     </ul>
 
-    <br>
-    <p><strong style="font-size: 18px;">Risco Prospetivo</strong></p>
+    <br/>
+    <p><strong>RISCO PROSPETIVO:</strong></p>
     ${riscoProspectivo}
 
-    <br>
-    <p><strong style="font-size: 18px;">Conclusão</strong></p>
+    <br/>
+    <p><strong>CONCLUSÃO:</strong></p>
     ${conclusao}
   `;
 }
@@ -114,7 +113,7 @@ function gerarResponsabilidades({ dividas, fiancas, dividasExterna, avalesExtern
       `<li>Possui ${dividas.length} crédito${dividas.length > 1 ? 's' : ''} ativo na Caixa:${criarListaInterna(
         dividas,
         (d) =>
-          `<li class="ql-indent-1">C/CR ${d.tipo}, saldo ${fNumber(Math.abs(d.saldo_divida))} ${d.moeda}, situação ${
+          `<li class="ql-indent-1">${d.tipo}, saldo ${fNumber(Math.abs(d.saldo_divida))} ${d.moeda}, situação ${
             d.situacao
           };</li>`
       )}</li>`
@@ -178,37 +177,45 @@ function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, prop
   const resultados = [];
 
   resultados.push({
+    cumpre: dsti <= 50,
     regra: 'DSTI <= 50%',
-    valor: fPercent(dsti),
-    status: dsti <= 50 ? 'Dentro do limite recomendado' : 'Fora do limite recomendado',
+    status:
+      dsti <= 50
+        ? `O rácio de esforço do cliente é de <b>${fPercent(dsti)}</b>, encontrando-se <b>dentro do limite definido</b>, evidenciando capacidade adequada para assumir a prestação proposta;`
+        : `O rácio de esforço do cliente é de <b>${fPercent(dsti)}</b>, encontrando-se <b>fora do limite definido</b>, indicando pressão excessiva sobre o rendimento disponível;`,
   });
 
   resultados.push({
+    cumpre: dstiCor <= 70,
     regra: 'DSTI Corrigido <= 70%',
-    valor: fPercent(dstiCor),
-    status: dstiCor <= 70 ? 'Dentro do limite recomendado' : 'Fora do limite recomendado',
+    status:
+      dstiCor <= 70
+        ? `Após ajustamentos prudenciais, o DSTI situa-se em <b>${fPercent(dstiCor)}</b>, permanecendo <b>dentro do limite definido</b>;`
+        : `Após ajustamentos prudenciais, o DSTI situa-se em <b>${fPercent(dstiCor)}</b>, encontrando-se <b>fora do limite definido</b>, agravando o risco de sobre-endividamento`,
   });
 
-  const somaAval = [...(fiancas || []), ...(avalesExterna || [])].reduce(
-    (acc, a) => acc + Math.abs(a.valor_prestacao || 0),
-    0
-  );
+  const somaAval = [...fiancas, ...avalesExterna].reduce((acc, a) => acc + Math.abs(a.valor_prestacao || 0), 0);
   const limiteAval = calcRendimento(rendimento, true) * 0.5 * 2;
   resultados.push({
+    cumpre: somaAval <= limiteAval,
     regra: 'Prestações avalizadas/afiançadas <= 2x limite DSTI',
-    valor: fCurrency(somaAval),
-    status: somaAval <= limiteAval ? 'Dentro do limite recomendado' : 'Fora do limite recomendado',
+    status:
+      somaAval <= limiteAval
+        ? `A exposição por avales/fianças totaliza <b>${fCurrency(somaAval)}</b>, encontrando-se <b>dentro do limite definido</b>;`
+        : `A exposição por avales/fianças totaliza <b>${fCurrency(somaAval)}</b>, encontrando-se <b>fora do limite definido</b>, representando risco contingente adicional associado a eventual incumprimento de terceiros;`,
   });
 
-  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
   const reforma = idadeReforma(ficha?.entidade?.sexo);
+  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
   const idadeFimCredito = idadeTitular + Number(proposta?.prazo_amortizacao || 0) / 12;
-  let ajusteStatus = 'Antes da idade de reforma';
-  if (idadeFimCredito >= reforma) ajusteStatus = 'ATENÇÃO';
+
   resultados.push({
+    cumpre: idadeFimCredito <= reforma,
     regra: 'Ajuste rendimento por idade de reforma',
-    valor: `${idadeFimCredito.toFixed(0)} anos ao final do crédito`,
-    status: ajusteStatus,
+    status:
+      idadeFimCredito <= reforma
+        ? `O prazo do crédito termina <b>antes</b> da idade legal de reforma do proponente, ${idadeFimCredito.toFixed(0)} anos no final do crédito.`
+        : `O prazo do crédito <b>ultrapassa</b> a idade legal de reforma do proponente, ${idadeFimCredito.toFixed(0)} anos, sendo aplicado <b>ajustamento prudencial de 20% ao rendimento</b>, visando reforçar a prudência na avaliação da capacidade futura de pagamento`,
   });
 
   return resultados;
@@ -216,74 +223,68 @@ function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, prop
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function gerarRiscoProspectivo(ficha, rendimento, proposta) {
-  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
-  const reforma = idadeReforma(ficha?.entidade?.sexo);
-  const idadeFimCredito = idadeTitular + Number(proposta?.prazo_amortizacao || 0) / 12;
-  const anosAposReforma = Math.max(0, idadeFimCredito - reforma);
+function gerarRiscoProspectivo(regras) {
+  const riscos = [];
 
-  const risco = [];
+  regras.forEach(({ cumpre, regra }) => {
+    if (cumpre) return;
 
-  if (anosAposReforma > 0) {
-    risco.push(
-      `O crédito projetado ultrapassa a idade de reforma (${reforma} anos) em cerca de ${anosAposReforma.toFixed(
-        0
-      )} anos, o que poderá impactar a capacidade de pagamento após a aposentadoria.`
-    );
-  }
+    switch (regra) {
+      case 'DSTI <= 50%':
+        riscos.push(
+          'O nível de esforço financeiro atual poderá limitar a capacidade do cliente de acomodar aumentos futuros de despesas ou responsabilidades.'
+        );
+        break;
 
-  const dstiAtual = percentagemDsti(ficha);
-  if (dstiAtual <= 50) {
-    const potencialDSTI = dstiAtual * 1.1;
-    if (potencialDSTI > 50) {
-      risco.push(
-        `Em cenário de aumento de responsabilidades futuras, o DSTI poderia subir, ultrapassando o limite recomendado de 50% e comprometendo a folga financeira.`
-      );
+      case 'DSTI Corrigido <= 70%':
+        riscos.push(
+          'Após ajustamentos prudenciais, o rácio de esforço mantém-se elevado, aumentando o risco de sobre-endividamento em cenários adversos.'
+        );
+        break;
+
+      case 'Prestações avalizadas/afiançadas <= 2x limite DSTI':
+        riscos.push(
+          'A exposição associada a avales e fianças representa risco contingente relevante, dependente de eventual incumprimento de terceiros.'
+        );
+        break;
+
+      case 'Ajuste rendimento por idade de reforma':
+        riscos.push(
+          'A extensão do prazo do crédito para além da idade de reforma poderá impactar negativamente a capacidade futura de pagamento.'
+        );
+        break;
+
+      default:
+        break;
     }
-  } else {
-    risco.push(
-      `O DSTI do cliente encontra-se atualmente acima do limite recomendado de 50% (${fPercent(
-        dstiAtual
-      )}), sugerindo risco de sobre-endividamento no curto prazo.`
-    );
+  });
+
+  if (riscos.length === 0) {
+    return '<p>À data da análise, não se identificam riscos prospetivos relevantes suscetíveis de comprometer a capacidade futura de pagamento.</p>';
   }
 
-  const somaAval = [...(ficha?.fiancas || []), ...(ficha?.avales_externas || [])].reduce(
-    (acc, a) => acc + Math.abs(a.valor_prestacao || 0),
-    0
-  );
-  const limiteAval = calcRendimento(rendimento, true) * 0.5 * 2;
-  if (somaAval > limiteAval) {
-    risco.push(
-      `O cliente exerce função de avalista/fiador em créditos cujo valor totaliza ${fCurrency(
-        somaAval
-      )}, aumentando significativamente a exposição a riscos contingentes.`
-    );
-  }
-
-  if (risco.length === 0) return '<p>Não foram identificados riscos prospetivos relevantes.</p>';
-
-  return `<ul>${risco.map((r) => `<li>${r}</li>`).join('')}</ul>`;
+  return `
+    <p>A análise prospetiva identifica fatores que poderão impactar a capacidade futura de cumprimento das obrigações financeiras, designadamente:</p>
+    <ul>
+      ${riscos.map((r) => `<li>${r}</li>`).join('')}
+    </ul>
+  `;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function gerarConclusao(regras, credito) {
-  const total = regras.length;
-  const ok = regras.filter(
-    (r) => r.status === 'Dentro do limite recomendado' || r.status === 'Antes da idade de reforma'
-  ).length;
-  const fails = regras.filter((r) => r.status === 'Fora do limite recomendado' || r.status === 'ATENÇÃO');
+function gerarConclusao(regras) {
+  const falhas = regras.filter((r) => !r.cumpre);
 
-  if (fails.length === 0) {
-    return `<p>O cliente cumpre todas as ${total} regras de solvabilidade estabelecidas. Considerando também a garantia apresentada (${
-      credito?.garantia ?? 'N/A'
-    }), a proposta revela-se enquadrada dentro do perfil de risco aceitável.</p>`;
+  if (falhas.length === 0) {
+    return `<p>O cliente cumpre integralmente os critérios de solvabilidade analisados. Considerando as condições da operação e as garantias apresentadas, a proposta enquadra-se no perfil de risco aceitável, não se identificando impedimentos à sua aprovação.</p>`;
   }
 
-  return `<p>O cliente atende ${ok} das ${total} regras de solvabilidade, com atenção ou não conformidade observada em: ${fails
-    .map((f) => f.regra)
-    .join('; ')}. Considerando as garantias apresentadas (${
-    credito?.garantia ?? 'N/A'
-  }), recomenda-se uma avaliação criteriosa e detalhada antes da decisão final sobre a aprovação do crédito.</p>`;
+  if (falhas.length === 1) {
+    return `<p>A análise evidencia <b>uma alerta</b> face aos critérios de solvabilidade, designadamente: <b>${falhas[0].regra}</b>.</p>
+      <p>A proposta poderá ser considerada, desde que devidamente ponderado o risco identificado, podendo ser equacionadas medidas mitigadoras.</p>`;
+  }
+
+  return `<p>A análise evidencia <b>não conformidades relevantes</b> face aos critérios de solvabilidade definidos, nomeadamente: <b>${falhas.map((f) => f.regra).join('; ')}</b>.</p>
+    <p>Nestes termos, recomenda-se especial cautela na decisão, podendo ser necessário o ajustamento das condições da operação ou o reforço das garantias antes de eventual aprovação.</p>`;
 }

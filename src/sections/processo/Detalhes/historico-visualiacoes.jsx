@@ -6,15 +6,14 @@ import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { ptDateTime } from '../../../utils/formatTime';
-// redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getInfoProcesso } from '../../../redux/slices/digitaldocs';
+import { ptDateTime } from '@/utils/formatTime';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getInfoProcesso } from '@/redux/slices/digitaldocs';
 // components
-import Label from '../../../components/Label';
-import { SkeletonBar } from '../../../components/skeleton';
-import { SearchNotFound } from '../../../components/table';
-import { ColaboradorInfo } from '../../../components/Panel';
+import Label from '@/components/Label';
+import { SkeletonBar } from '@/components/skeleton';
+import { SearchNotFound } from '@/components/table';
+import { ColaboradorInfo } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -10,10 +10,10 @@ import Typography from '@mui/material/Typography';
 import { tituloSchema } from './schemaFileds';
 // components
 import FormSeguros from './form-seguros';
-import GridItem from '../../../../../components/GridItem';
-import { SemDados } from '../../../../../components/Panel';
-import { AddItem, DefaultAction } from '../../../../../components/Actions';
-import { RHFTextField, RHFNumberField } from '../../../../../components/hook-form';
+import GridItem from '@/components/GridItem';
+import { SemDados } from '@/components/Panel';
+import { AddItem, DefaultAction } from '@/components/Actions';
+import { RHFTextField, RHFNumberField } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

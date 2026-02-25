@@ -4,10 +4,9 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-// guards
-import RoleBasedGuard from '../../../guards/RoleBasedGuard';
-// config
-import { ICON } from '../../../config';
+//
+import { ICON } from '@/config';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 //
 import Iconify from '../../Iconify';
 import { ListItemStyle } from './style';

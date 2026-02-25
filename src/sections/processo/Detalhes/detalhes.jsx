@@ -14,23 +14,21 @@ import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 // utils
-import { fNumber2, fCurrency } from '../../../utils/formatNumber';
-import { ptDate, fToNow, ptDateTime } from '../../../utils/formatTime';
-import { entidadesParse, baralharString, valorPorExtenso } from '../../../utils/formatText';
+import { tiposDocumentos } from '@/_mock';
+import { fNumber, fCurrency } from '@/utils/formatNumber';
+import { ptDate, fToNow, ptDateTime } from '@/utils/formatTime';
+import { entidadesParse, valorPorExtenso } from '@/utils/formatText';
 // redux
-import useToggle from '../../../hooks/useToggle';
-import { useSelector } from '../../../redux/store';
+import useToggle from '@/hooks/useToggle';
+import { useSelector } from '@/redux/store';
 // components
-import Label from '../../../components/Label';
-import { DefaultAction } from '../../../components/Actions';
-import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { Checked, CellChecked, Criado, newLineText } from '../../../components/Panel';
+import Label from '@/components/Label';
+import { DefaultAction } from '@/components/Actions';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { Checked, CellChecked, Criado } from '@/components/Panel';
 //
 import { colorProcesso } from '../../tabela/table-processos';
-// _mock
-import { tiposDocumentos } from '../../../_mock';
 
 const itemStyle = { py: 0.75, px: 1, my: 0.5, borderRadius: 0.5, backgroundColor: 'background.neutral', minHeight: 36 };
 
@@ -40,13 +38,12 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
   const { origens } = useSelector((state) => state.parametrizacao);
   const { colaboradores } = useSelector((state) => state.intranet);
 
-  const { estados = [], htransicoes = [], estado = null } = processo;
+  const { estados = [], estado = null } = processo;
   const { domicilio, origem_id: origemId = '', fluxo = '', uo } = processo;
   const { entidade = '', cliente = '', conta = '', titular = '', email = '', observacao = '' } = processo;
   const { doc_idp: docIdP = '', tipo_doc_idp: tipoIdP, doc_ids: docIdS, tipo_doc_ids: tipoIdS } = processo;
 
   const entidadesList = useMemo(() => entidadesParse(entidade), [entidade]);
-  const devolvido = useMemo(() => htransicoes?.[0]?.modo === 'Devolução', [htransicoes]);
   const origem = useMemo(() => origens?.find(({ id }) => id === origemId), [origens, origemId]);
 
   return (
@@ -71,13 +68,10 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
             <TextItem
               title="Estado:"
               situacao={
-                (devolvido || estado?.duplicado) && (
+                (estado?.via_devolucao || estado?.duplicado || estado?.via_resgate) && (
                   <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                    {devolvido && (
-                      <Label color="error" startIcon={<ErrorOutlineIcon />}>
-                        Devolvido
-                      </Label>
-                    )}
+                    {estado?.via_resgate && <Label color="warning">Processo Resgatado</Label>}
+                    {estado?.via_devolucao && <Label color="error">Processo devolvido</Label>}
                     {estado?.duplicado && <Duplicado ccDup={estado?.ccDup} dataDup={estado?.dataDup} />}
                   </Stack>
                 )
@@ -135,14 +129,14 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
               }
             />
           )}
-          <TextItem title="Observação:" text={newLineText(observacao)} />
+          <TextItem title="Observação:" text={observacao} />
           {(processo?.criado_em || processo?.criador) && (
             <TextItem
               title="Criado:"
               label={
                 <>
                   <Criado tipo="data" value={ptDateTime(processo?.criado_em)} sx={{ pr: 0 }} />
-                  <Criado tipo="user" value={processo?.criador ?? ''} baralhar sx={{ pr: 0 }} />
+                  <Criado tipo="user" value={processo?.criador ?? ''} sx={{ pr: 0 }} />
                 </>
               }
             />
@@ -155,25 +149,23 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
           <ListItem disableGutters divider sx={{ pb: 0.5 }}>
             <Typography variant="subtitle1">Identificação</Typography>
           </ListItem>
-          <TextItem text={titular} title={isPS ? 'Descrição:' : 'Titular:'} baralhar={!isPS} />
-          <TextItem baralhar text={email} title={fluxo === 'Formulário' ? 'Codificação/Nome:' : 'Email:'} />
+          <TextItem text={titular} title={isPS ? 'Descrição:' : 'Titular:'} />
+          <TextItem text={email} title={fluxo === 'Formulário' ? 'Codificação/Nome:' : 'Email:'} />
           {docIdP && (
             <TextItem
-              baralhar
               text={docIdP?.toString()}
               title={`${tiposDocumentos?.find(({ id }) => id === tipoIdP)?.label || 'Doc. primário'}:`}
             />
           )}
           {docIdS && (
             <TextItem
-              baralhar
               text={docIdS?.toString()}
               title={`${tiposDocumentos?.find(({ id }) => id === tipoIdS)?.label || 'Doc. secundário'}:`}
             />
           )}
-          {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} baralhar />}
-          {cliente && <TextItem title="Nº de cliente:" text={cliente?.toString()} baralhar />}
-          {conta && <TextItem title="Nº de conta:" text={conta?.toString()} baralhar />}
+          {entidadesList && <TextItem title="Nº de entidade(s):" text={entidadesList} />}
+          {cliente && <TextItem title="Nº de cliente:" text={cliente?.toString()} />}
+          {conta && <TextItem title="Nº de conta:" text={conta?.toString()} />}
           <TextItem
             title="Segmento:"
             text={(processo?.segmento === 'P' && 'Particular') || (processo?.segmento === 'E' && 'Empresa') || ''}
@@ -243,7 +235,7 @@ export default function DetalhesProcesso({ isPS = false, processo, versoes = fal
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function TextItem({ title = '', text = '', label = null, baralhar = false, situacao = null, sx = null }) {
+export function TextItem({ title = '', text = '', label = null, situacao = null, sx = null }) {
   return (title && text) || label ? (
     <Stack useFlexGap flexWrap="wrap" spacing={0.5} direction="row" alignItems="center" sx={{ ...itemStyle, ...sx }}>
       {title && (
@@ -253,9 +245,10 @@ export function TextItem({ title = '', text = '', label = null, baralhar = false
       )}
       {text && (
         <Typography
-          sx={text === 'Não definido' && { fontStyle: 'italic', color: 'text.disabled', typography: 'body2' }}
+          variant="body2"
+          sx={text === 'Não definido' && { fontStyle: 'italic', color: 'text.disabled', whiteSpace: 'pre-line' }}
         >
-          {baralhar ? baralharString(text) : text}
+          {text}
         </Typography>
       )}
       {situacao ? <Box>{situacao}</Box> : ''}
@@ -269,9 +262,7 @@ export function TextItem({ title = '', text = '', label = null, baralhar = false
 export function Duplicado({ ccDup, dataDup }) {
   return (
     <>
-      <Label color="error" startIcon={<ErrorOutlineIcon />}>
-        Eliminado
-      </Label>
+      <Label color="error">Eliminado</Label>
       {(ccDup || dataDup) && (
         <Stack direction="row" sx={{ color: 'text.secondary' }}>
           <Criado caption tipo="user" value={ccDup} />
@@ -343,14 +334,14 @@ function ValorItem({ title, valor, cativos }) {
                         <TableRow hover key={`${row?.id}_${index}`}>
                           <TableCell>{row?.conta}</TableCell>
                           <TableCell align="right">
-                            {fNumber2(row?.saldo)} {row?.moeda}
+                            {fNumber(row?.saldo, 2)} {row?.moeda}
                           </TableCell>
                           <TableCell align="right">{fCurrency(row?.saldo_cve)}</TableCell>
                           <CellChecked check={row.enviado_banka} />
                           <TableCell align="center">
                             {row?.executado ? (
                               <>
-                                <Criado tipo="user" value={row?.cativador} baralhar sx={{ pr: 0 }} />
+                                <Criado tipo="user" value={row?.cativador} sx={{ pr: 0 }} />
                                 <Criado tipo="data" value={ptDate(row?.data_cativo)} sx={{ pr: 0 }} />
                               </>
                             ) : (

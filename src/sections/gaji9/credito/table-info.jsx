@@ -8,20 +8,20 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
-import { usePermissao } from '../../../hooks/useAcesso';
-import useTable, { getComparator } from '../../../hooks/useTable';
+import { fCurrency } from '@/utils/formatNumber';
+import { usePermissao } from '@/hooks/useAcesso';
+import useTable, { getComparator } from '@/hooks/useTable';
 // redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { getDocumentoGaji9, getFromGaji9, deleteItem, setModal } from '../../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getDocumentoGaji9, getFromGaji9, deleteItem, setModal } from '@/redux/slices/gaji9';
 // Components
-import Scrollbar from '../../../components/Scrollbar';
-import { DefaultAction } from '../../../components/Actions';
-import { SkeletonTable } from '../../../components/skeleton';
-import { CellChecked, noDados } from '../../../components/Panel';
-import { DialogConfirmar } from '../../../components/CustomDialog';
-import { SearchToolbarSimple } from '../../../components/SearchToolbar';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { CellChecked, noDados } from '@/components/Panel';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import DetalhesCredito from './detalhes-credito';
 import { applySortFilter } from '../applySortFilter';

@@ -82,7 +82,7 @@ export const actionsList = [
 ];
 
 export const ratingList = [
-  { id: 'VERY_UNSATISFIED', rating: 1, label: 'Muito insatisfeito' },
+  { id: 'VERY_DISSATISFIED', rating: 1, label: 'Muito insatisfeito' },
   { id: 'UNSATISFIED', rating: 2, label: 'Insatisfeito' },
   { id: 'NEUTRAL', rating: 3, label: 'Neutro' },
   { id: 'SATISFIED', rating: 4, label: 'Satisfeito' },

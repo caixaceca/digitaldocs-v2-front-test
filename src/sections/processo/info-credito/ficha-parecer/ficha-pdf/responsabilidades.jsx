@@ -2,8 +2,8 @@ import { View, Text } from '@react-pdf/renderer';
 // utils
 import { responsabilidadesInfo } from '../calculos';
 // components
+import { styles } from '@/components/exportar-dados/pdf';
 import { EmptyRow, RowDivida, RowFianca } from './pdf-fragments';
-import { styles } from '../../../../../components/exportar-dados/pdf';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

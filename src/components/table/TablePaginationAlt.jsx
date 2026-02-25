@@ -14,6 +14,7 @@ export default function TablePaginationAlt({
   onChangePage,
   onChangeDense,
   onChangeRowsPerPage,
+  options = [10, 25, 50, 100],
 }) {
   return (
     <Stack
@@ -32,7 +33,7 @@ export default function TablePaginationAlt({
         component="div"
         rowsPerPage={rowsPerPage}
         onPageChange={onChangePage}
-        rowsPerPageOptions={[10, 25, 50, 100]}
+        rowsPerPageOptions={options}
         onRowsPerPageChange={onChangeRowsPerPage}
         sx={{ border: 'none', mt: '0px !important' }}
       />

@@ -3,9 +3,8 @@ import { useMemo } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { alpha, ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 // hooks
-import useSettings from '../../hooks/useSettings';
-//
-import componentsOverride from '../../theme/overrides';
+import useSettings from '@/hooks/useSettings';
+import componentsOverride from '@/theme/overrides';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

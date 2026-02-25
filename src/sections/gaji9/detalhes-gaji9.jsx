@@ -8,17 +8,16 @@ import Skeleton from '@mui/material/Skeleton';
 import TableBody from '@mui/material/TableBody';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { useSelector } from '../../redux/store';
-import { colorLabel } from '../../utils/getColorPresets';
-import { sortPermissoes } from '../../utils/formatObject';
-import { ptDate, ptDateTime } from '../../utils/formatTime';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import { useSelector } from '@/redux/store';
+import { colorLabel } from '@/utils/getColorPresets';
+import { sortPermissoes } from '@/utils/formatObject';
+import { ptDate, ptDateTime } from '@/utils/formatTime';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import Label from '../../components/Label';
-import { newLineText } from '../../components/Panel';
-import { SearchNotFoundSmall } from '../../components/table';
-import { DialogTitleAlt } from '../../components/CustomDialog';
-import { TabsWrapperSimple } from '../../components/TabsWrapper';
+import Label from '@/components/Label';
+import { SearchNotFoundSmall } from '@/components/table';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
 import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
 import { GrupoDetail, BalcoesRepresentante, SubtiposGarantias } from './sub-items';
@@ -196,7 +195,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   />
                   <TableRowItem title="Segmento:" text={dados?.segmento} id={dados?.segmento_id} />
                   <TableRowItem title="Componente:" text={dados?.componente} id={dados?.componente_id} />
-                  <TableRowItem title="Conteúdo:" text={newLineText(dados?.conteudo)} />
+                  <TableRowItem title="Conteúdo:" text={dados?.conteudo} />
                   <TableRowItem title="Data emissão:" text={ptDate(dados?.data_emissao)} />
                   <TableRowItem title="Validade:" text={ptDate(dados?.valido_ate)} />
                   <TableRowItem title="Data início:" text={ptDateTime(dados?.data_inicio)} />
@@ -225,7 +224,7 @@ export function DetalhesContent({ dados = null, item = '' }) {
                   <TableRowItem title="Publicado por:" text={dados?.cc_vigor} />
                   <TableRowItem title="Data de revogação:" text={ptDateTime(dados?.data_revogado)} />
                   <TableRowItem title="Revogado por:" text={dados?.cc_revogado} />
-                  <TableRowItem title="Observação:" text={newLineText(dados?.nota)} />
+                  <TableRowItem title="Observação:" text={dados?.nota} />
                   {dados && 'reais' in dados && (
                     <TableRowItem
                       title="Tipo:"

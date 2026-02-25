@@ -10,11 +10,11 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 // utils
-import { fillData } from '../../../../utils/formatTime';
-import { fluxosGmkt, bancaDigital } from '../../../../utils/validarAcesso';
-import { shapeDate, shapeNumber, shapeMixed } from '../../../../components/hook-form/yup-shape';
+import { fillData } from '@/utils/formatTime';
+import { fluxosGmkt, bancaDigital } from '@/utils/validarAcesso';
+import { shapeDate, shapeNumber, shapeMixed } from '@/components/hook-form/yup-shape';
 // redux
-import { useSelector, useDispatch } from '../../../../redux/store';
+import { useSelector, useDispatch } from '@/redux/store';
 // components
 import {
   RHFSwitch,
@@ -23,10 +23,10 @@ import {
   RHFDatePicker,
   RHFNumberField,
   RHFAutocompleteSmp,
-} from '../../../../components/hook-form';
+} from '@/components/hook-form';
 import DadosCliente from '../dados-cliente';
-import GridItem from '../../../../components/GridItem';
-import { ButtonsStepper } from '../../../../components/Actions';
+import GridItem from '@/components/GridItem';
+import { ButtonsStepper } from '@/components/Actions';
 //
 import { entidadesList, submitDados } from '../utils-form-processo';
 

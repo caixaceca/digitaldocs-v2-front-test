@@ -6,11 +6,11 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 // utils
-import { pdfInfo } from '../../../utils/formatText';
-import { ptDateTime } from '../../../utils/formatTime';
-import { getFileThumb } from '../../../utils/formatFile';
+import { pdfInfo } from '@/utils/formatText';
+import { ptDateTime } from '@/utils/formatTime';
+import { getFileThumb } from '@/utils/formatFile';
 // components
-import { styles, RodapePdfAlt, CabecalhoPdfAlt } from '../../../components/exportar-dados/pdf';
+import { styles, RodapePdfAlt, CabecalhoPdfAlt } from '@/components/exportar-dados/pdf';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

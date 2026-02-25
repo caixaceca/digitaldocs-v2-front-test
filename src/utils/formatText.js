@@ -1,7 +1,6 @@
 import get from 'lodash/get';
 import extenso from 'extenso';
 // config
-import { ambiente } from '../config';
 import { noDados } from '../components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -12,26 +11,6 @@ export function normalizeText(text) {
     ?.toLowerCase()
     ?.normalize('NFD')
     ?.replace(/[\u0300-\u036f]/g, '');
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function baralharString(str) {
-  if (!str || ambiente === 'producao') return str;
-  return str;
-
-  // if (foto) {
-  //   return 'foto';
-  // }
-
-  // const arr = str.split('');
-
-  // for (let i = arr.length - 1; i > 0; i -= 1) {
-  //   const j = Math.floor(Math.random() * (i + 1));
-  //   [arr[i], arr[j]] = [arr[j], arr[i]];
-  // }
-
-  // return arr.join('');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -79,9 +58,9 @@ export function valorPorExtenso(valor = 0) {
 
 export function contaCliEnt(dados) {
   return (
-    (dados?.conta && baralharString(dados?.conta)) ||
-    (dados?.cliente && baralharString(dados?.cliente)) ||
-    (dados?.entidades && baralharString(entidadesParse(dados?.entidades))) ||
+    (dados?.conta && dados?.conta) ||
+    (dados?.cliente && dados?.cliente) ||
+    (dados?.entidades && entidadesParse(dados?.entidades)) ||
     noDados()
   );
 }

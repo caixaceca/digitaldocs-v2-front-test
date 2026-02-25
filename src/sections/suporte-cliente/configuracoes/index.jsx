@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
-import { useDispatch } from '../../../redux/store';
-import { setModal } from '../../../redux/slices/suporte-cliente';
-import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
+import { useDispatch } from '@/redux/store';
+import { setModal } from '@/redux/slices/suporte-cliente';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // Components
-import { DefaultAction } from '../../../components/Actions';
-import { TabsWrapperSimple } from '../../../components/TabsWrapper';
-import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
+import { DefaultAction } from '@/components/Actions';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 //
 import TableConfiguracoes from './table-configuracoes';
 

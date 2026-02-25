@@ -4,7 +4,7 @@ import Tooltip from '@mui/material/Tooltip';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // guards
-import RoleBasedGuard from '../../../guards/RoleBasedGuard';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 //
 import { ListItemStyle, ListItemTextStyle, ListItemIconStyle } from './style';
 

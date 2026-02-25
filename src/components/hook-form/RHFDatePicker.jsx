@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // utils
-import { setDataUtil } from '../../utils/formatTime';
+import { setDataUtil } from '@/utils/formatTime';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

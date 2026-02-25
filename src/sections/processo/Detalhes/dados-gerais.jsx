@@ -3,19 +3,17 @@ import { useMemo } from 'react';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 // utils
-import { fluxosGmkt } from '../../../utils/validarAcesso';
-// redux
-import { useSelector } from '../../../redux/store';
-// hooks
-import { getComparator, applySort } from '../../../hooks/useTable';
+import { useSelector } from '@/redux/store';
+import { fluxosGmkt } from '@/utils/validarAcesso';
+import { getComparator, applySort } from '@/hooks/useTable';
 // components
-import { SearchNotFound404 } from '../../../components/table';
-import { SkeletonProcesso } from '../../../components/skeleton';
+import GridItem from '@/components/GridItem';
+import { SearchNotFound404 } from '@/components/table';
+import { SkeletonProcesso } from '@/components/skeleton';
 //
 import NotaProcesso from './nota';
 import DetalhesProcesso from './detalhes';
 import Anexos from './anexos/anexos-dados-gerais';
-import GridItem from '../../../components/GridItem';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { useSnackbar } from 'notistack';
 // utils
-import { ptDate } from '../../../../utils/formatTime';
-import { useSelector } from '../../../../redux/store';
-import { fCurrency, fConto } from '../../../../utils/formatNumber';
+import { ptDate } from '@/utils/formatTime';
+import { useSelector } from '@/redux/store';
+import { fCurrency, fConto } from '@/utils/formatNumber';
 //
+import { montateNC, dataNC } from '@/sections/indicadores/estatistica-credito/nao-classificados';
 import { ExportToExcell, fileInfo, sheetProperty, estiloCabecalho, ajustarLargura } from '../formatacoes';
-import { montateNC, dataNC } from '../../../../sections/indicadores/estatistica-credito/nao-classificados';
 //
 import resumoEstatistica from './resumo';
 import dadosFase, { dadosPorItem } from './dados-fase';

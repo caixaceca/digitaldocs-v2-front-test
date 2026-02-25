@@ -1,9 +1,9 @@
 import { sumBy } from 'lodash';
 // utils
-import { ptDate } from '../../../../utils/formatTime';
-import { fPercent } from '../../../../utils/formatNumber';
-import { formatPrazoAmortizacao } from '../../../../utils/formatText';
-import { categorias } from '../../../../sections/indicadores/estatistica-credito/table-situacao';
+import { ptDate } from '@/utils/formatTime';
+import { fPercent } from '@/utils/formatNumber';
+import { formatPrazoAmortizacao } from '@/utils/formatText';
+import { categorias } from '@/sections/indicadores/estatistica-credito/table-situacao';
 //
 import { valorMoeda } from './formatacoes';
 

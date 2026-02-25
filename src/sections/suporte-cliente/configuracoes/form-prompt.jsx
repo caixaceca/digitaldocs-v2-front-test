@@ -3,16 +3,16 @@ import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { updateDados, resetDados } from '../../../redux/slices/stepper';
-import { createInSuporte, updateInSuporte, deleteInSuporte } from '../../../redux/slices/suporte-cliente';
+import { useSelector, useDispatch } from '@/redux/store';
+import { updateDados, resetDados } from '@/redux/slices/stepper';
+import { createInSuporte, updateInSuporte, deleteInSuporte } from '@/redux/slices/suporte-cliente';
 // components
-import Steps from '../../../components/Steps';
-import { FormLoading } from '../../../components/skeleton';
-import { ButtonsStepper } from '../../../components/Actions';
-import { FormProvider, RHFTextField } from '../../../components/hook-form';
-import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
-import { DialogTitleAlt, DialogConfirmar } from '../../../components/CustomDialog';
+import Steps from '@/components/Steps';
+import { FormLoading } from '@/components/skeleton';
+import { ButtonsStepper } from '@/components/Actions';
+import { FormProvider, RHFTextField } from '@/components/hook-form';
+import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
+import { DialogTitleAlt, DialogConfirmar } from '@/components/CustomDialog';
 //
 import { usePromptStep, schemaContexto, schemaInstrucoes, schemaResposta } from './utils';
 

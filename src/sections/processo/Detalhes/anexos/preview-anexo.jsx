@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import Lightbox from 'yet-another-react-lightbox';
 // @mui
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 // components
-import Image from '../../../../components/Image';
+import Image from '@/components/Image';
+import ImageLightbox from '@/components/image-lightbox';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ export function ImagemPreview({ imagem }) {
         onClick={() => setIndex(0)}
       />
 
-      <Lightbox index={0} open={index > -1} close={() => setIndex(-1)} slides={[{ src: imagem }]} />
+      {index > -1 && <ImageLightbox onClose={() => setIndex(-1)} slides={[{ src: imagem }]} />}
     </>
   );
 }

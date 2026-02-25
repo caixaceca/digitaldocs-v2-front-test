@@ -6,24 +6,24 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 //
-import useSettings from '../../hooks/useSettings';
-import { usePermissao } from '../../hooks/useAcesso';
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import useSettings from '@/hooks/useSettings';
+import { usePermissao } from '@/hooks/useAcesso';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, getSuccess, openModal, closeModal } from '../../redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromGaji9, getSuccess, openModal, closeModal } from '@/redux/slices/gaji9';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
-import { DefaultAction } from '../../components/Actions';
-import { SearchNotFound404 } from '../../components/table';
-import DialogPreviewDoc from '../../components/CustomDialog';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
+import { DefaultAction } from '@/components/Actions';
+import { SearchNotFound404 } from '@/components/table';
+import DialogPreviewDoc from '@/components/CustomDialog';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 // sections
 import AcessoGaji9 from './acesso-gaji9';
-import { PreviewForm } from '../../sections/gaji9/form-minuta';
-import InfoMinuta, { TableInfoMinuta } from '../../sections/gaji9/info-minuta';
+import { PreviewForm } from '@/sections/gaji9/form-minuta';
+import InfoMinuta, { TableInfoMinuta } from '@/sections/gaji9/info-minuta';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

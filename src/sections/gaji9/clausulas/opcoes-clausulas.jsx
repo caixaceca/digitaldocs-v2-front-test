@@ -10,19 +10,19 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fNumber } from '../../../utils/formatNumber';
-import { numeroParaLetra } from '../../../utils/formatText';
+import { fNumber } from '@/utils/formatNumber';
+import { numeroParaLetra } from '@/utils/formatText';
 // redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromGaji9, setModal, deleteItem } from '../../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getFromGaji9, setModal, deleteItem } from '@/redux/slices/gaji9';
 // components
 import DetalhesGaji9 from '../detalhes-gaji9';
 import { labelTitular } from '../applySortFilter';
-import { DefaultAction } from '../../../components/Actions';
-import { TableSearchNotFound } from '../../../components/table';
-import { DialogConfirmar } from '../../../components/CustomDialog';
-import SearchNotFound from '../../../components/table/SearchNotFound';
-import { CellChecked, newLineText, noDados } from '../../../components/Panel';
+import { DefaultAction } from '@/components/Actions';
+import { TableSearchNotFound } from '@/components/table';
+import { CellChecked, noDados } from '@/components/Panel';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import SearchNotFound from '@/components/table/SearchNotFound';
 import { ComponetesForm, SegmentosForm, FinalidadesForm, CondicionalForm } from './form-opcoes';
 
 const sx = { '&:hover': { backgroundColor: 'action.hover', borderRadius: 1.5 }, p: 1.25 };
@@ -49,7 +49,9 @@ export function NumerosClausula({ id = '', dados = [], condicional = false, minu
                 )}
                 <Stack spacing={condicional ? 1 : 0}>
                   {numero?.conteudo && (
-                    <Typography variant={condicional ? 'body2' : 'body1'}>{newLineText(numero?.conteudo)}</Typography>
+                    <Typography variant={condicional ? 'body2' : 'body1'} sx={{ whiteSpace: 'pre-line' }}>
+                      {numero?.conteudo}
+                    </Typography>
                   )}
                   {numero?.sub_alineas?.map((alinea, index1) => (
                     <Stack spacing={1} direction="row" sx={condicional ? null : sx} key={`num_${index}_al_${index1}`}>
@@ -64,8 +66,8 @@ export function NumerosClausula({ id = '', dados = [], condicional = false, minu
                         <Typography variant={condicional ? 'subtitle2' : 'subtitle1'}>
                           {numeroParaLetra(alinea?.numero_ordem)}.
                         </Typography>
-                        <Typography variant={condicional ? 'body2' : 'body1'}>
-                          {newLineText(alinea?.conteudo)}
+                        <Typography variant={condicional ? 'body2' : 'body1'} sx={{ whiteSpace: 'pre-line' }}>
+                          {alinea?.conteudo}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -293,7 +295,11 @@ export function RelacionadosCl({ dados = [], item = 'Tipo de titular' }) {
                         )}
                       </TableCell>
                       <TableCell sx={{ minWidth: 400 }}>
-                        {res?.conteudo_principal && newLineText(res?.conteudo_principal)}
+                        {res?.conteudo_principal && (
+                          <Typography variant="body2" sx={{ textAlign: 'justify', whiteSpace: 'pre-line' }}>
+                            {res?.conteudo_principal}
+                          </Typography>
+                        )}
                         {res?.alinea && <NumerosClausula dados={[res?.alinea]} condicional />}
                         {res?.sub_alinea && (
                           <NumerosClausula condicional dados={[{ sub_alineas: [res?.sub_alinea] }]} />

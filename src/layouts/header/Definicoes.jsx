@@ -6,15 +6,15 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 // hooks
-import useSettings from '../../hooks/useSettings';
+import useSettings from '@/hooks/useSettings';
 // components
-import Scrollbar from '../../components/Scrollbar';
-import MenuPopover from '../../components/MenuPopover';
-import SettingMode from '../../components/settings/drawer/SettingMode';
-import SettingLayout from '../../components/settings/drawer/SettingLayout';
-import SettingStretch from '../../components/settings/drawer/SettingStretch';
-import SettingContrast from '../../components/settings/drawer/SettingContrast';
-import SettingFullscreen from '../../components/settings/drawer/SettingFullscreen';
+import Scrollbar from '@/components/Scrollbar';
+import MenuPopover from '@/components/MenuPopover';
+import SettingMode from '@/components/settings/drawer/SettingMode';
+import SettingLayout from '@/components/settings/drawer/SettingLayout';
+import SettingStretch from '@/components/settings/drawer/SettingStretch';
+import SettingContrast from '@/components/settings/drawer/SettingContrast';
+import SettingFullscreen from '@/components/settings/drawer/SettingFullscreen';
 //
 import { IconButtonHeader } from '.';
 

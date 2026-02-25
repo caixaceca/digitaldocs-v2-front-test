@@ -8,11 +8,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 // utils
-import { fillData } from '../../../../utils/formatTime';
-import { shapeText, shapeDate, shapeNumber, shapeMixed } from '../../../../components/hook-form/yup-shape';
+import { fillData } from '@/utils/formatTime';
+import { submitDados } from '../utils-form-processo';
+import { tiposDocumentos, estadosCivis } from '@/_mock';
+import { shapeText, shapeDate, shapeNumber, shapeMixed } from '@/components/hook-form/yup-shape';
 // redux
-import { updateDados } from '../../../../redux/slices/stepper';
-import { useSelector, useDispatch } from '../../../../redux/store';
+import { updateDados } from '@/redux/slices/stepper';
+import { useSelector, useDispatch } from '@/redux/store';
 // components
 import {
   RHFSwitch,
@@ -21,13 +23,9 @@ import {
   RHFDatePicker,
   RHFNumberField,
   RHFAutocompleteObj,
-} from '../../../../components/hook-form';
-import GridItem from '../../../../components/GridItem';
-import { ButtonsStepper } from '../../../../components/Actions';
-// _mock
-import { tiposDocumentos, estadosCivis } from '../../../../_mock';
-//
-import { submitDados } from '../utils-form-processo';
+} from '@/components/hook-form';
+import GridItem from '@/components/GridItem';
+import { ButtonsStepper } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

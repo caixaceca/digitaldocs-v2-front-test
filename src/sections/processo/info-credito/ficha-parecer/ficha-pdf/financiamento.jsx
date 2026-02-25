@@ -11,9 +11,9 @@ import {
   dstiAposContratacao,
   dividasConsolidadas,
 } from '../calculos';
-import { fCurrency, fPercent } from '../../../../../utils/formatNumber';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
-import { styles } from '../../../../../components/exportar-dados/pdf';
+import { styles } from '@/components/exportar-dados/pdf';
 import { RowFicha, TitleFicha, Alerta, NadaConsta } from './pdf-fragments';
 
 const options = { success: true, ficha: true };
@@ -40,7 +40,7 @@ export default function Financiamento({ dados }) {
           value={fCurrency(proposta?.montante || credito?.montante_solicitado)}
         />
         <RowFicha small title="Tipo de crédito" value={credito?.componente} />
-        {proposta && <RowFicha small title="Taxa do preçario" value={fPercent(proposta?.taxa_precario)} />}
+        {proposta && <RowFicha small title="Taxa do preçário" value={fPercent(proposta?.taxa_precario)} />}
         {proposta && (
           <RowFicha
             small

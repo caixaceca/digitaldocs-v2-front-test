@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 // @mui
 import { alpha, ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 // utils
-import { defaultPreset } from '../../utils/getColorPresets';
+import { defaultPreset } from '@/utils/getColorPresets';
 //
-import componentsOverride from '../../theme/overrides';
+import componentsOverride from '@/theme/overrides';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

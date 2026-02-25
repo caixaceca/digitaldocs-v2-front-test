@@ -4,10 +4,10 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 // utils
-import { useSelector } from '../../../redux/store';
-import { ptDate } from '../../../utils/formatTime';
-import { formatPrazoAmortizacao } from '../../../utils/formatText';
-import { fPercent, fNumber, fConto } from '../../../utils/formatNumber';
+import { useSelector } from '@/redux/store';
+import { ptDate } from '@/utils/formatTime';
+import { formatPrazoAmortizacao } from '@/utils/formatText';
+import { fPercent, fNumber, fConto } from '@/utils/formatNumber';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

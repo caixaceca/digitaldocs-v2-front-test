@@ -7,15 +7,13 @@ import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { baralharString } from '../../utils/formatText';
-import { ptDate, ptDateTime } from '../../utils/formatTime';
-// redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '@/redux/store';
+import { ptDate, ptDateTime } from '@/utils/formatTime';
 // components
-import Label from '../../components/Label';
-import { Criado } from '../../components/Panel';
-import { SearchNotFoundSmall } from '../../components/table';
-import { DialogTitleAlt } from '../../components/CustomDialog';
+import Label from '@/components/Label';
+import { Criado } from '@/components/Panel';
+import { SearchNotFoundSmall } from '@/components/table';
+import { DialogTitleAlt } from '@/components/CustomDialog';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -43,7 +41,7 @@ export function Detalhes({ closeModal }) {
               <>
                 <List>
                   <TextItem title="Tipo de cartão:" text={selectedItem?.tipo} />
-                  <TextItem title="Nº do cartão:" text={baralharString(selectedItem?.numero?.substring(9, 15))} />
+                  <TextItem title="Nº do cartão:" text={selectedItem?.numero?.substring(9, 15)} />
                   <TextItem title="Data de emissão:" text={ptDate(selectedItem?.data_emissao)} />
                   {bDomicilio && (
                     <TextItem title="Balcão de domicílio:" text={`${bDomicilio?.label} (${bDomicilio?.balcao})`} />
@@ -64,8 +62,8 @@ export function Detalhes({ closeModal }) {
                       }
                     />
                   )}
-                  <TextItem title="Nº cliente:" text={baralharString(selectedItem?.cliente)} />
-                  <TextItem title="Nome:" text={baralharString(selectedItem?.nome)} />
+                  <TextItem title="Nº cliente:" text={selectedItem?.cliente} />
+                  <TextItem title="Nome:" text={selectedItem?.nome} />
                 </List>
                 <List>
                   <ListItem disableGutters divider sx={{ pb: 0.5 }}>
@@ -84,7 +82,7 @@ export function Detalhes({ closeModal }) {
                     text1={
                       selectedItem?.emissao_validado ? (
                         <Stack sx={{ mt: 1 }}>
-                          <Criado tipo="user" value={selectedItem?.emissao_validado_por} baralhar />
+                          <Criado tipo="user" value={selectedItem?.emissao_validado_por} />
                           <Criado tipo="data" value={ptDateTime(selectedItem?.emissao_validado_em)} />
                           <Criado tipo="note" value={selectedItem?.nota_emissao} />
                         </Stack>
@@ -101,7 +99,7 @@ export function Detalhes({ closeModal }) {
                     text1={
                       selectedItem?.rececao_validado ? (
                         <Stack spacing={0.5} sx={{ mt: 1 }}>
-                          <Criado tipo="user" value={selectedItem?.rececao_validado_por} baralhar />
+                          <Criado tipo="user" value={selectedItem?.rececao_validado_por} />
                           <Criado tipo="data" value={ptDateTime(selectedItem?.rececao_validado_em)} />
                           <Criado tipo="note" value={selectedItem?.nota_rececao} />
                         </Stack>

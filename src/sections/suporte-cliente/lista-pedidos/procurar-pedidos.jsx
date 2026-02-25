@@ -3,17 +3,16 @@ import { useState, useMemo } from 'react';
 import Card from '@mui/material/Card';
 // utils
 import { injectCollaboratorName } from '../utils';
-import { normalizeText } from '../../../utils/formatText';
-import useTable, { getComparator, applySort } from '../../../hooks/useTable';
+import { normalizeText } from '@/utils/formatText';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getInSuporte } from '../../../redux/slices/suporte-cliente';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getInSuporte } from '@/redux/slices/suporte-cliente';
 // Components
-import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
-//
 import TablePedidos from './table-pedidos';
 import { SearchTickets } from './search-toolbar';
-import { SearchToolbarSimple } from '../../../components/SearchToolbar';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

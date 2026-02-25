@@ -7,16 +7,16 @@ import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
-import { deleteItem } from '../../../redux/slices/gaji9';
-import { useSelector, useDispatch } from '../../../redux/store';
-import { applySort, getComparator } from '../../../hooks/useTable';
+import { fCurrency } from '@/utils/formatNumber';
+import { deleteItem } from '@/redux/slices/gaji9';
+import { useSelector, useDispatch } from '@/redux/store';
+import { applySort, getComparator } from '@/hooks/useTable';
 // components
 import { SemDados } from '../sub-items';
 import { IntervenienteForm } from './form-credito';
-import { CellChecked } from '../../../components/Panel';
-import { DefaultAction } from '../../../components/Actions';
-import { DialogConfirmar } from '../../../components/CustomDialog';
+import { CellChecked } from '@/components/Panel';
+import { DefaultAction } from '@/components/Actions';
+import { DialogConfirmar } from '@/components/CustomDialog';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

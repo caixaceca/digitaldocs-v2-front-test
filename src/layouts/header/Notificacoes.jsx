@@ -4,14 +4,13 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-// redux
-import { useSelector } from '../../redux/store';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
+// utils
+import { useSelector } from '@/redux/store';
+import { getComparator, applySort } from '@/hooks/useTable';
 // components
 import { IconButtonHeader } from '.';
-import Scrollbar from '../../components/Scrollbar';
-import MenuPopover from '../../components/MenuPopover';
+import Scrollbar from '@/components/Scrollbar';
+import MenuPopover from '@/components/MenuPopover';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

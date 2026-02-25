@@ -8,20 +8,20 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fPercent } from '../../utils/formatNumber';
-import { emailCheck } from '../../utils/validarAcesso';
-import { nomeacaoBySexo } from '../../utils/formatText';
+import { idCheck } from '@/utils/formatObject';
+import { fPercent } from '@/utils/formatNumber';
+import { nomeacaoBySexo } from '@/utils/formatText';
 // hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import useTable, { getComparator } from '@/hooks/useTable';
 // redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '@/redux/store';
 // Components
-import Scrollbar from '../../components/Scrollbar';
-import { ActionButton } from '../../components/Actions';
-import { SkeletonTable } from '../../components/skeleton';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, ColaboradorInfo, DataLabel, CellUoBalcao } from '../../components/Panel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Scrollbar from '@/components/Scrollbar';
+import { ActionButton } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { CellChecked, ColaboradorInfo, DataLabel, CellUoBalcao } from '@/components/Panel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import { applySortFilter } from './applySortFilter';
 
@@ -45,7 +45,7 @@ export default function TableInfoEstado({ item, dados }) {
     defaultOrderBy: item === 'colaboradores' ? 'nome' : 'id',
   });
   const { isLoading } = useSelector((state) => state.parametrizacao);
-  const { mail, colaboradores } = useSelector((state) => state.intranet);
+  const { idAd, colaboradores } = useSelector((state) => state.intranet);
   const [filter, setFilter] = useState(localStorage.getItem(`filter_${item}`) || '');
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export default function TableInfoEstado({ item, dados }) {
                         ))}
                       <TableCell align="center" width={50}>
                         <Stack direction="row" spacing={0.5} justifyContent="right">
-                          {(item === 'regrasEstado' || emailCheck(mail)) && (
+                          {(item === 'regrasEstado' || idCheck(idAd)) && (
                             <ActionButton options={{ fab: true, sm: true, item: 'eliminar-item', dados: row }} />
                           )}
                           <ActionButton options={{ fab: true, sm: true, label: 'EDITAR', item, dados: row }} />

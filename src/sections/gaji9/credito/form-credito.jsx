@@ -11,10 +11,10 @@ import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { formatDate, fillData } from '../../../utils/formatTime';
-// redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromGaji9, getDocumentoGaji9, createItem, updateItem } from '../../../redux/slices/gaji9';
+import { listaTitrulares } from '../applySortFilter';
+import { useSelector, useDispatch } from '@/redux/store';
+import { formatDate, fillData } from '@/utils/formatTime';
+import { getFromGaji9, getDocumentoGaji9, createItem, updateItem } from '@/redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -24,13 +24,11 @@ import {
   RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
-} from '../../../components/hook-form';
-import GridItem from '../../../components/GridItem';
-import { DialogButons } from '../../../components/Actions';
-import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { shapeMixed } from '../../../components/hook-form/yup-shape';
-//
-import { listaTitrulares } from '../applySortFilter';
+} from '@/components/hook-form';
+import GridItem from '@/components/GridItem';
+import { DialogButons } from '@/components/Actions';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { shapeMixed } from '@/components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -48,7 +46,7 @@ export default function CreditoForm({ onClose }) {
     taxa_imposto_selo: Yup.number().min(0).required().label('Taxa imposto de selo'),
     prazo_contratual: Yup.number().positive(0).required().label('Prazo contratual'),
     valor_comissao: Yup.number().min(0).required().label('Valor total de comissões'),
-    taxa_juro_precario: Yup.number().min(0).required().label('Taxa de juros preçario'),
+    taxa_juro_precario: Yup.number().min(0).required().label('Taxa de juros preçário'),
     taxa_juro_desconto: Yup.number().min(0).required().label('Taxa de juros desconto'),
     valor_imposto_selo: Yup.number().min(0).required().label('Valor total de imposto selo'),
     taxa_comissao_abertura: Yup.number().min(0).required().label('Taxa comissão de abertura'),
@@ -136,7 +134,7 @@ export default function CreditoForm({ onClose }) {
             </GridItem>
             <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" />} />
             <GridItem xs={6} md={3}>
-              <RHFNumberField label="Taxa de juros preçario" name="taxa_juro_precario" tipo="%" />
+              <RHFNumberField label="Taxa de juros preçário" name="taxa_juro_precario" tipo="%" />
             </GridItem>
             <GridItem xs={6} md={3}>
               <RHFNumberField label="Taxa de juros desconto" name="taxa_juro_desconto" tipo="%" />

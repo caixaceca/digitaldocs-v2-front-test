@@ -6,10 +6,10 @@ import Autocomplete from '@mui/material/Autocomplete';
 import OutlinedInput from '@mui/material/OutlinedInput';
 // utils
 import { statusList } from '../utils';
-import { setItemValue } from '../../../utils/formatObject';
+import { setItemValue } from '@/utils/formatObject';
 // components
-import { DefaultAction } from '../../../components/Actions';
-import { SearchField, RemoverFiltros } from '../../../components/SearchToolbar';
+import { DefaultAction } from '@/components/Actions';
+import { SearchField, RemoverFiltros } from '@/components/SearchToolbar';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

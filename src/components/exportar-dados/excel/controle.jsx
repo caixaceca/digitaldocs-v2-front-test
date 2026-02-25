@@ -1,12 +1,11 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 // utils
-import { fNumber } from '../../../utils/formatNumber';
-import { ptDateTime, ptDate } from '../../../utils/formatTime';
+import { tiposDocumentos } from '@/_mock';
+import { fNumber } from '@/utils/formatNumber';
+import { ptDateTime, ptDate } from '@/utils/formatTime';
 //
 import { ExportToExcell, fileInfo, sheetProperty, ajustarLargura, estiloCabecalho } from './formatacoes';
-// _mock
-import { tiposDocumentos } from '../../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

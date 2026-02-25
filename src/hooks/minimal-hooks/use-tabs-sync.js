@@ -1,8 +1,5 @@
 import { useState, useCallback } from 'react';
 
-/**
- * Hook para gerenciar abas com persistência opcional e validação automática.
- */
 export function useTabsSync(tabs, initialValue = '', itemLocalStorage = '') {
   const [currentTab, setCurrentTab] = useState(() => {
     const stored = itemLocalStorage ? localStorage.getItem(itemLocalStorage) : null;

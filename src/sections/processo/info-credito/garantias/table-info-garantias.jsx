@@ -5,11 +5,11 @@ import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 // utils
-import { useSelector } from '../../../../redux/store';
-import { fCurrency, fPercent } from '../../../../utils/formatNumber';
+import { useSelector } from '@/redux/store';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
-import { noDados } from '../../../../components/Panel';
-import { TableSearchNotFound } from '../../../../components/table/SearchNotFound';
+import { noDados } from '@/components/Panel';
+import { TableSearchNotFound } from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

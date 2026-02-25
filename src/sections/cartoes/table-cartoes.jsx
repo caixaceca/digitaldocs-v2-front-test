@@ -12,23 +12,21 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDate } from '../../utils/formatTime';
-import { UosAcesso } from '../../utils/validarAcesso';
-import { baralharString } from '../../utils/formatText';
-// hooks
-import { useNotificacao } from '../../hooks/useNotificacao';
-import useTable, { getComparator } from '../../hooks/useTable';
+import { ptDate } from '@/utils/formatTime';
+import { UosAcesso } from '@/utils/validarAcesso';
+import { useNotificacao } from '@/hooks/useNotificacao';
+import useTable, { getComparator } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { setModal, getFromDigitalDocs } from '../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
+import { setModal, getFromDigitalDocs } from '@/redux/slices/digitaldocs';
 // Components
-import { Checked } from '../../components/Panel';
-import Scrollbar from '../../components/Scrollbar';
-import { DefaultAction } from '../../components/Actions';
-import { SkeletonTable } from '../../components/skeleton';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { SearchToolbarCartoes } from '../../components/SearchToolbar';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import { Checked } from '@/components/Panel';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarCartoes } from '@/components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import { Detalhes } from './detalhes-cartao';
 import { UoData } from '../tabela/uo-data-filter';
@@ -271,9 +269,9 @@ export default function TableCartoes() {
                         </TableCell>
                         <TableCell>{ptDate(row.data_emissao)}</TableCell>
                         <TableCell>{row?.entrega}</TableCell>
-                        <TableCell align="center">{baralharString(row?.numero)}</TableCell>
-                        <TableCell>{baralharString(row?.cliente)}</TableCell>
-                        <TableCell>{baralharString(row?.nome)}</TableCell>
+                        <TableCell align="center">{row?.numero}</TableCell>
+                        <TableCell>{row?.cliente}</TableCell>
+                        <TableCell>{row?.nome}</TableCell>
                         <TableCell>{row?.tipo}</TableCell>
                         <TableCell align="center" sx={{ width: 10 }}>
                           <Checked check={row.emissao_validado} color={row.emissao_validado ? '' : 'error.main'} />

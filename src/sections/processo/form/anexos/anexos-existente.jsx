@@ -7,15 +7,15 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 // utils
-import { getFileThumb } from '../../../../utils/formatFile';
-import { findColaborador } from '../../../../utils/formatObject';
-import { ptDateTime, ptDate } from '../../../../utils/formatTime';
+import { getFileThumb } from '@/utils/formatFile';
+import { findColaborador } from '@/utils/formatObject';
+import { ptDateTime, ptDate } from '@/utils/formatTime';
 // redux
-import { getSuccess } from '../../../../redux/slices/digitaldocs';
-import { useSelector, useDispatch } from '../../../../redux/store';
+import { getSuccess } from '@/redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '@/redux/store';
 // components
-import { Criado } from '../../../../components/Panel';
-import { DefaultAction } from '../../../../components/Actions';
+import { Criado } from '@/components/Panel';
+import { DefaultAction } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ export default function AnexosExistente({ anexos, onOpen = null, noTitle = false
                   secondary={
                     (criado || criador || emissao || validade) && (
                       <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ pt: 0.5 }}>
-                        <Criado caption tipo="user" value={findColaborador(criador, colaboradores)} baralhar />
+                        <Criado caption tipo="user" value={findColaborador(criador, colaboradores)} />
                         <Criado caption tipo="data" value={ptDateTime(criado)} />
                         <Criado caption iconText="Emissão:" value={ptDate(emissao)} />
                         <Criado caption iconText="Validade:" value={ptDate(validade)} />

@@ -8,8 +8,8 @@ import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDate } from '../../../utils/formatTime';
-import { fConto, fNumber } from '../../../utils/formatNumber';
+import { ptDate } from '@/utils/formatTime';
+import { fConto, fNumber } from '@/utils/formatNumber';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

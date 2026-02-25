@@ -8,10 +8,10 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
 //
-import { useSelector } from '../../redux/store';
-import { useAuthContext } from '../../providers/auth-provider';
+import { useSelector } from '@/redux/store';
+import { useAuthContext } from '@/providers/auth-provider';
 // components
-import { AvatarBadge } from '../../components/custom-avatar';
+import { AvatarBadge } from '@/components/custom-avatar';
 
 const RootStyle = styled('div')(({ theme }) => ({
   display: 'flex',

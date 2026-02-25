@@ -1,7 +1,7 @@
 // @mui
 import Box from '@mui/material/Box';
 // redux
-import { useSelector } from '../../../../redux/store';
+import { useSelector } from '@/redux/store';
 // components
 import FormInfoInterno from './form-info-interno';
 import FormAnexosInterno from './form-anexos-interno';

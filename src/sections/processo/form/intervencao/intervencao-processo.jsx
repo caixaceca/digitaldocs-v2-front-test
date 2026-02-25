@@ -5,9 +5,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Switch from '@mui/material/Switch';
+import Divider from '@mui/material/Divider';
 import Checkbox from '@mui/material/Checkbox';
 import TableRow from '@mui/material/TableRow';
 import TableHead from '@mui/material/TableHead';
@@ -16,20 +21,23 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import TableContainer from '@mui/material/TableContainer';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import DialogContentText from '@mui/material/DialogContentText';
 // utils
-import { vdt } from '../../../../utils/formatObject';
-import { paraLevantamento } from '../../../../utils/validarAcesso';
+import { vdt } from '@/utils/formatObject';
+import { paraLevantamento } from '@/utils/validarAcesso';
+import { fNumber, fCurrency } from '@/utils/formatNumber';
 import { shapeAnexos, appendAnexos } from '../anexos/utils-anexos';
-import { fNumber, fCurrency } from '../../../../utils/formatNumber';
 // redux
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
-import { getInfoProcesso, setModal, updateItem, deleteItem } from '../../../../redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
+import { getInfoProcesso, setModal, createItem, updateItem, deleteItem } from '@/redux/slices/digitaldocs';
 // components
-import { DialogConfirmar } from '../../../../components/CustomDialog';
-import { DefaultAction, DialogButons } from '../../../../components/Actions';
-import { RHFSwitch, FormProvider, RHFTextField, RHFAutocompleteObj } from '../../../../components/hook-form';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import { DefaultAction, DialogButons } from '@/components/Actions';
+import { RHFSwitch, FormProvider, RHFTextField, RHFAutocompleteObj } from '@/components/hook-form';
 //
 import Anexos from '../anexos';
 import { Confidencialidade, confidenciaIds } from './encaminhar';
@@ -303,6 +311,66 @@ export function FinalizarOpeForm({ id, onClose }) {
         dispatch(updateItem('finalizar', JSON.stringify({ cativos: [] }), { id, msg: 'Processo finalizado' }))
       }
     />
+  );
+}
+
+// --- APLICAR NA BANCA ------------------------------------------------------------------------------------------------
+
+export function AplicarBancaForm({ id, assunto = '', titular = '', onClose }) {
+  const dispatch = useDispatch();
+  const [arquivar, setArquivar] = useState(false);
+  const { isSaving, erros } = useSelector((state) => state.digitaldocs);
+
+  const onConfirm = async () => {
+    const params = { id, onClose, msg: 'Processo aplicado' };
+    dispatch(createItem('aplicar', JSON.stringify({ processo_id: Number(id), arquivar }), params));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>Confirmar aplicação na Banca</DialogTitle>
+
+      <DialogContent>
+        <DialogContentText sx={{ mt: 3 }}>
+          Tens a certeza que pretendes aplicar este processo de <strong>{assunto}</strong> {titular ? `de ` : ''}
+          {titular ? <b>{titular}</b> : ''} na Banca?
+        </DialogContentText>
+
+        <Divider sx={{ mt: 3, mb: 2, borderStyle: 'dashed' }} />
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <FormControlLabel
+            sx={{ margin: 0 }}
+            label={<Typography variant="subtitle2">Arquivar após aplicação?</Typography>}
+            control={<Switch checked={arquivar} onChange={(e) => setArquivar(e.target.checked)} />}
+          />
+
+          {arquivar && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              <strong>Atenção:</strong> O processo será bloqueado para edições futuras.
+            </Alert>
+          )}
+
+          {erros && erros?.length > 0 && (
+            <Alert severity="error" sx={{ mt: 2, typography: 'caption' }}>
+              {erros?.map((row, index) => (
+                <Box key={`erro_${index}`}>
+                  {index + 1} - {row}
+                </Box>
+              ))}
+            </Alert>
+          )}
+        </Box>
+      </DialogContent>
+
+      <DialogActions>
+        <Button color="inherit" variant="outlined" onClick={onClose} disabled={isSaving}>
+          Cancelar
+        </Button>
+        <Button loading={isSaving} variant="soft" color={arquivar ? 'warning' : 'primary'} onClick={onConfirm}>
+          {arquivar ? 'Aplicar e Arquivar' : 'Aplicar'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 

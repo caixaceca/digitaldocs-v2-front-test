@@ -3,10 +3,10 @@ import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
 import { InteractionRequiredAuthError } from '@azure/msal-browser';
 //
-import { callMsGraph } from '../../graph';
-import { loginRequest, msalInstance } from '../../config';
+import { callMsGraph } from '@/graph';
+import { loginRequest, msalInstance } from '@/config';
 import { addRole, getFromParametrizacao } from './parametrizacao';
-import { API_INTRANET_URL, API_SLIM_URL, API_CORENET_URL } from '../../utils/apisUrl';
+import { API_INTRANET_URL, API_SLIM_URL, API_CORENET_URL } from '@/utils/apisUrl';
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -15,6 +15,8 @@ const initialState = {
   isSaving: false,
   isLoading: false,
   disposicao: true,
+  loadingConf: false,
+  idAd: '',
   done: '',
   mail: '',
   error: '',
@@ -33,7 +35,6 @@ const initialState = {
   links: [],
   perguntas: [],
   notificacoes: [],
-  certificacoes: [],
   colaboradores: [],
   minhasAplicacoes: [],
 };
@@ -71,6 +72,7 @@ export function authenticateColaborador() {
     try {
       const accessToken = await getAccessToken();
       const msalProfile = await callMsGraph(accessToken);
+      dispatch(slice.actions.getSuccess({ item: 'idAd', dados: msalProfile?.id }));
       dispatch(slice.actions.getSuccess({ item: 'mail', dados: msalProfile?.userPrincipalName }));
       const perfil = await axios.post(`${API_CORENET_URL}/v2/portal/pfs/msal`, msalProfile, {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -120,11 +122,12 @@ export async function getAccessToken() {
 
 export function getInfoInicial(id, inicial) {
   return async (dispatch) => {
+    dispatch(slice.actions.getSuccess({ item: 'loadingConf', dados: true }));
     if (!inicial) await dispatch(getFromIntranet('cc', { id }));
     await dispatch(getFromIntranet('colaboradores'));
     await dispatch(getFromIntranet('uos', { label: 'label' }));
 
-    await dispatch(getFromParametrizacao('meusambientes'));
+    await dispatch(getFromParametrizacao('meusambientes', { inicial }));
     await dispatch(getFromParametrizacao('meusacessos'));
     await dispatch(getFromParametrizacao('fluxos'));
     await dispatch(getFromParametrizacao('estados'));
@@ -135,9 +138,9 @@ export function getInfoInicial(id, inicial) {
       await dispatch(getFromIntranet('disposicao', { id, data: format(new Date(), 'yyyy-MM-dd') }));
       await dispatch(getFromIntranet('minhasAplicacoes', { label: 'nome' }));
       await dispatch(getFromIntranet('links', { label: 'nome' }));
-      await dispatch(getFromIntranet('certificacoes'));
       await dispatch(getFromParametrizacao('motivosPendencia'));
     }
+    dispatch(slice.actions.getSuccess({ item: 'loadingConf', dados: false }));
   };
 }
 
@@ -154,9 +157,8 @@ export function getFromIntranet(item, params) {
       const options = headerOptions({ accessToken, mail, cc: false, ct: false, mfd: false });
 
       if (item === 'colaboradores') {
-        const requests = [true, false].map((ativo) =>
-          axios.get(`${API_CORENET_URL}/v2/portal/cls/load`, { ...options, params: { ativo } })
-        );
+        const apiUrl = `${API_CORENET_URL}/v2/portal/cls/load`;
+        const requests = [true, false].map((ativo) => axios.get(apiUrl, { ...options, params: { ativo } }));
 
         const responses = await Promise.all(requests);
         const colaboradores = [...(responses[0].data?.objeto || []), ...(responses[1].data?.objeto || [])];
@@ -189,7 +191,6 @@ export function getFromIntranet(item, params) {
         const apiUrl =
           (item === 'ajuda' && `${API_INTRANET_URL}/help/ajuda`) ||
           (item === 'frase' && `${API_INTRANET_URL}/frase_semana/ativa`) ||
-          (item === 'certificacoes' && `${API_INTRANET_URL}/certificacao`) ||
           (item === 'links' && `${API_INTRANET_URL}/aplicacao/links/uteis`) ||
           (item === 'uos' && `${API_CORENET_URL}/v2/portal/uos/load?ativo=true`) ||
           (item === 'perguntas' && `${API_INTRANET_URL}/help/perguntas_frequentes`) ||

@@ -4,11 +4,11 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // utils
-import { toHourLabel } from '../../../utils/formatTime';
-import { fNumber, fPercent, calcPercentagem } from '../../../utils/formatNumber';
+import { toHourLabel } from '@/utils/formatTime';
+import { fNumber, fPercent, calcPercentagem } from '@/utils/formatNumber';
 //
-import { Icon } from '../../../assets/icons';
-import GridItem from '../../../components/GridItem';
+import { Icon } from '@/assets/icons';
+import GridItem from '@/components/GridItem';
 import { CheckIcon, TicketIcon, FirstIcon, TimeIcon, SatisfyIcon, ArrowIcon } from './icons';
 
 // ---------------------------------------------------------------------------------------------------------------------

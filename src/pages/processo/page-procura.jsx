@@ -12,27 +12,25 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime, fToNow, fYear } from '../../utils/formatTime';
-import { normalizeText, entidadesParse } from '../../utils/formatText';
+import useSettings from '@/hooks/useSettings';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { ptDateTime, fToNow, fYear } from '@/utils/formatTime';
+import { normalizeText, entidadesParse } from '@/utils/formatText';
 // hooks
-import useTable, { getComparator, applySort } from '../../hooks/useTable';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getListaProcessos, resetProcesso } from '../../redux/slices/digitaldocs';
-// hooks
-import useSettings from '../../hooks/useSettings';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getListaProcessos, resetProcesso } from '@/redux/slices/digitaldocs';
 // components
-import Page from '../../components/Page';
-import Label from '../../components/Label';
-import Scrollbar from '../../components/Scrollbar';
-import { SkeletonTable } from '../../components/skeleton';
-import Panel, { Criado, noDados } from '../../components/Panel';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { SearchToolbarProcura } from '../../components/SearchToolbar';
-import { DefaultAction, MaisProcessos } from '../../components/Actions';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Page from '@/components/Page';
+import Label from '@/components/Label';
+import Scrollbar from '@/components/Scrollbar';
+import { SkeletonTable } from '@/components/skeleton';
+import Panel, { Criado, noDados } from '@/components/Panel';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarProcura } from '@/components/SearchToolbar';
+import { DefaultAction, MaisProcessos } from '@/components/Actions';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

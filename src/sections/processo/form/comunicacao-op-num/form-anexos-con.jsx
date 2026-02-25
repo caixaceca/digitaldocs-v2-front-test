@@ -7,12 +7,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Stack from '@mui/material/Stack';
 // redux
-import { updateDados } from '../../../../redux/slices/stepper';
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { createProcesso } from '../../../../redux/slices/digitaldocs';
+import { updateDados } from '@/redux/slices/stepper';
+import { useSelector, useDispatch } from '@/redux/store';
+import { createProcesso } from '@/redux/slices/digitaldocs';
 // components
-import { FormProvider } from '../../../../components/hook-form';
-import { ButtonsStepper } from '../../../../components/Actions';
+import { FormProvider } from '@/components/hook-form';
+import { ButtonsStepper } from '@/components/Actions';
 // sections
 import Anexos from '../anexos';
 import { shapeAnexos, defaultAnexos, appendAnexos } from '../anexos/utils-anexos';

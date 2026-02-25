@@ -9,12 +9,12 @@ import Paper from '@mui/material/Paper';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { formatDate, fillData } from '../../../../utils/formatTime';
+import { formatDate, fillData } from '@/utils/formatTime';
 // redux
-import { getFromGaji9 } from '../../../../redux/slices/gaji9';
-import { updateItem } from '../../../../redux/slices/digitaldocs';
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { updateDados, resetDados, backStep } from '../../../../redux/slices/stepper';
+import { getFromGaji9 } from '@/redux/slices/gaji9';
+import { updateItem } from '@/redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '@/redux/store';
+import { updateDados, resetDados, backStep } from '@/redux/slices/stepper';
 // components
 import {
   RHFSwitch,
@@ -23,28 +23,30 @@ import {
   RHFDatePicker,
   RHFNumberField,
   RHFAutocompleteObj,
-} from '../../../../components/hook-form';
-import Steps from '../../../../components/Steps';
-import GridItem from '../../../../components/GridItem';
-import { ButtonsStepper } from '../../../../components/Actions';
-import { DialogTitleAlt } from '../../../../components/CustomDialog';
-import { shapeText } from '../../../../components/hook-form/yup-shape';
+} from '@/components/hook-form';
+import Steps from '@/components/Steps';
+import GridItem from '@/components/GridItem';
+import { ButtonsStepper } from '@/components/Actions';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { shapeText } from '@/components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function MetadadosCreditoForm({ onClose, dados = null, ids }) {
   const dispatch = useDispatch();
-  const { activeStep } = useSelector((state) => state.stepper);
+  const { activeStep, dadosStepper } = useSelector((state) => state.stepper);
 
-  const onClose1 = useCallback(() => {
+  const handleClose = useCallback(() => {
     onClose();
     dispatch(resetDados());
   }, [onClose, dispatch]);
 
+  const commonProps = { dados, dadosStepper, dispatch, onClose: handleClose };
+
   return (
     <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
-        onClose={() => onClose1()}
+        onClose={() => handleClose()}
         title="Outras informações do crédito"
         content={
           <Steps
@@ -55,11 +57,11 @@ export default function MetadadosCreditoForm({ onClose, dados = null, ids }) {
         }
       />
       <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
-        {activeStep === 0 && <RegimeEspecial onClose={onClose1} dados={dados} />}
-        {activeStep === 1 && <Condicoes dados={dados} />}
-        {activeStep === 2 && <Taxas dados={dados} />}
-        {activeStep === 3 && <Objeto dados={dados} />}
-        {activeStep === 4 && <Entidade onClose={onClose1} ids={ids} dados={dados} />}
+        {activeStep === 0 && <RegimeEspecial {...commonProps} />}
+        {activeStep === 1 && <Condicoes {...commonProps} />}
+        {activeStep === 2 && <Taxas {...commonProps} />}
+        {activeStep === 3 && <Objeto {...commonProps} />}
+        {activeStep === 4 && <Entidade {...commonProps} ids={ids} />}
       </DialogContent>
     </Dialog>
   );
@@ -67,10 +69,7 @@ export default function MetadadosCreditoForm({ onClose, dados = null, ids }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function RegimeEspecial({ onClose, dados }) {
-  const dispatch = useDispatch();
-  const { dadosStepper } = useSelector((state) => state.stepper);
-
+function RegimeEspecial({ onClose, dados, dispatch, dadosStepper }) {
   const formSchema = Yup.object().shape({
     nivel_formacao: shapeText('Nível de formação', true, '', 'credibolsa'),
     designacao_curso: shapeText('Designação do curso', true, '', 'credibolsa'),
@@ -149,12 +148,9 @@ function RegimeEspecial({ onClose, dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Condicoes({ dados }) {
-  const dispatch = useDispatch();
-  const { dadosStepper } = useSelector((state) => state.stepper);
-
+function Condicoes({ dados, dispatch, dadosStepper }) {
   const formSchema = Yup.object().shape({
-    data_vencimento_prestacao1: Yup.date().required().label('Data 1ª prestação'),
+    // data_vencimento_prestacao1: Yup.date().required().label('Data 1ª prestação'),
     numero_prestacao: Yup.number().positive().integer().required().label('Nº de prestações'),
   });
 
@@ -228,8 +224,8 @@ function Taxas({ dados }) {
     taxa_imposto_selo: Yup.number().positive().max(100).required().label('Taxa de imposto selo'),
     taxa_juro_precario: Yup.number().positive().max(100).required().label('Taxa de juros precário'),
     taxa_comissao_abertura: Yup.number().min(0).max(100).required().label('Taxa de comissão abertura'),
-    taxa_comissao_imobilizacao: Yup.number().min(0).max(100).required().label('Taxa de comissão imobilização'),
     taxa_imposto_selo_utilizacao: Yup.number().min(0).max(100).required().label('Taxa imp. selo utilização'),
+    taxa_comissao_imobilizacao: Yup.number().min(0).max(100).required().label('Taxa de comissão imobilização'),
   });
 
   const defaultValues = useMemo(
@@ -238,6 +234,7 @@ function Taxas({ dados }) {
       taxa_imposto_selo: dadosStepper?.taxa_imposto_selo || dados?.taxa_imposto_selo || 3.5,
       taxa_juro_desconto: dadosStepper?.taxa_juro_desconto || dados?.taxa_juro_desconto || 0,
       taxa_juro_precario: dadosStepper?.taxa_juro_precario || dados?.taxa_juro_precario || 11,
+      modo_taxa_equivalente: dadosStepper?.modo_taxa_equivalente || dados?.modo_taxa_equivalente || false,
       taxa_comissao_abertura: dadosStepper?.taxa_comissao_abertura || dados?.taxa_comissao_abertura || 1.75,
       taxa_comissao_imobilizacao: dadosStepper?.taxa_comissao_imobilizacao || dados?.taxa_comissao_imobilizacao || 0,
       taxa_imposto_selo_utilizacao:
@@ -258,6 +255,7 @@ function Taxas({ dados }) {
       >
         <Title title="Taxas" />
         <Grid container spacing={3} sx={{ mt: 3 }}>
+          <GridItem children={<RHFSwitch name="modo_taxa_equivalente" label="Taxa equivalente" />} />
           <GridItem xs={6} md={3}>
             <RHFNumberField name="taxa_tan" label="TAN" tipo="%" />
           </GridItem>
@@ -288,10 +286,8 @@ function Taxas({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Objeto({ dados }) {
-  const dispatch = useDispatch();
+function Objeto({ dados, dispatch, dadosStepper }) {
   const { tiposImoveis } = useSelector((state) => state.gaji9);
-  const { dadosStepper } = useSelector((state) => state.stepper);
   const imoveisList = useMemo(() => tiposImoveis.map((i) => ({ id: i?.id, label: i?.tipo })), [tiposImoveis]);
 
   useEffect(() => {
@@ -338,9 +334,7 @@ function Objeto({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Entidade({ dados, ids, onClose }) {
-  const dispatch = useDispatch();
-  const { dadosStepper } = useSelector((state) => state.stepper);
+function Entidade({ dados, ids, onClose, dispatch, dadosStepper }) {
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const defaultValues = useMemo(
@@ -361,71 +355,6 @@ function Entidade({ dados, ids, onClose }) {
 
   const methods = useForm({ defaultValues });
   const { handleSubmit } = methods;
-
-  // const onSubmit = async (values) => {
-  //   try {
-  //     const rawData = { ...dadosStepper, ...values };
-
-  //     const dataFormatted = {
-  //       taxa_imposto_selo: String(rawData.taxa_imposto_selo || '0'),
-  //       taxa_juro_precario: String(rawData.taxa_juro_precario || '0'),
-  //       taxa_comissao_abertura: String(rawData.taxa_comissao_abertura || '0'),
-  //       taxa_imposto_selo_utilizacao: String(rawData.taxa_imposto_selo_utilizacao || '0'),
-
-  //       tipo_imovel_id: rawData.tipo_imovel_id?.id || rawData.tipo_imovel_id || undefined,
-  //       conta_do_renda: rawData.conta_do_renda ? Number(rawData.conta_do_renda) : undefined,
-  //       meses_vencimento: rawData.meses_vencimento ? Number(rawData.meses_vencimento) : undefined,
-  //       numero_prestacao: rawData.numero_prestacao ? Number(rawData.numero_prestacao) : undefined,
-  //       periodo_carencia: rawData.periodo_carencia ? Number(rawData.periodo_carencia) : undefined,
-  //       prazo_utilizacao: rawData.prazo_utilizacao ? Number(rawData.prazo_utilizacao) : undefined,
-
-  //       taxa_tan: rawData.taxa_tan ? String(rawData.taxa_tan) : undefined,
-  //       taxa_taeg: rawData.taxa_taeg ? String(rawData.taxa_taeg) : undefined,
-  //       taxa_juro_desconto: rawData.taxa_juro_desconto ? String(rawData.taxa_juro_desconto) : undefined,
-  //       capital_max_isento_imposto_selo: rawData.capital_max_isento_imposto_selo
-  //         ? String(rawData.capital_max_isento_imposto_selo)
-  //         : undefined,
-  //       nivel_formacao: rawData.nivel_formacao || undefined,
-  //       designacao_curso: rawData.designacao_curso || undefined,
-  //       estabelecimento_ensino: rawData.estabelecimento_ensino || undefined,
-  //       localizacao_estabelecimento_ensino: rawData.localizacao_estabelecimento_ensino || undefined,
-  //       bem_servico_financiado: rawData.bem_servico_financiado || undefined,
-  //       nome_empresa_fornecedora: rawData.nome_empresa_fornecedora || undefined,
-  //       nib_vendedor_ou_fornecedor: rawData.nib_vendedor_ou_fornecedor || undefined,
-  //       finalidade_credito_habitacao: rawData.finalidade_credito_habitacao || undefined,
-  //       instituicao_credito_conta_vendedor_ou_fornecedor:
-  //         rawData.instituicao_credito_conta_vendedor_ou_fornecedor || undefined,
-  //       montante_tranches_credibolsa: rawData.montante_tranches_credibolsa
-  //         ? String(rawData.montante_tranches_credibolsa)
-  //         : undefined,
-  //       valor_transferir_conta_vendedor_ou_fornecedor: rawData.valor_transferir_conta_vendedor_ou_fornecedor
-  //         ? String(rawData.valor_transferir_conta_vendedor_ou_fornecedor)
-  //         : undefined,
-
-  //       data_vencimento_prestacao1: rawData.data_vencimento_prestacao1
-  //         ? formatDate(rawData.data_vencimento_prestacao1, 'yyyy-MM-dd')
-  //         : undefined,
-  //       data_utilizacao: rawData.data_utilizacao ? formatDate(rawData.data_utilizacao, 'yyyy-MM-dd') : undefined,
-
-  //       revolving: rawData.revolving,
-  //       bonificado: rawData.bonificado,
-  //       isento_comissao: rawData.isento_comissao,
-  //       jovem_bonificado: rawData.jovem_bonificado,
-  //       tem_isencao_imposto_selo: rawData.tem_isencao_imposto_selo,
-  //       colaborador_empresa_parceira: rawData.colaborador_empresa_parceira,
-  //     };
-
-  //     const payload = Object.fromEntries(
-  //       // eslint-disable-next-line no-unused-vars
-  //       Object.entries(dataFormatted).filter(([_, value]) => value !== undefined && value !== '')
-  //     );
-
-  //     const params = { ...ids, msg: 'Informações atualizadas', fillCredito: true };
-  //     dispatch(updateItem('metadados-credito', JSON.stringify(payload), { ...params, onClose }));
-  //   } catch (error) {
-  //     console.error('Erro no envio dos dados:', error);
-  //   }
-  // };
 
   const onSubmit = async (values) => {
     try {
@@ -450,6 +379,7 @@ function Entidade({ dados, ids, onClose }) {
         taxa_imposto_selo: String(rawData.taxa_imposto_selo || '0'),
         taxa_juro_precario: String(rawData.taxa_juro_precario || '0'),
         taxa_juro_desconto: String(rawData.taxa_juro_desconto || '0'),
+        modo_taxa_equivalente: Boolean(rawData.modo_taxa_equivalente),
         taxa_comissao_abertura: String(rawData.taxa_comissao_abertura || '0'),
         taxa_tan: rawData.taxa_tan ? String(rawData.taxa_tan?.replace(',', '.') || '0') : undefined,
         taxa_imposto_selo_utilizacao: String(rawData.taxa_imposto_selo_utilizacao || '0'),

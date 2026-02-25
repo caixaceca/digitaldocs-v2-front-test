@@ -13,11 +13,11 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { getColorRating } from '../utils';
-import { noDados } from '../../../components/Panel';
+import { noDados } from '@/components/Panel';
 import { fNumber, fPercent } from '@/utils/formatNumber';
-import { ptDateTime, toHourLabel } from '../../../utils/formatTime';
+import { ptDateTime, toHourLabel } from '@/utils/formatTime';
 //
-import { TableSearchNotFound } from '../../../components/table/SearchNotFound';
+import { TableSearchNotFound } from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

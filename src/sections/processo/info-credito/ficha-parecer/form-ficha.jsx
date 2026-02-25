@@ -13,10 +13,10 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { textParecer } from './parecer';
-import { fillData } from '../../../../utils/formatTime';
-import { updateFicha } from '../../../../redux/slices/intranet';
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { resetDados, forwardStep, backStep } from '../../../../redux/slices/stepper';
+import { fillData } from '@/utils/formatTime';
+import { updateFicha } from '@/redux/slices/intranet';
+import { useSelector, useDispatch } from '@/redux/store';
+import { resetDados, forwardStep, backStep } from '@/redux/slices/stepper';
 // components
 import {
   RHFSwitch,
@@ -26,13 +26,15 @@ import {
   RHFDatePicker,
   RHFNumberField,
   RHFAutocompleteSmp,
-} from '../../../../components/hook-form';
-import Steps from '../../../../components/Steps';
-import GridItem from '../../../../components/GridItem';
-import { SemDados } from '../../../../components/Panel';
-import { DialogTitleAlt } from '../../../../components/CustomDialog';
-import { AddItem, DefaultAction, ButtonsStepper, DialogButons } from '../../../../components/Actions';
-import { shapeText, shapeNumber, shapeDate, shapeMixed } from '../../../../components/hook-form/yup-shape';
+} from '@/components/hook-form';
+import Steps from '@/components/Steps';
+import GridItem from '@/components/GridItem';
+import { SemDados } from '@/components/Panel';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { AddItem, DefaultAction, ButtonsStepper, DialogButons } from '@/components/Actions';
+import { shapeText, shapeNumber, shapeDate, shapeMixed } from '@/components/hook-form/yup-shape';
+
+const divida = { valor: '', valor_prestacao: '', saldo_divida: '' };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -194,26 +196,24 @@ function Despesas({ dados }) {
   };
 
   return (
-    <>
-      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-        <Stack direction="column" spacing={3} sx={{ mt: 3 }}>
-          {fields?.length === 0 && <SemDados message="Ainda não foi adicionada nenhuma despesa..." />}
-          {fields.map((item, index) => (
-            <Stack direction="row" key={item.id} spacing={2} alignItems="center">
-              <Stack direction="row" sx={{ width: 1 }} spacing={2}>
-                <RHFTextField name={`despesas[${index}].despesa`} label="Despesa" />
-                <RHFNumberField name={`despesas[${index}].valor`} label="Valor" tipo="CVE" sx={{ width: '50%' }} />
-              </Stack>
-              <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
+    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+      <Stack direction="column" spacing={3} sx={{ mt: 3 }}>
+        {fields?.length === 0 && <SemDados message="Ainda não foi adicionada nenhuma despesa..." />}
+        {fields.map((item, index) => (
+          <Stack direction="row" key={item.id} spacing={2} alignItems="center">
+            <Stack direction="row" sx={{ width: 1 }} spacing={2}>
+              <RHFTextField name={`despesas[${index}].despesa`} label="Despesa" />
+              <RHFNumberField name={`despesas[${index}].valor`} label="Valor" tipo="CVE" sx={{ width: '50%' }} />
             </Stack>
-          ))}
-          <Stack direction="row" justifyContent="center">
-            <AddItem dados={{ small: true, label: 'Despesa' }} onClick={() => append({ despesa: '', valor: '' })} />
+            <DefaultAction small label="ELIMINAR" onClick={() => remove(index)} />
           </Stack>
+        ))}
+        <Stack direction="row" justifyContent="center">
+          <AddItem dados={{ small: true, label: 'Despesa' }} onClick={() => append({ despesa: '', valor: '' })} />
         </Stack>
-        <ButtonsStepper onClose={() => dispatch(backStep())} />
-      </FormProvider>
-    </>
+      </Stack>
+      <ButtonsStepper onClose={() => dispatch(backStep())} />
+    </FormProvider>
   );
 }
 
@@ -260,16 +260,14 @@ function RespExterna({ dados }) {
 function Dividas({ name }) {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
+  const title = name === 'dividas_externas' ? 'Dívidas em outros bancos' : 'Avales/Fianças em outros bancos';
 
   return (
     <Stack spacing={3}>
       <Stack spacing={2} direction="row" justifyContent="space-between" alignItems="flex-end">
-        <Typography variant="subtitle1">{name === 'dividas_externas' ? 'Dívidas' : 'Avales/Fianças'}</Typography>
+        <Typography variant="subtitle1">{title}</Typography>
         <Stack spacing={2} direction="row" alignItems="center" justifyContent="space-between">
-          <AddItem
-            onClick={() => append({ valor: '', valor_prestacao: '', saldo_divida: '' })}
-            dados={{ small: true }}
-          />
+          <AddItem dados={{ small: true }} onClick={() => append(divida)} />
         </Stack>
       </Stack>
 
@@ -300,18 +298,18 @@ function Proposta({ dados, credito, onClose }) {
     comissoes: Yup.string().required().label('Comissões'),
     taxa_juro: Yup.number().positive().label('Taxa de juro'),
     origem_taxa: Yup.mixed().required().label('Origem da taxa'),
-    taxa_precario: Yup.number().positive().label('Taxa do preçario'),
+    taxa_precario: Yup.number().positive().label('Taxa do preçário'),
     prazo_amortizacao: Yup.number().positive().label('Prazo de amortização'),
   });
 
   const defaultValues = useMemo(
     () => ({
       taxa_juro: dados?.taxa_juro || credito?.taxa_juro,
+      modo_taxa_equivalente: dados?.modo_taxa_equivalente || false,
       comissoes: dados?.comissoes || credito?.comissoes || 'Em vigor',
       montante: dados?.montante || credito?.montante_solicitado || '',
-      observacao: dados?.observacao || credito?.observacao_proposta || '',
       taxa_precario: dados?.taxa_precario || credito?.taxa_precario || 11,
-      origem_taxa: dados?.origem_taxa || credito?.origem_taxa || 'Preçario',
+      origem_taxa: dados?.origem_taxa || credito?.origem_taxa || 'Preçário',
       prazo_utilizacao: dados?.prazo_utilizacao || credito?.prazo_utilizacao || '',
       prazo_amortizacao: dados?.prazo_amortizacao || credito?.prazo_amortizacao || '',
     }),
@@ -333,6 +331,7 @@ function Proposta({ dados, credito, onClose }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3} justifyContent="center" sx={{ pt: 3 }}>
+        <GridItem children={<RHFSwitch name="modo_taxa_equivalente" label="Taxa equivalente" />} />
         <GridItem sm={6} md={4} children={<RHFNumberField tipo="CVE" name="montante" label="Montante" />} />
         <GridItem sm={6} md={4}>
           <RHFNumberField tipo="meses" name="prazo_amortizacao" label="Prazo amortização" />
@@ -340,17 +339,16 @@ function Proposta({ dados, credito, onClose }) {
         <GridItem sm={6} md={4}>
           <RHFNumberField tipo="meses" name="prazo_utilizacao" label="Prazo utilização" />
         </GridItem>
-        <GridItem sm={6} md={4} children={<RHFNumberField tipo="%" name="taxa_precario" label="Taxa do preçario" />} />
+        <GridItem sm={6} md={4} children={<RHFNumberField tipo="%" name="taxa_precario" label="Taxa do preçário" />} />
         <GridItem sm={6} md={4} children={<RHFNumberField tipo="%" name="taxa_juro" label="Taxa de juro" />} />
         <GridItem sm={6} md={4}>
           <RHFAutocompleteSmp
             name="origem_taxa"
             label="Origem da taxa"
-            options={['Negociada', 'Condições Especiais de Negociação', 'Preçario']}
+            options={['Negociada', 'Condições Especiais de Negociação', 'Preçário']}
           />
         </GridItem>
         <GridItem children={<RHFTextField name="comissoes" label="Comissões" />} />
-        <GridItem children={<RHFTextField name="observacao" label="Observação" multiline rows={2} />} />
       </Grid>
       <ButtonsStepper onClose={() => dispatch(backStep())} label="Guardar" />
     </FormProvider>
@@ -361,29 +359,34 @@ function Proposta({ dados, credito, onClose }) {
 
 export function FormParecer({ ficha, onClose }) {
   const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
 
   const formSchema = Yup.object().shape({ parecer: Yup.string().required().label('Parecer') });
-  const defaultValues = useMemo(() => ({ parecer: textParecer(ficha) || '' }), [ficha]);
+  const defaultValues = useMemo(() => ({ parecer: ficha?.parecer || textParecer(ficha) || '' }), [ficha]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { handleSubmit } = methods;
+  const { handleSubmit, reset } = methods;
 
-  const onSubmit = async (values) => {
-    try {
-      dispatch(updateFicha(values));
-      onClose();
-    } catch {
-      enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
-    }
+  const onSubmit = (values) => {
+    dispatch(updateFicha(values));
+    onClose();
+  };
+
+  const onReset = () => {
+    dispatch(updateFicha({ parecer: '' }));
+    reset({ parecer: textParecer(ficha) });
   };
 
   return (
     <Dialog open fullWidth maxWidth="lg">
-      <DialogTitleAlt onClose={onClose} title="Parecer do analista" sx={{ mb: 2 }} />
+      <DialogTitleAlt
+        sx={{ mb: 2 }}
+        onClose={onClose}
+        title="Parecer do analista"
+        action={<DefaultAction small button label="Parecer base" onClick={() => onReset()} />}
+      />
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack sx={{ pt: 1 }}>
-            <GridItem children={<RHFEditor name="parecer" simple />} />
+            <RHFEditor name="parecer" simple />
           </Stack>
           <DialogButons onClose={onClose} edit />
         </FormProvider>

@@ -15,13 +15,13 @@ import DialogContent from '@mui/material/DialogContent';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 // utils
-import useToggle from '../../hooks/useToggle';
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-import { setItemValue } from '../../utils/formatObject';
-import { useDispatch, useSelector } from '../../redux/store';
-import { getListaProcessos } from '../../redux/slices/digitaldocs';
+import useToggle from '@/hooks/useToggle';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { setItemValue } from '@/utils/formatObject';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getListaProcessos } from '@/redux/slices/digitaldocs';
 // components
-import GridItem from '../../components/GridItem';
+import GridItem from '@/components/GridItem';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -6,15 +6,15 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+// utils
+import { veiculoSchema } from './schemaFileds';
 // components
 import FormSeguros from './form-seguros';
 import FormEntidades from './form-entidades';
-import GridItem from '../../../../../components/GridItem';
-import { SemDados } from '../../../../../components/Panel';
-import { AddItem, DefaultAction } from '../../../../../components/Actions';
-import { RHFTextField, RHFNumberField } from '../../../../../components/hook-form';
-//
-import { veiculoSchema } from './schemaFileds';
+import GridItem from '@/components/GridItem';
+import { SemDados } from '@/components/Panel';
+import { AddItem, DefaultAction } from '@/components/Actions';
+import { RHFTextField, RHFNumberField } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

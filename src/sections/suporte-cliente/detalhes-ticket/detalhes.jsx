@@ -6,11 +6,11 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 // utils
-import { ptDateTime } from '../../../utils/formatTime';
+import { ptDateTime } from '@/utils/formatTime';
 import { getCustomerTypeLabel, getColorRating, ratingList } from '../utils';
 // components
 import Mensagens from './mensagens';
-import Label, { LabelSN } from '../../../components/Label';
+import Label, { LabelSN } from '@/components/Label';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

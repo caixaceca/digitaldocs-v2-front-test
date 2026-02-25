@@ -8,17 +8,17 @@ import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { ptDateTime } from '../../../utils/formatTime';
-import { useSelector, useDispatch } from '../../../redux/store';
-import { fCurrency, fPercent } from '../../../utils/formatNumber';
-import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
-import { setModal, getInfoProcesso } from '../../../redux/slices/digitaldocs';
+import { ptDateTime } from '@/utils/formatTime';
+import { useSelector, useDispatch } from '@/redux/store';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
+import { pertencoEstadoId, gestorEstado } from '@/utils/validarAcesso';
+import { setModal, getInfoProcesso } from '@/redux/slices/digitaldocs';
 // components
-import Label from '../../../components/Label';
-import { DefaultAction } from '../../../components/Actions';
+import Label from '@/components/Label';
+import { DefaultAction } from '@/components/Actions';
+import { ColaboradorInfo, Criado } from '@/components/Panel';
+import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
 import FormParecer, { CondicoesForm } from '../form/credito/form-parecer';
-import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
-import { ColaboradorInfo, Criado, newLineText } from '../../../components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ export function Parecer({ dados, acessoParecer = false, historico = false, openM
           </Stack>
         </AccordionSummary>
         <AccordionDetails>
-          <Typography sx={{ pt: 1, textAlign: 'justify' }}>{newLineText(parecer)}</Typography>
+          <Typography sx={{ pt: 1, textAlign: 'justify', whiteSpace: 'pre-line' }}>{parecer}</Typography>
           {!historico && (
             <Typography sx={{ pt: 1, typography: 'body2', color: 'text.secondary' }}>{ptDateTime(em)}</Typography>
           )}

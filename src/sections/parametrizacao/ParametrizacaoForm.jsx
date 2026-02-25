@@ -14,12 +14,11 @@ import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fillData } from '../../utils/formatTime';
-import { emailCheck } from '../../utils/validarAcesso';
-import { subtractArrays } from '../../utils/formatObject';
+import { fillData } from '@/utils/formatTime';
+import { subtractArrays, idCheck } from '@/utils/formatObject';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
+import { useSelector, useDispatch } from '@/redux/store';
+import { createItem, updateItem, deleteItem } from '@/redux/slices/parametrizacao';
 // components
 import {
   RHFSwitch,
@@ -28,15 +27,15 @@ import {
   RHFDatePicker,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
-} from '../../components/hook-form';
-import GridItem from '../../components/GridItem';
-import ListSelect from '../../components/ListSelect';
-import { FormLoading } from '../../components/skeleton';
-import { DialogButons } from '../../components/Actions';
-import { SearchNotFoundSmall } from '../../components/table';
-import { shapeDate } from '../../components/hook-form/yup-shape';
+} from '@/components/hook-form';
+import GridItem from '@/components/GridItem';
+import ListSelect from '@/components/ListSelect';
+import { FormLoading } from '@/components/skeleton';
+import { DialogButons } from '@/components/Actions';
+import { SearchNotFoundSmall } from '@/components/table';
+import { shapeDate } from '@/components/hook-form/yup-shape';
 // _mock
-import { codacessos, objetos, listaFreguesias } from '../../_mock';
+import { codacessos, objetos, listaFreguesias } from '@/_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -463,7 +462,7 @@ export function DespesaForm({ onClose }) {
 export function DocumentoForm({ onClose }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const { mail } = useSelector((state) => state.intranet);
+  const { idAd } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.parametrizacao);
 
   const formSchema = Yup.object().shape({
@@ -524,7 +523,7 @@ export function DocumentoForm({ onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           {isEdit &&
-          !emailCheck(mail) &&
+          !idCheck(idAd) &&
           (selectedItem?.designacao === 'OUTROS' || selectedItem?.designacao === 'ATA - PARECER DE CRÉDITO') ? (
             <Stack sx={{ pt: 3, pb: 1 }}>
               <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'info.main' }}>

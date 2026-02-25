@@ -1,191 +1,142 @@
+import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-// markdown plugins
 import rehypeRaw from 'rehype-raw';
 // @mui
-import Link from '@mui/material/Link';
-import Divider from '@mui/material/Divider';
 import { styled } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-//
+import { Link, Divider, Typography, Box } from '@mui/material';
+// componentes
 import Image from './Image';
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+const cleanProps = (props) => {
+  const cleanProps = { ...props };
+  delete cleanProps.node;
+  return cleanProps;
+};
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 const MarkdownStyle = styled('div')(({ theme }) => {
   const isLight = theme.palette.mode === 'light';
-
   return {
-    // Segurança para evitar que o texto ultrapasse o container
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
-
-    // Listas UL normais
-    '& ul': {
+    '& ul, & ol': {
       ...theme.typography.body1,
-      paddingLeft: theme.spacing(5),
-      listStyleType: 'disc',
-      '& li': { lineHeight: 2 },
+      paddingLeft: theme.spacing(3),
+      '& li': { lineHeight: 1.5, '& > p': { margin: 0, display: 'inline' } },
     },
-
-    // Listas OL normais
-    '& ol': {
-      ...theme.typography.body1,
-      paddingLeft: theme.spacing(5),
-      listStyleType: 'decimal',
-      '& li': { lineHeight: 2 },
-    },
-
-    // Caso o Quill coloque o atributo no <li> (ex.: <li data-list="bullet">), converte visualmente
-    '& ol li[data-list="bullet"]': {
-      listStyleType: 'disc !important',
-      display: 'list-item',
-      marginLeft: theme.spacing(0),
-      paddingLeft: theme.spacing(0),
-    },
-
-    // Se Quill usar data-list no próprio OL
-    '& ol[data-list="bullet"]': { listStyleType: 'disc !important' },
-
-    // Remove os spans de UI que o Quill injeta
-    '& span.ql-ui': { display: 'none !important' },
-
-    // Caso existam bullets "checked"/"unchecked"
-    '& li[data-list="checked"], & li[data-list="unchecked"]': {
-      listStyleType: 'none',
-      '&::before': { content: '""' },
-      display: 'flex',
-      alignItems: 'center',
-    },
-    '& li[data-list="checked"]::before': {
-      content: '"\\2713\\00a0"', // ✓
-      marginRight: theme.spacing(1),
-      fontSize: '0.9em',
-    },
-    '& li[data-list="unchecked"]::before': {
-      content: '"\\25A1\\00a0"', // □
-      marginRight: theme.spacing(1),
-      fontSize: '0.9em',
-    },
-
-    // Blockquote
+    '& ul': { listStyleType: 'disc' },
+    '& ol': { listStyleType: 'decimal' },
+    '& .ql-ui': { display: 'none' },
     '& blockquote': {
-      lineHeight: 1.5,
-      fontSize: '1.5em',
-      margin: '40px auto',
+      margin: theme.spacing(4, 0),
+      padding: theme.spacing(2, 2, 2, 5),
       position: 'relative',
-      fontFamily: 'Georgia, serif',
-      padding: theme.spacing(3, 3, 3, 8),
-      borderRadius: Number(theme.shape.borderRadius) * 2,
+      fontStyle: 'italic',
+      color: theme.palette.text.secondary,
       backgroundColor: theme.palette.background.neutral,
-      color: `${theme.palette.text.secondary} !important`,
-      [theme.breakpoints.up('md')]: {
-        width: '80%',
-      },
-      '& p, & span': {
-        marginBottom: '0 !important',
-        fontSize: 'inherit !important',
-        fontFamily: 'Georgia, serif !important',
-        color: `${theme.palette.text.secondary} !important`,
-      },
+      borderRadius: theme.shape.borderRadius,
+      borderLeft: `4px solid ${theme.palette.divider}`,
       '&:before': {
-        left: 16,
-        top: -8,
-        display: 'block',
+        left: 10,
+        top: -10,
+        opacity: 0.5,
         fontSize: '3em',
         content: '"\\201C"',
         position: 'absolute',
         color: theme.palette.text.disabled,
       },
     },
-
-    '& pre, & pre > code': {
-      fontSize: 16,
-      overflowX: 'auto',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-all',
-      padding: theme.spacing(2),
-      color: theme.palette.common.white,
-      borderRadius: theme.shape.borderRadius,
-      backgroundColor: isLight ? theme.palette.grey[900] : theme.palette.grey['500_16'],
-    },
     '& code': {
-      fontSize: 14,
       borderRadius: 4,
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-all',
-      padding: theme.spacing(0.2, 0.5),
+      fontSize: '0.85em',
+      padding: '2px 4px',
       color: theme.palette.warning[isLight ? 'darker' : 'lighter'],
       backgroundColor: theme.palette.warning[isLight ? 'lighter' : 'darker'],
-      '&.hljs': { padding: 0, backgroundColor: 'transparent' },
+    },
+    '& pre': {
+      padding: theme.spacing(2),
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: theme.palette.grey[isLight ? 900 : 800],
+      '& code': { padding: 0, color: theme.palette.common.white, backgroundColor: 'transparent' },
     },
   };
 });
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Markdown({ ...other }) {
-  return (
-    <MarkdownStyle>
-      <ReactMarkdown rehypePlugins={[rehypeRaw]} components={components} {...other} />
-    </MarkdownStyle>
-  );
-}
+const createComponents = (variant, caption) => ({
+  h1: (props) => <Typography variant={caption ? 'caption' : 'h1'} gutterBottom {...cleanProps(props)} />,
+  h2: (props) => <Typography variant={caption ? 'caption' : 'h2'} gutterBottom {...cleanProps(props)} />,
+  h3: (props) => <Typography variant={caption ? 'caption' : 'h3'} gutterBottom {...cleanProps(props)} />,
+  h4: (props) => <Typography variant={caption ? 'caption' : 'h4'} gutterBottom {...cleanProps(props)} />,
+  h5: (props) => <Typography variant={caption ? 'caption' : 'h5'} gutterBottom {...cleanProps(props)} />,
+  h6: (props) => <Typography variant={caption ? 'caption' : 'h6'} gutterBottom {...cleanProps(props)} />,
+  hr: (props) => <Divider sx={{ my: 3 }} {...cleanProps(props)} />,
 
-export function MarkdownCaption({ children }) {
-  return (
-    <MarkdownStyle>
-      <ReactMarkdown
-        rehypePlugins={[rehypeRaw]}
-        components={{
-          p: ({ ...props }) => <Typography variant="caption" {...props} />,
-          h1: ({ ...props }) => <Typography variant="caption" {...props} />,
-          h2: ({ ...props }) => <Typography variant="caption" {...props} />,
-          h3: ({ ...props }) => <Typography variant="caption" {...props} />,
-          li: ({ ...props }) => <Typography component="li" variant="caption" {...props} />,
-          span: ({ ...props }) => <Typography component="span" variant="caption" {...props} />,
+  img: (props) => <Image alt={props.alt} ratio="16/9" sx={{ borderRadius: 2, my: 3 }} {...cleanProps(props)} />,
+  a: (props) => (
+    <Link target={props.href?.includes('http') ? '_blank' : '_self'} rel="noopener" {...cleanProps(props)} />
+  ),
+
+  p: (props) => {
+    const { children } = props;
+    const isEmpty = React.Children.count(children) === 0 || (typeof children === 'string' && children.trim() === '');
+
+    if (isEmpty && !caption) return <Box sx={{ height: 20 }} />;
+
+    return (
+      <Typography variant={caption ? 'caption' : variant} component="p" {...cleanProps(props)}>
+        {children}
+      </Typography>
+    );
+  },
+
+  li: (p) => {
+    const { node, className, children } = p;
+    const indentMatch = className?.match(/ql-indent-(\d+)/);
+    const indentLevel = indentMatch ? parseInt(indentMatch[1], 10) : 0;
+    const isBullet = node?.properties?.['data-list'] === 'bullet';
+
+    return (
+      <Box
+        component="li"
+        className={className}
+        sx={{
+          ml: indentLevel * 3,
+          listStyleType: isBullet ? 'disc' : undefined,
+          ...(theme) => theme.typography[caption ? 'caption' : variant],
+          '& .MuiTypography-root': { display: 'inline', fontSize: 'inherit' },
         }}
+        {...cleanProps(p)}
       >
         {children}
+      </Box>
+    );
+  },
+});
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export default function Markdown({ caption = false, variant = 'body1', children, ...other }) {
+  const components = useMemo(() => createComponents(variant, caption), [variant, caption]);
+
+  const content = useMemo(() => {
+    if (typeof children !== 'string') return children;
+
+    return children
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\u00a0/g, ' ')
+      .replace(/\s+/g, ' ');
+  }, [children]);
+
+  return (
+    <MarkdownStyle>
+      <ReactMarkdown rehypePlugins={[rehypeRaw]} components={components} {...other}>
+        {content}
       </ReactMarkdown>
     </MarkdownStyle>
   );
 }
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-const components = {
-  h1: ({ ...props }) => <Typography variant="h1" {...props} />,
-  h2: ({ ...props }) => <Typography variant="h2" {...props} />,
-  h3: ({ ...props }) => <Typography variant="h3" {...props} />,
-  h4: ({ ...props }) => <Typography variant="h4" {...props} />,
-  h5: ({ ...props }) => <Typography variant="h5" {...props} />,
-  h6: ({ ...props }) => <Typography variant="h6" {...props} />,
-  hr: ({ ...props }) => <Divider sx={{ my: 3 }} {...props} />,
-  img: ({ ...props }) => <Image alt={props.alt} ratio="16/9" sx={{ borderRadius: 2, my: 5 }} {...props} />,
-  a: ({ ...props }) =>
-    props.href?.includes('http') ? <Link target="_blank" rel="noopener" {...props} /> : <Link {...props} />,
-
-  p: ({ ...props }) => {
-    if (props.style) return <p {...props} />;
-    return <Typography variant="body1" {...props} />;
-  },
-
-  li: ({ node, className, style, ...props }) => {
-    let indent = 0;
-    if (className?.includes('ql-indent-1')) indent = 1;
-    else if (className?.includes('ql-indent-2')) indent = 2;
-    else if (className?.includes('ql-indent-3')) indent = 3;
-    else if (className?.includes('ql-indent-4')) indent = 4;
-    else if (className?.includes('ql-indent-5')) indent = 5;
-
-    const isBullet = node?.properties?.['data-list'] === 'bullet';
-
-    return (
-      <li
-        style={{ marginLeft: indent * 24, lineHeight: 2, listStyleType: isBullet ? 'disc' : undefined, ...style }}
-        className={className}
-        {...props}
-      />
-    );
-  },
-};

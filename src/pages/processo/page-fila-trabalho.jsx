@@ -13,27 +13,27 @@ import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fNumber } from '../../utils/formatNumber';
-import { colorLabel } from '../../utils/getColorPresets';
-import { pertencoAoEstado } from '../../utils/validarAcesso';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import { fNumber } from '@/utils/formatNumber';
+import { colorLabel } from '@/utils/getColorPresets';
+import { pertencoAoEstado } from '@/utils/validarAcesso';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // hooks
-import useToggle from '../../hooks/useToggle';
-import useSettings from '../../hooks/useSettings';
+import useToggle from '@/hooks/useToggle';
+import useSettings from '@/hooks/useSettings';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { meusFluxos } from '../../redux/slices/parametrizacao';
-import { getIndicadores } from '../../redux/slices/indicadores';
-import { getInfoInicial, getSuccess } from '../../redux/slices/intranet';
+import { useDispatch, useSelector } from '@/redux/store';
+import { meusFluxos } from '@/redux/slices/parametrizacao';
+import { getIndicadores } from '@/redux/slices/indicadores';
+import { getInfoInicial, getSuccess } from '@/redux/slices/intranet';
 // components
-import Page from '../../components/Page';
-import Label from '../../components/Label';
-import { TabsWrapperStyle } from '../../components/Panel';
-import { DefaultAction } from '../../components/Actions';
-import { DialogTitleAlt } from '../../components/CustomDialog';
+import Page from '@/components/Page';
+import Label from '@/components/Label';
+import { TabsWrapperStyle } from '@/components/Panel';
+import { DefaultAction } from '@/components/Actions';
+import { DialogTitleAlt } from '@/components/CustomDialog';
 // sections
-import TableProcessos from '../../sections/tabela/table-processos';
-import ProcessoForm from '../../sections/processo/form/form-processo';
+import TableProcessos from '@/sections/tabela/table-processos';
+import ProcessoForm from '@/sections/processo/form/form-processo';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -41,13 +41,14 @@ export default function PageFilaTrabalho() {
   const dispatch = useDispatch();
   const { themeStretch } = useSettings();
   const { toggle: open, onOpen, onClose } = useToggle();
+
   const { totalP } = useSelector((state) => state.indicadores);
-  const { cc, dateUpdate } = useSelector((state) => state.intranet);
   const { isOpenModal } = useSelector((state) => state.digitaldocs);
+  const { cc, dateUpdate, loadingConf } = useSelector((state) => state.intranet);
   const { meusAmbientes, meuAmbiente } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
-    if (cc?.id && add(new Date(dateUpdate), { minutes: 10 }) < new Date()) dispatch(getInfoInicial(cc?.id, false));
+    if (cc?.id && add(new Date(dateUpdate), { minutes: 30 }) < new Date()) dispatch(getInfoInicial(cc?.id, false));
   }, [dispatch, cc?.id, dateUpdate]);
 
   const tabsList = useMemo(() => {
@@ -76,11 +77,8 @@ export default function PageFilaTrabalho() {
     return baseTabs;
   }, [totalP, meusAmbientes]);
 
-  // const storedTab = localStorage.getItem('tabProcessos');
-  // const defaultTab = tabs.map((tab) => tab.value).includes(storedTab) ? storedTab : tabs[0]?.value || 'Tarefas';
   const [tab, setTab] = useTabsSync(tabsList, 'Tarefas', 'tab-fila-trabalho');
-
-  const refreshDados = () => dispatch(getSuccess({ item: 'dateUpdate', dados: sub(new Date(), { minutes: 10 }) }));
+  const onRefresh = () => dispatch(getSuccess({ item: 'dateUpdate', dados: sub(new Date(), { minutes: 30 }) }));
 
   return (
     <Page title="Fila de trabalho | DigitalDocs">
@@ -99,9 +97,7 @@ export default function PageFilaTrabalho() {
                 <DefaultAction small color="inherit" variant="outlined" label="Nº PROCESSOS" onClick={onOpen} />
               )}
             </Stack>
-            {cc && (
-              <DefaultAction small color="inherit" variant="outlined" label="ATAULIZAR DADOS" onClick={refreshDados} />
-            )}
+            {cc && <DefaultAction small color="inherit" label="ATAULIZAR" onClick={onRefresh} loading={loadingConf} />}
           </Stack>
 
           <TabsWrapperStyle>

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Lightbox from 'yet-another-react-lightbox';
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -12,14 +11,15 @@ import LinkIcon from '@mui/icons-material/Link';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { useSelector } from '../../redux/store';
-import { ptDate, normalizeData } from '../../utils/formatTime';
+import { useSelector } from '@/redux/store';
+import { ptDate, normalizeData } from '@/utils/formatTime';
 // components
-import Image from '../../components/Image';
-import GridItem from '../../components/GridItem';
-import { Loading } from '../../components/LoadingScreen';
-import { DialogTitleAlt } from '../../components/CustomDialog';
-import { ConsultarDocForm } from '../../sections/home/HomeForm';
+import Image from '@/components/Image';
+import GridItem from '@/components/GridItem';
+import { Loading } from '@/components/LoadingScreen';
+import ImageLightbox from '@/components/image-lightbox';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { ConsultarDocForm } from '@/sections/home/HomeForm';
 
 // ---------------------------------------------------------
 
@@ -241,7 +241,7 @@ function ImagemSecao({ docPdex }) {
         </Stack>
         {assinatura && <Imagem image={assinatura} setImage={setImage} doc="ass" />}
       </Stack>
-      <Lightbox index={0} open={!!image} close={() => setImage('')} slides={[{ src: image }]} />
+      {!!image && <ImageLightbox onClose={() => setImage('')} slides={[{ src: image }]} />}
     </>
   ) : null;
 }

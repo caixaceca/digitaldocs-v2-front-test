@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { View, Text } from '@react-pdf/renderer';
 // utils
 import { movimentosConta } from '../calculos';
-import { fNumber, fCurrency } from '../../../../../utils/formatNumber';
+import { fNumber, fCurrency } from '@/utils/formatNumber';
 // components
-import { styles } from '../../../../../components/exportar-dados/pdf';
+import { styles } from '@/components/exportar-dados/pdf';
 import { TotaisConta, RowMovimento, ItemValue, MoedaColumn, EmptyRow } from './pdf-fragments';
 
 // ---------------------------------------------------------------------------------------------------------------------

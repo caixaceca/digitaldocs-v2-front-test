@@ -4,11 +4,11 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // hooks
-import useAnexos from '../../../../hooks/useAnexos';
+import useAnexos from '@/hooks/useAnexos';
 // components
 import AnexosExistente from './anexos-existente';
+import { RHFUploadMultiFile } from '@/components/hook-form';
 import FormDocumentosChecklist from './form-documento-checklist';
-import { RHFUploadMultiFile } from '../../../../components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

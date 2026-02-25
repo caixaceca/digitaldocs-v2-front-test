@@ -3,6 +3,7 @@ export {
   FinalizarNeForm,
   FinalizarOpeForm,
   EliminarReativar,
+  AplicarBancaForm,
   ColocarPendenteForm,
   ConfidencialidadesForm,
 } from './intervencao-processo';

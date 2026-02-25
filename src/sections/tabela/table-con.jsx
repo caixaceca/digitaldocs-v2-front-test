@@ -10,25 +10,23 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fCurrency } from '../../utils/formatNumber';
-import { normalizeText, baralharString } from '../../utils/formatText';
-import { ptDate, ptDateTime, getDataLS, dataValido, dataLabel } from '../../utils/formatTime';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-// hooks
-import useTable, { getComparator, applySort } from '../../hooks/useTable';
+import { fCurrency } from '@/utils/formatNumber';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { normalizeText } from '@/utils/formatText';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
+import { ptDate, ptDateTime, getDataLS, dataValido, dataLabel } from '@/utils/formatTime';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getListaProcessos } from '../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getListaProcessos } from '@/redux/slices/digitaldocs';
 // Components
-import { RHFDateIF } from '../../components/hook-form';
-import { SkeletonTable } from '../../components/skeleton';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { CellChecked, Criado, noDados } from '../../components/Panel';
-import { DefaultAction, MaisProcessos } from '../../components/Actions';
-import { ExportarDadosControle } from '../../components/exportar-dados/excel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import { RHFDateIF } from '@/components/hook-form';
+import { SkeletonTable } from '@/components/skeleton';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { CellChecked, Criado, noDados } from '@/components/Panel';
+import { DefaultAction, MaisProcessos } from '@/components/Actions';
+import { ExportarDadosControle } from '@/components/exportar-dados/excel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -140,12 +138,12 @@ export default function TableCON({ item = 'con' }) {
                     {(item === 'pjf' && (
                       <>
                         <TableCell>{row?.referencia}</TableCell>
-                        <TableCell>{row?.titular ? baralharString(row?.titular) : noDados()}</TableCell>
+                        <TableCell>{row?.titular ? row?.titular : noDados()}</TableCell>
                         <TableCell>{row?.origem || noDados()}</TableCell>
                         <TableCell>
                           {!row?.doc_1 && !row?.doc_2 && noDados()}
-                          {row?.doc_1 && <Criado value={row.doc_1} baralhar />}
-                          {row?.doc_2 && <Criado value={row.doc_2} baralhar />}
+                          {row?.doc_1 && <Criado value={row.doc_1} />}
+                          {row?.doc_2 && <Criado value={row.doc_2} />}
                         </TableCell>
                         <TableCell>
                           {!row?.operacao && !row?.valor && noDados()}
@@ -159,9 +157,9 @@ export default function TableCON({ item = 'con' }) {
                       </>
                     )) || (
                       <>
-                        <TableCell>{baralharString(row?.nome_cliente)}</TableCell>
+                        <TableCell>{row?.nome_cliente}</TableCell>
                         <CellChecked check={row.titular_ordenador} />
-                        <TableCell align="right">{baralharString(row?.conta_processo)}</TableCell>
+                        <TableCell align="right">{row?.conta_processo}</TableCell>
                         <TableCell align="right">{row?.valor ? fCurrency(row?.valor) : noDados()}</TableCell>
                         <TableCell align="right">{row?.cdg_operacao || noDados()}</TableCell>
                         <TableCell align="center">{ptDate(row?.data_entrada) || noDados()}</TableCell>

@@ -4,12 +4,11 @@ import AppBar from '@mui/material/AppBar';
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
-// redux
-import { useSelector } from '../../redux/store';
-// config
-import { HEADER } from '../../config';
+// utils
+import { HEADER } from '@/config';
+import { useSelector } from '@/redux/store';
 // components
-import { NavSectionHorizontal } from '../../components/nav-section';
+import { NavSectionHorizontal } from '@/components/nav-section';
 //
 import NavConfig from './NavConfig';
 import Aplicacoes from './Aplicacoes';

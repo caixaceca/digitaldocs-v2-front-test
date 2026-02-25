@@ -2,46 +2,46 @@ import { useMemo } from 'react';
 import Html from 'react-pdf-html';
 import { Document, Page, View, Text } from '@react-pdf/renderer';
 // utils
+import { ptDate } from '@/utils/formatTime';
+import { pdfInfo } from '@/utils/formatText';
 import { extractClientes } from '../calculos';
 import { situacaoProfissionalRows } from '../utils';
-import { ptDate } from '../../../../../utils/formatTime';
-import { pdfInfo } from '../../../../../utils/formatText';
-import { fCurrency, fPercent } from '../../../../../utils/formatNumber';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
+import { processHtmlForPdf } from '@/components/editor/normalizeEditorText';
+import { styles, CabecalhoFicha, RodapeFicha } from '@/components/exportar-dados/pdf';
+//
 import Identificacao from './identificacao';
 import Financiamento from './financiamento';
 import ResumoMovimentos from './resumo-movimentos';
 import Responsabilidades from './responsabilidades';
 import { RowFicha, RowCR, ItemValue, TitleFicha, NadaConsta } from './pdf-fragments';
-import { styles, CabecalhoFicha, RodapeFicha } from '../../../../../components/exportar-dados/pdf';
-import { inlineStylesFromClasses } from '../../../../../components/exportar-dados/pdf/htmlInlineizer';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function FichaPdf({ dados }) {
+  const {
+    saldos,
+    titulos,
+    dividas,
+    clientes,
+    restruturacoes,
+    irregularidades,
+    totalSaldoPorMoeda,
+    garantiasPrestadas,
+    garantiasRecebidas,
+  } = useMemo(() => extractClientes(dados?.clientes || []), [dados?.clientes]);
   const { dividas_externas: dividasExternas = [], avales_externas: avalesExternos = [] } = dados || {};
   const { rendimento = null, parecer = '', credito = null, proposta = null, valorPrestacao = 0 } = dados || {};
   const { numero, analista, uo, fiancas, entidade, mensagens, central_risco: cr, movimentos = [] } = dados || {};
 
   const parecerInline = useMemo(() => {
     try {
-      return inlineStylesFromClasses(parecer);
+      return processHtmlForPdf(parecer);
     } catch {
       return parecer;
     }
   }, [parecer]);
-
-  const {
-    saldos,
-    titulos,
-    dividas,
-    restruturacoes,
-    irregularidades,
-    totalSaldoPorMoeda,
-    garantiasPrestadas,
-    garantiasRecebidas,
-    clientes: clientesList,
-  } = useMemo(() => extractClientes(dados?.clientes || []), [dados?.clientes]);
 
   const renderSection = (title, wrap, success, items, columns, renderItem) => {
     const temRegistos = items && Array.isArray(items) && items?.length > 0;
@@ -101,7 +101,7 @@ export default function FichaPdf({ dados }) {
       <Page size="A4" style={[styles.page, styles.pageFicha, { color: '#444' }]}>
         <CabecalhoFicha title="Ficha de Análise e Parecer de Crédito" codificacao="CCRD.FM.U.060.00 | 11-08-2025" />
         <View style={[styles.bodyFicha]}>
-          <Identificacao numero={numero} entidade={entidade} clientes={clientesList} renderSection={renderSection} />
+          <Identificacao numero={numero} entidade={entidade} clientes={clientes} renderSection={renderSection} />
 
           <ResumoMovimentos
             saldos={saldos}
@@ -236,10 +236,7 @@ export default function FichaPdf({ dados }) {
                 )}
                 <RowFicha small title="Valor da prestação" value={fCurrency(valorPrestacao)} />
                 <RowFicha small title="Comissões" value={proposta?.comissoes} />
-                <RowFicha small title="Garantias" value={credito?.garantia} options={{ final: !proposta?.outros }} />
-                {proposta?.outros && (
-                  <RowFicha small title="Outros" value={proposta?.observacao} options={{ final: true }} />
-                )}
+                <RowFicha small title="Garantias" value={credito?.garantia} options={{ final: true }} />
               </>
             ) : (
               <NadaConsta />

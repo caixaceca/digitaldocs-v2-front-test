@@ -1,13 +1,13 @@
 // @mui
 import Dialog from '@mui/material/Dialog';
 import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import { useSelector } from '../../../redux/store';
+import { useSelector } from '@/redux/store';
 // components
-import { newLineText } from '../../../components/Panel';
-import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -26,7 +26,9 @@ export default function DetalhesPrompt({ onClose }) {
             {!selectedItem ? (
               <SearchNotFoundSmall message="Item não disponível..." />
             ) : (
-              <>{newLineText(selectedItem?.prompt)}</>
+              <Typography variant="body2" sx={{ textAlign: 'justify', whiteSpace: 'pre-line' }}>
+                {selectedItem?.prompt}
+              </Typography>
             )}
           </>
         )}

@@ -5,8 +5,8 @@ import Typography from '@mui/material/Typography';
 import { styled, alpha } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 // utils
-import { fData } from '../../utils/formatNumber';
-import { getFileThumb } from '../../utils/formatFile';
+import { fData } from '@/utils/formatNumber';
+import { getFileThumb } from '@/utils/formatFile';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

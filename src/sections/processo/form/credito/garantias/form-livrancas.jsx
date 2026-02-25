@@ -7,10 +7,10 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 // components
-import GridItem from '../../../../../components/GridItem';
-import { SemDados } from '../../../../../components/Panel';
-import { RHFTextField } from '../../../../../components/hook-form';
-import { AddItem, DeleteBox } from '../../../../../components/Actions';
+import GridItem from '@/components/GridItem';
+import { SemDados } from '@/components/Panel';
+import { RHFTextField } from '@/components/hook-form';
+import { AddItem, DeleteBox } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

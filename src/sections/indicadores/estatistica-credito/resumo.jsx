@@ -17,14 +17,14 @@ import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import AssignmentReturnedOutlinedIcon from '@mui/icons-material/AssignmentReturnedOutlined';
 // utils
 import { categorias } from './table-situacao';
-import { useSelector } from '../../../redux/store';
-import { bgGradient } from '../../../utils/cssStyles';
-import { fCurrency, fConto, fNumber } from '../../../utils/formatNumber';
+import { useSelector } from '@/redux/store';
+import { bgGradient } from '@/utils/cssStyles';
+import { fCurrency, fConto, fNumber } from '@/utils/formatNumber';
 // components
+import { BoxMask } from '@/components/Panel';
+import GridItem from '@/components/GridItem';
+import { BarChart } from '@/components/skeleton';
 import NaoClassificados from './nao-classificados';
-import { BoxMask } from '../../../components/Panel';
-import GridItem from '../../../components/GridItem';
-import { BarChart } from '../../../components/skeleton';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

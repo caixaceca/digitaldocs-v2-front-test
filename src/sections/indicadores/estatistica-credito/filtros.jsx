@@ -5,14 +5,14 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { setItemValue } from '../../../utils/formatObject';
-import { dataLabel, getDataLS, dataValido, formatDate, setDataUtil, ultimoDiaDoMes } from '../../../utils/formatTime';
+import { setItemValue } from '@/utils/formatObject';
+import { dataLabel, getDataLS, dataValido, formatDate, setDataUtil, ultimoDiaDoMes } from '@/utils/formatTime';
 // redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getEstatisticaCredito, setMoeda } from '../../../redux/slices/indicadores';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getEstatisticaCredito, setMoeda } from '@/redux/slices/indicadores';
 // components
-import { RHFDateIF } from '../../../components/hook-form';
-import ExportarEstatisticaCredito from '../../../components/exportar-dados/excel/estatistica-credito';
+import { RHFDateIF } from '@/components/hook-form';
+import ExportarEstatisticaCredito from '@/components/exportar-dados/excel/estatistica-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -14,14 +14,14 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 // utils
-import { ptDateTime } from '../../../utils/formatTime';
-import useResponsive from '../../../hooks/useResponsive';
-import { colorLabel } from '../../../utils/getColorPresets';
-import { applySort, getComparator } from '../../../hooks/useTable';
+import { ptDateTime } from '@/utils/formatTime';
+import useResponsive from '@/hooks/useResponsive';
+import { colorLabel } from '@/utils/getColorPresets';
+import { applySort, getComparator } from '@/hooks/useTable';
 import { getActionLabel, getStatusLabel, useColaborador } from '../utils';
 // components
-import Label from '../../../components/Label';
-import { Criado } from '../../../components/Panel';
+import Label from '@/components/Label';
+import { Criado } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

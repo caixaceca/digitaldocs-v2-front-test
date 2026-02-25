@@ -3,20 +3,20 @@ import { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import useSettings from '../../hooks/useSettings';
-import { useNotificacao } from '../../hooks/useNotificacao';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import useSettings from '@/hooks/useSettings';
+import { useNotificacao } from '@/hooks/useNotificacao';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { closeModal } from '../../redux/slices/parametrizacao';
+import { useSelector, useDispatch } from '@/redux/store';
+import { closeModal } from '@/redux/slices/parametrizacao';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
 // sections
-import Acessos from '../../sections/parametrizacao/Acessos';
-import TabParametrizacao from '../../sections/parametrizacao/TabParametrizacao';
+import Acessos from '@/sections/parametrizacao/Acessos';
+import TabParametrizacao from '@/sections/parametrizacao/TabParametrizacao';
 // guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

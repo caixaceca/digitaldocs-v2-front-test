@@ -8,12 +8,12 @@ import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { shapeNumberZero } from '@/components/hook-form/yup-shape';
 import { listaProdutos, listaTitrulares } from '../applySortFilter';
-import { shapeNumberZero } from '../../../components/hook-form/yup-shape';
 // redux
-import { createItem } from '../../../redux/slices/gaji9';
-import { useSelector, useDispatch } from '../../../redux/store';
-import { updateDados, resetDados } from '../../../redux/slices/stepper';
+import { createItem } from '@/redux/slices/gaji9';
+import { useSelector, useDispatch } from '@/redux/store';
+import { updateDados, resetDados } from '@/redux/slices/stepper';
 // components
 import {
   FormProvider,
@@ -21,11 +21,11 @@ import {
   RHFNumberField,
   RHFAutocompleteObj,
   RHFAutocompleteSmp,
-} from '../../../components/hook-form';
-import Steps from '../../../components/Steps';
+} from '@/components/hook-form';
+import Steps from '@/components/Steps';
 import { SearchVariavel } from './form-clausula';
-import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { AddItem, DefaultAction, DialogButons, ButtonsStepper } from '../../../components/Actions';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { AddItem, DefaultAction, DialogButons, ButtonsStepper } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

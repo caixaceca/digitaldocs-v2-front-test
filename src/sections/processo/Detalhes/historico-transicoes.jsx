@@ -7,13 +7,11 @@ import DoubleArrowIcon from '@mui/icons-material/DoubleArrow';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 // utils
-import { ptDateTime, fDistance } from '../../../utils/formatTime';
-// redux
-import { useSelector } from '../../../redux/store';
+import { useSelector } from '@/redux/store';
+import { ptDateTime, fDistance } from '@/utils/formatTime';
 // components
-import Label from '../../../components/Label';
-import { Criado } from '../../../components/Panel';
-//
+import Label from '@/components/Label';
+import { Criado } from '@/components/Panel';
 import { Info, InfoCriador } from './estados-processo';
 
 // ---------------------------------------------------------------------------------------------------------------------

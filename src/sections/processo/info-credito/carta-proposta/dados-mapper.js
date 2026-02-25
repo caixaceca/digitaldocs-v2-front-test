@@ -10,32 +10,20 @@ function mapCondicoes(modelo) {
   const credito = modelo?.credito ?? {};
   const meta = credito?.gaji9_metadados ?? {};
 
-  // Extração Elaborada de Fiadores
-  const fiadores =
-    credito?.garantias
-      ?.filter((g) => g.tipo_garantia?.toUpperCase().includes('FIANÇA') || g.metadados?.fiadores)
-      .flatMap(
-        (g) =>
-          g?.metadados?.fiadores?.map((f) => ({
-            nome: f?.nome_entidade || '---',
-            nif: f?.nif || '---',
-            estadoCivil: f?.estado_civil || '---',
-          })) ?? []
-      ) ?? [];
-
   return {
-    tan: meta?.taxa_tan,
-    taeg: meta?.taxa_taeg,
+    tan: meta?.taxa_tan || 0,
+    taeg: meta?.taxa_taeg || 0,
     agencia: modelo?.uo?.nome || 'Agência',
     taxa_mora: meta?.taxa_juro_mora || '2',
-    nome_proponente: modelo?.titular,
+    nome_proponente: modelo?.titular || '---',
     data_entrada: modelo?.data_entrada,
-    montante: credito?.montante_aprovado || credito?.montante_solicitado,
-    meses_vencimento: meta?.meses_vencimento,
-    valor_prestacao: meta?.valor_prestacao,
-    prazo_amortizacao: credito?.prazo_amortizacao,
+    montante: credito?.montante_aprovado || credito?.montante_solicitado || 0,
+    meses_vencimento: meta?.meses_vencimento || 0,
+    valor_prestacao: meta?.valor_prestacao || 0,
+    prazo_amortizacao: credito?.prazo_amortizacao || '---',
     prazo_entrega_contrato: 15,
-    fiadores,
+    garantias_brutas: credito?.garantias || [],
+    fiadores: extrairFiadoresSimples(credito?.garantias),
   };
 }
 
@@ -55,9 +43,20 @@ function mapEncargos(modelo) {
 }
 
 function mapObrigacoes(modelo) {
+  const credito = modelo?.credito ?? {};
+  const meta = credito?.gaji9_metadados ?? {};
+
+  const temSeguroGeral = credito?.seguros?.length > 0;
+  const temSeguroGarantia = credito?.garantias?.some((g) => g.metadados?.seguros?.length > 0);
+
   return {
-    prazo_entrega_contrato: modelo?.credito?.gaji9_metadados?.prazo_utilizacao || 15,
-    tem_seguro: modelo?.credito?.seguros?.length > 0,
-    descricao_seguro: modelo?.credito?.seguros?.[0]?.tipo_seguro || 'Não aplicável',
+    prazo_entrega_contrato: meta?.prazo_utilizacao || 15,
+    tem_seguro: temSeguroGeral || temSeguroGarantia,
+    descricao_seguro: credito?.seguros?.[0]?.tipo_seguro || 'Seguro de Vida / Multiriscos',
   };
+}
+
+function extrairFiadoresSimples(garantias) {
+  if (!garantias) return [];
+  return garantias.flatMap((g) => g.metadados?.fiadores || []).map((f) => ({ nome: f?.nome_entidade || '---' }));
 }

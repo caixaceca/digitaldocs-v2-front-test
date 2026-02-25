@@ -51,6 +51,7 @@ import {
 import { Icon } from '../assets/icons';
 import SvgIconStyle from './SvgIconStyle';
 import { DialogConfirmar } from './CustomDialog';
+import { ApllyIcon } from '@/theme/overrides/CustomIcons';
 
 const wh = { width: 38, height: 38 };
 const whsmall = { width: 30, height: 30 };
@@ -75,12 +76,14 @@ export function DefaultAction({
   label = '',
   small = false,
   button = false,
+  loading = false,
   variant = 'soft',
   color = 'success',
   ...others
 }) {
   const colorAlt =
-    ((label === 'EDITAR' ||
+    ((icon === 'editar' ||
+      label === 'EDITAR' ||
       label === 'Editar' ||
       label === 'Estado' ||
       label === 'REATIVAR' ||
@@ -107,10 +110,11 @@ export function DefaultAction({
     (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
     (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
     (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||
+    (label === 'ATAULIZAR' && <RefreshIcon sx={{ width: 22, height: 22 }} />) ||
     (label === 'CONFIRMAR' && <DoneAllIcon sx={{ color: 'common.white' }} />) ||
     (label === 'ACEITAR' && <LockPersonIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'ADICIONAR ANEXO' && <AddAnexo sx={{ width: small ? 18 : 22 }} />) ||
-    (label === 'ATAULIZAR DADOS' && <RefreshIcon sx={{ width: 22, height: 22 }} />) ||
+    (label === 'APLICAR NA BANCA' && <ApllyIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'Esconder detalhes' && <RemoveIcon sx={{ width: small ? 18 : 22 }} />) ||
     (icon === 'loading' && <CircularProgress size={small ? 18 : 24} color="inherit" />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
@@ -156,6 +160,7 @@ export function DefaultAction({
         color={colorAlt}
         variant={variant}
         onClick={onClick}
+        loading={loading}
         startIcon={iconAlt}
         size={small ? 'small' : 'medium'}
         sx={{ color: variant === 'contained' && color === 'success' && 'common.white' }}
@@ -172,11 +177,11 @@ export function DefaultAction({
           size="small"
           color={colorAlt}
           variant={variant}
-          onClick={onClick}
+          onClick={loading ? null : onClick}
           sx={{ ...(small ? whsmall : wh), boxShadow: icon === 'Remover' && 'none' }}
           {...others}
         >
-          {iconAlt}
+          {loading ? <CircularProgress size={small ? 18 : 24} color="inherit" /> : iconAlt}
         </Fab>
       </Tooltip>
     </Stack>

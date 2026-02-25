@@ -12,27 +12,26 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { contaCliEnt } from '../../utils/formatText';
-import { ColaboradoresAcesso, UosAcesso } from '../../utils/validarAcesso';
-import { ptDateTime, getDataLS, dataValido, fToNow, fYear, dataLabel } from '../../utils/formatTime';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-// hooks
-import useTable, { getComparator } from '../../hooks/useTable';
+import { contaCliEnt } from '@/utils/formatText';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import useTable, { getComparator } from '@/hooks/useTable';
+import { ColaboradoresAcesso, UosAcesso } from '@/utils/validarAcesso';
+import { ptDateTime, getDataLS, dataValido, fToNow, fYear, dataLabel } from '@/utils/formatTime';
+
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromDigitalDocs } from '../../redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromDigitalDocs } from '@/redux/slices/digitaldocs';
 // Components
-import Label from '../../components/Label';
-import Scrollbar from '../../components/Scrollbar';
-import ItemAnalytic from '../../components/ItemAnalytic';
-import { DefaultAction } from '../../components/Actions';
-import { SkeletonTable } from '../../components/skeleton';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { Criado, noDados, newLineText } from '../../components/Panel';
-import { SearchToolbarEntradas } from '../../components/SearchToolbar';
-import { ExportarDadosControle } from '../../components/exportar-dados/excel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Label from '@/components/Label';
+import Scrollbar from '@/components/Scrollbar';
+import ItemAnalytic from '@/components/ItemAnalytic';
+import { DefaultAction } from '@/components/Actions';
+import { Criado, noDados } from '@/components/Panel';
+import { SkeletonTable } from '@/components/skeleton';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarEntradas } from '@/components/SearchToolbar';
+import { ExportarDadosControle } from '@/components/exportar-dados/excel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import { UoData } from './uo-data-filter';
 import applySortFilter, { dadosList } from './applySortFilter';
@@ -225,9 +224,12 @@ export default function TableControle({ from }) {
                             {row?.observacao && (
                               <Typography
                                 variant="body2"
-                                sx={row?.motivo && { color: 'text.secondary', typography: 'caption' }}
+                                sx={{
+                                  whiteSpace: 'pre-line',
+                                  ...(row?.motivo ? { color: 'text.secondary', typography: 'caption' } : {}),
+                                }}
                               >
-                                {newLineText(row?.observacao)}
+                                {row?.observacao}
                               </Typography>
                             )}
                           </TableCell>
@@ -254,7 +256,6 @@ export default function TableControle({ from }) {
                       <TableCell width={10}>
                         <Criado caption tipo="data" value={ptDateTime(row.criado_em || row?.data_transicao)} />
                         <Criado
-                          baralhar
                           value={row.colaborador}
                           caption={from !== 'Trabalhados'}
                           tipo={from === 'Trabalhados' ? '' : 'user'}

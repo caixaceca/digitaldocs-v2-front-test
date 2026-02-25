@@ -6,13 +6,13 @@ import { Packer, TextRun, Document, Paragraph, AlignmentType } from 'docx';
 import { Stack } from '@mui/material';
 import Divider from '@mui/material/Divider';
 // utils
-import { useSelector } from '../../../../redux/store';
-import { formatDate } from '../../../../utils/formatTime';
-import { fCurrency } from '../../../../utils/formatNumber';
-import { valorPorExtenso } from '../../../../utils/formatText';
+import { useSelector } from '@/redux/store';
+import { formatDate } from '@/utils/formatTime';
+import { fCurrency } from '@/utils/formatNumber';
+import { valorPorExtenso } from '@/utils/formatText';
 //
-import DownloadModeloDoc from '../../../../components/Actions';
-import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
+import DownloadModeloDoc from '@/components/Actions';
+import { CabecalhoWord, RodapeWord, createStyles } from '@/components/exportar-dados/word';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

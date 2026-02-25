@@ -13,13 +13,13 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 // utils
 import { useColaborador } from '../utils';
-import { ptDateTime } from '../../../utils/formatTime';
-import { getFileThumb } from '../../../utils/formatFile';
-import useResponsive from '../../../hooks/useResponsive';
-import { API_SUPORTE_CLIENTE_URL } from '../../../utils/apisUrl';
+import { ptDateTime } from '@/utils/formatTime';
+import { getFileThumb } from '@/utils/formatFile';
+import useResponsive from '@/hooks/useResponsive';
+import { API_SUPORTE_CLIENTE_URL } from '@/utils/apisUrl';
 // components
 import { SemRegisto } from './historico';
-import { newLineText } from '../../../components/Panel';
+import { newLineText } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ function TimelineMessageItem({ message, isLast, isDesktop }) {
               </Typography>
             </Stack>
           )}
-          <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-wrap' }}>
+          <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-line' }}>
             {newLineText(content)}
           </Typography>
 

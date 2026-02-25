@@ -13,33 +13,33 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuIcon from '@mui/icons-material/Menu';
 import { styled, alpha } from '@mui/material/styles';
 // utils
-import cssStyles from '../../utils/cssStyles';
-import { formatDate } from '../../utils/formatTime';
+import cssStyles from '@/utils/cssStyles';
+import { formatDate } from '@/utils/formatTime';
 // redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '@/redux/store';
 // hooks
-import useToggle from '../../hooks/useToggle';
-import useOffSetTop from '../../hooks/useOffSetTop';
-import useResponsive from '../../hooks/useResponsive';
+import useToggle from '@/hooks/useToggle';
+import useOffSetTop from '@/hooks/useOffSetTop';
+import useResponsive from '@/hooks/useResponsive';
 // config
-import { HEADER, NAVBAR } from '../../config';
+import { HEADER, NAVBAR } from '@/config';
 // components
-import Logo from '../../components/Logo';
-import Image from '../../components/Image';
-import SvgIconStyle from '../../components/SvgIconStyle';
-import { IconButtonAnimate } from '../../components/animate';
-import { Id, AjudaIcon, DenunciaIcon, LinksIcon, DefinicoesIcon, NotificacoesIcon } from '../../assets';
+import Logo from '@/components/Logo';
+import Image from '@/components/Image';
+import SvgIconStyle from '@/components/SvgIconStyle';
+import { IconButtonAnimate } from '@/components/animate';
+import { Id, AjudaIcon, DenunciaIcon, LinksIcon, DefinicoesIcon, NotificacoesIcon } from '@/assets';
 //
 import Definicoes from './Definicoes';
 import LinksUteis from './LinksUteis';
 import Notificacoes from './Notificacoes';
 import ProcuraAvancada from './ProcuraAvancada';
-import AjudaDialog from '../../sections/home/Ajuda';
+import AjudaDialog from '@/sections/home/Ajuda';
 import ConsultarDocumento from './ConsultarDocumento';
-import Felicitacoes from '../../sections/home/Felicitacoes';
-import { FormSugestao, DenunciaForm } from '../../sections/home/HomeForm';
+import Felicitacoes from '@/sections/home/Felicitacoes';
+import { FormSugestao, DenunciaForm } from '@/sections/home/HomeForm';
 // guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

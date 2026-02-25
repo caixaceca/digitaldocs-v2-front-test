@@ -4,13 +4,11 @@ import Stack from '@mui/material/Stack';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 // utils
-import { ptDate } from '../../../utils/formatTime';
-import { fCurrency } from '../../../utils/formatNumber';
+import { ptDate } from '@/utils/formatTime';
+import { fCurrency } from '@/utils/formatNumber';
+import { tiposDocumentos, estadosCivis } from '@/_mock';
 // components
 import { TextItem } from './detalhes';
-import { newLineText } from '../../../components/Panel';
-// _mock
-import { tiposDocumentos, estadosCivis } from '../../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -23,8 +21,8 @@ export default function InfoCon({ dados }) {
         </ListItem>
         <TextItem title="Nº da operação:" text={dados?.numero} />
         <TextItem title="Valor:" text={fCurrency(dados?.valor)} />
-        <TextItem title="Origem do fundo:" text={newLineText(dados?.origem_fundo)} />
-        <TextItem title="Finalidade do fundo:" text={newLineText(dados?.finalidade)} />
+        <TextItem title="Origem do fundo:" text={dados?.origem_fundo} />
+        <TextItem title="Finalidade do fundo:" text={dados?.finalidade} />
         <TextItem title="Beneficiário residente:" text={dados?.residente ? 'SIM' : 'NÃO'} />
       </List>
       <List sx={{ width: 1, pt: 0 }}>

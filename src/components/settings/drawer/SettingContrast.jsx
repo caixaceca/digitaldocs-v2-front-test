@@ -4,11 +4,11 @@ import { styled } from '@mui/material/styles';
 import RadioGroup from '@mui/material/RadioGroup';
 import CardActionArea from '@mui/material/CardActionArea';
 // hooks
-import useSettings from '../../../hooks/useSettings';
+import useSettings from '@/hooks/useSettings';
 //
 import BoxMask from './BoxMask';
 import GridItem from '../../GridItem';
-import { Contraste, ContrasteAlt } from '../../../assets';
+import { Contraste, ContrasteAlt } from '@/assets';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

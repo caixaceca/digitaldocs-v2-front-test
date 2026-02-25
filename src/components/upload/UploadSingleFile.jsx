@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 // utils
-import { getFileFormat } from '../../utils/formatFile';
+import { getFileFormat } from '@/utils/formatFile';
 //
 import Image from '../Image';
 import BlockContent from './BlockContent';

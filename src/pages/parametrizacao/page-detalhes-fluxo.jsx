@@ -8,22 +8,20 @@ import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
-import { setItemValue, transicoesList } from '../../utils/formatObject';
+import useSettings from '@/hooks/useSettings';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
+import { setItemValue, transicoesList } from '@/utils/formatObject';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, setModal, deleteItem } from '../../redux/slices/parametrizacao';
-// routes
-import useSettings from '../../hooks/useSettings';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromParametrizacao, setModal, deleteItem } from '@/redux/slices/parametrizacao';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
-import { ActionButton } from '../../components/Actions';
-import { SearchNotFound404 } from '../../components/table';
-import { DialogConfirmar } from '../../components/CustomDialog';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
+import { ActionButton } from '@/components/Actions';
+import { SearchNotFound404 } from '@/components/table';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 // sections
 import {
   FluxoForm,
@@ -31,12 +29,12 @@ import {
   TransicaoForm,
   ClonarFluxoForm,
   NotificacaoForm,
-} from '../../sections/parametrizacao/form-fluxo';
-import TableInfoFluxo from '../../sections/parametrizacao/table-info-fluxo';
-import TableTransicoes from '../../sections/parametrizacao/table-transicoes';
-import { Detalhes, DetalhesContent } from '../../sections/parametrizacao/Detalhes';
+} from '@/sections/parametrizacao/form-fluxo';
+import TableInfoFluxo from '@/sections/parametrizacao/table-info-fluxo';
+import TableTransicoes from '@/sections/parametrizacao/table-transicoes';
+import { Detalhes, DetalhesContent } from '@/sections/parametrizacao/Detalhes';
 // guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

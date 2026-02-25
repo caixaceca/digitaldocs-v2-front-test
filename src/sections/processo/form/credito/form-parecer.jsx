@@ -12,19 +12,13 @@ import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import useAnexos from '../../../../hooks/useAnexos';
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { createItem, updateItem } from '../../../../redux/slices/digitaldocs';
-import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
+import useAnexos from '@/hooks/useAnexos';
+import { useSelector, useDispatch } from '@/redux/store';
+import { createItem, updateItem } from '@/redux/slices/digitaldocs';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // components
-import {
-  FormProvider,
-  RHFTextField,
-  RHFRadioGroup,
-  RHFNumberField,
-  RHFUploadSingleFile,
-} from '../../../../components/hook-form';
-import { DialogButons } from '../../../../components/Actions';
+import { DialogButons } from '@/components/Actions';
+import { FormProvider, RHFTextField, RHFRadioGroup, RHFNumberField, RHFUploadSingleFile } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

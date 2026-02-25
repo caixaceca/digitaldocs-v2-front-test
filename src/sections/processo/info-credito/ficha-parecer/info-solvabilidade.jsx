@@ -4,9 +4,9 @@ import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 // utils
-import Markdown from '../../../../components/Markdown';
-import { fPercent, fCurrency } from '../../../../utils/formatNumber';
-import { normalizeQuillLists } from '../../../../components/exportar-dados/pdf/htmlInlineizer';
+import Markdown from '@/components/Markdown';
+import { fPercent, fCurrency } from '@/utils/formatNumber';
+import { normalizeQuillLists } from '@/components/editor/normalizeEditorText';
 //
 import {
   limiteDsti,
@@ -19,8 +19,8 @@ import {
   dstiAposContratacao,
   dividasConsolidadas,
 } from './calculos';
-import { Cabecalho, rowInfo, EmptyRow } from './dados-ficha';
 import { situacaoProfissionalRows } from './utils';
+import { Cabecalho, rowInfo, EmptyRow } from './dados-ficha';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ export function NovoFinanciamento({ dados }) {
     <TableBody>
       {rowInfo('Capital pretendido', fCurrency(proposta?.montante || credito?.montante_solicitado), false)}
       {rowInfo('Tipo de crédito', credito?.componente, false)}
-      {rowInfo('Taxa do preçario', proposta?.taxa_precario || '', false)}
+      {rowInfo('Taxa do preçário', proposta?.taxa_precario || '', false)}
       {rowInfo(
         'Taxa de juros',
         `${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${

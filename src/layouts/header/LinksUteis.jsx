@@ -9,12 +9,12 @@ import Typography from '@mui/material/Typography';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 //
-import { useSelector } from '../../redux/store';
-import { getIntranetFile } from '../../utils/formatFile';
+import { useSelector } from '@/redux/store';
+import { getIntranetFile } from '@/utils/formatFile';
 // components
 import { IconButtonHeader } from '.';
-import Scrollbar from '../../components/Scrollbar';
-import MenuPopover from '../../components/MenuPopover';
+import Scrollbar from '@/components/Scrollbar';
+import MenuPopover from '@/components/MenuPopover';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

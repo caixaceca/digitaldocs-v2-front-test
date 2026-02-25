@@ -4,12 +4,12 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import useToggle from '../../../hooks/useToggle';
-import { setModal } from '../../../redux/slices/digitaldocs';
-import { useSelector, useDispatch } from '../../../redux/store';
+import useToggle from '@/hooks/useToggle';
+import { setModal } from '@/redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '@/redux/store';
 // components
 import PareceresCredito from './pareceres';
-import { DefaultAction } from '../../../components/Actions';
+import { DefaultAction } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

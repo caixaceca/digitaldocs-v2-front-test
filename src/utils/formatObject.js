@@ -175,3 +175,9 @@ export function contarIdsValidos(ids, dados) {
   const filtrados = dados.filter(({ id }) => ids.includes(id));
   return filtrados.length;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function idCheck(id) {
+  return id === 'b8fa44dd-26df-4b4d-a205-efac2452b9ea';
+}

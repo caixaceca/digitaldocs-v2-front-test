@@ -6,13 +6,13 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material//Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { setItemValue } from '../../../utils/formatObject';
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getInSuporte } from '../../../redux/slices/suporte-cliente';
+import { setItemValue } from '@/utils/formatObject';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getInSuporte } from '@/redux/slices/suporte-cliente';
 // components
-import GridItem from '../../../components/GridItem';
-import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
-import { DashboardTicketSkeleton } from '../../../components/skeleton';
+import GridItem from '@/components/GridItem';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { DashboardTicketSkeleton } from '@/components/skeleton';
 //
 import KPI from './kpi';
 import { Evolucao, PorDepartamento } from './chart-dasboard';

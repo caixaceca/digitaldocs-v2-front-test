@@ -10,17 +10,17 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 // redux
-import { resetDados } from '../../../redux/slices/stepper';
-import { setModal } from '../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getFromParametrizacao, meusFluxos } from '../../../redux/slices/parametrizacao';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { resetDados } from '@/redux/slices/stepper';
+import { setModal } from '@/redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromParametrizacao, meusFluxos } from '@/redux/slices/parametrizacao';
 // routes
-import { PATH_DIGITALDOCS } from '../../../routes/paths';
 // components
-import Steps from '../../../components/Steps';
-import { Fechar } from '../../../components/Actions';
-import { FormLoading } from '../../../components/skeleton';
-import { SearchNotFoundSmall } from '../../../components/table';
+import Steps from '@/components/Steps';
+import { Fechar } from '@/components/Actions';
+import { FormLoading } from '@/components/skeleton';
+import { SearchNotFoundSmall } from '@/components/table';
 // sections
 import ProcessoInterno from './interno';
 import ProcessoCredito from './credito';

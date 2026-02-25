@@ -4,10 +4,10 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // redux
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { getFromIntranet } from '../../../../redux/slices/intranet';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getFromIntranet } from '@/redux/slices/intranet';
 // components
-import { DefaultAction } from '../../../../components/Actions';
+import { DefaultAction } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

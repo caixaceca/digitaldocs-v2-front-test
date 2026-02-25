@@ -1,4 +1,4 @@
-import { fCurrency, fPercent } from '../../../../utils/formatNumber';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
 
 export const mapearPayloadParaFINCC = (payload) => {
   if (!payload) return {};
@@ -6,11 +6,8 @@ export const mapearPayloadParaFINCC = (payload) => {
   const credito = payload.credito || {};
   const meta = credito.gaji9_metadados || {};
 
-  // Auxiliar para extrair nomes de garantias
-  const listaGarantias = credito.garantias?.map((g) => g.tipo_garantia).join(', ') || '--';
-
-  // Auxiliar para extrair seguros
   const primeiroSeguro = credito.seguros?.[0] || {};
+  const listaGarantias = credito.garantias?.map((g) => g.tipo_garantia).join(', ') || '--';
 
   return {
     // --- SEÇÃO A: IDENTIFICAÇÃO ---
@@ -42,10 +39,10 @@ export const mapearPayloadParaFINCC = (payload) => {
     descricao_seguro: `Apólice: ${primeiroSeguro.apolice || '--'}`,
 
     // --- SEÇÃO C: CUSTOS ---
-    tan: fPercent(meta.taxa_tan || 0),
+    tan: fPercent(meta.taxa_tan || 0, 3),
     regime_taxa_juro: 'Fixa',
     taxa_juro_nominal_fixa: fPercent(meta.taxa_tan || 0),
-    taeg: fPercent(meta.taxa_taeg || 0),
+    taeg: fPercent(meta.taxa_taeg || 0, 3),
     valor_total_encargos_iniciais: fCurrency(meta.custo_total),
     comissoes_iniciais: fCurrency(meta.valor_comissao || 0),
     comissoes_processamento: '--',

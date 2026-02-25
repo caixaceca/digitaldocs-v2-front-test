@@ -6,18 +6,18 @@ import Divider from '@mui/material/Divider';
 import TableBody from '@mui/material/TableBody';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { useSelector } from '../../../redux/store';
-import { ptDateTime } from '../../../utils/formatTime';
-import { fCurrency } from '../../../utils/formatNumber';
-import { useTabsSync } from '../../../hooks/minimal-hooks/use-tabs-sync';
+import { useSelector } from '@/redux/store';
+import { ptDateTime } from '@/utils/formatTime';
+import { fCurrency } from '@/utils/formatNumber';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import { SearchNotFoundSmall } from '../../../components/table';
-import { DialogTitleAlt } from '../../../components/CustomDialog';
-import { TabsWrapperSimple } from '../../../components/TabsWrapper';
+import { SearchNotFoundSmall } from '@/components/table';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
 import SegurosEntidades from './seguros-entidades';
-import MetadadosGarantia from '../../processo/info-credito/metadados-garantia';
 import { TableRowItem, LabelSN, Resgisto } from '../../parametrizacao/Detalhes';
+import MetadadosGarantia from '@/sections/processo/info-credito/metadados/garantia';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

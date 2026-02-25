@@ -7,14 +7,13 @@ import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 // utils
-import { pertencoEstadoId } from '../../../utils/validarAcesso';
-// redux
-import { setModal } from '../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../redux/store';
+import { setModal } from '@/redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
+import { pertencoEstadoId } from '@/utils/validarAcesso';
 // components
-import Label from '../../../components/Label';
-import { DefaultAction } from '../../../components/Actions';
-import { ColaboradorInfo } from '../../../components/Panel';
+import Label from '@/components/Label';
+import { DefaultAction } from '@/components/Actions';
+import { ColaboradorInfo } from '@/components/Panel';
 //
 import { Info, InfoCriador } from './estados-processo';
 import ParecerExport, { DownloadPdf } from './minuta-parecer';

@@ -9,12 +9,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContentText from '@mui/material/DialogContentText';
 // utils
-import useToggle from '../../../hooks/useToggle';
-// redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { getFromDigitalDocs } from '../../../redux/slices/digitaldocs';
+import useToggle from '@/hooks/useToggle';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getFromDigitalDocs } from '@/redux/slices/digitaldocs';
 // components
-import { DefaultAction } from '../../../components/Actions';
+import { DefaultAction } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -27,7 +26,7 @@ export default function EnviarContratacao({ fab = false, dados }) {
         <DefaultAction label="Enviar para GAJ-i9" onClick={onOpen} sx={{ p: 0 }} />
       ) : (
         <Stack direction="row" justifyContent="center" sx={{ mt: 2 }} spacing={2}>
-          <DefaultAction button variant="contained" label="Enviar para GAJ-i9" onClick={onOpen} />
+          <DefaultAction small button variant="contained" label="Enviar para GAJ-i9" onClick={onOpen} />
         </Stack>
       )}
 

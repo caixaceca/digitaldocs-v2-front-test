@@ -1,9 +1,9 @@
 import { View, Text } from '@react-pdf/renderer';
 // utils
-import { getIdade, ptDate } from '../../../../../utils/formatTime';
+import { getIdade, ptDate } from '@/utils/formatTime';
 import { docInfo, colorDoc, estadoCivil, dataNascimento } from '../calculos';
 // components
-import { styles } from '../../../../../components/exportar-dados/pdf';
+import { styles } from '@/components/exportar-dados/pdf';
 import { RowFicha, TitleFicha, EmptyRow, ItemValue } from './pdf-fragments';
 
 const options = { success: true, ficha: true };
@@ -15,8 +15,8 @@ export default function Identificacao({ numero, entidade, clientes, renderSectio
     <>
       <View>
         <TitleFicha title="1. Identificação" options={{ success: true }} />
-        <RowFicha title="Nº de entidade" value={numero || ' '} {...{ options }} />
-        <RowFicha title="Nome" value={entidade?.nome} {...{ options }} />
+        <RowFicha title="Nº de entidade" value={numero || '(Não definido...)'} {...{ options }} />
+        <RowFicha title="Nome" value={entidade?.nome || '(Não definido...)'} {...{ options }} />
         <RowFicha
           title="Doc. identificação"
           value={docInfo(entidade?.documento, entidade?.tipo_documento)}
@@ -30,7 +30,7 @@ export default function Identificacao({ numero, entidade, clientes, renderSectio
           }
           {...{ options }}
         />
-        <RowFicha title="NIF" value={entidade?.nif || ' '} {...{ options }} />
+        <RowFicha title="NIF" value={entidade?.nif || '(Não definido...)'} {...{ options }} />
         <RowFicha title="Telefone" value={entidade?.telefone} {...{ options }} />
         <RowFicha title="Email" value={entidade?.email} {...{ options }} />
         <RowFicha title="Sexo" value={entidade?.sexo} {...{ options }} />
@@ -41,8 +41,8 @@ export default function Identificacao({ numero, entidade, clientes, renderSectio
           {...{ options }}
         />
         <RowFicha title="Morada" value={entidade?.morada} {...{ options }} />
-        <RowFicha title="Código de risco" value={entidade?.codigo_risco || 'Não definido...'} {...{ options }} />
-        <RowFicha title="Nível de risco" value={entidade?.nivel_risco || 'Não definido...'} {...{ options }} />
+        <RowFicha title="Código de risco" value={entidade?.codigo_risco || '(Não definido...)'} {...{ options }} />
+        <RowFicha title="Nível de risco" value={entidade?.nivel_risco || '(Não definido...)'} {...{ options }} />
         <RowFicha
           title="Estado civil"
           value={estadoCivil(entidade?.estado_civil, entidade?.regime_casamento)}

@@ -5,15 +5,14 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
-import { UosAcesso } from '../../../utils/validarAcesso';
-import { setItemValue } from '../../../utils/formatObject';
+import { UosAcesso } from '@/utils/validarAcesso';
+import { setItemValue } from '@/utils/formatObject';
 // redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getFromGaji9, setModal } from '../../../redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromGaji9, setModal } from '@/redux/slices/gaji9';
 // Components
-import { DefaultAction, MaisProcessos } from '../../../components/Actions';
-//
 import { PropostaForm } from './form-credito';
+import { DefaultAction, MaisProcessos } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

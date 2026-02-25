@@ -10,20 +10,17 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
-// routes
-import { PATH_DIGITALDOCS } from '../../../routes/paths';
-// hooks
-import useTable, { getComparator } from '../../../hooks/useTable';
-// redux
-import { useSelector } from '../../../redux/store';
+import { useSelector } from '@/redux/store';
+import { fCurrency } from '@/utils/formatNumber';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import useTable, { getComparator } from '@/hooks/useTable';
 // Components
-import { noDados } from '../../../components/Panel';
-import Scrollbar from '../../../components/Scrollbar';
-import { DefaultAction } from '../../../components/Actions';
-import { SkeletonTable } from '../../../components/skeleton';
-import { SearchToolbarSimple } from '../../../components/SearchToolbar';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
+import { noDados } from '@/components/Panel';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import PesquisarCredito from './pesquisar-credito';
 import { applySortFilter, labelTitular } from '../applySortFilter';
@@ -111,7 +108,6 @@ export default function TableCredito() {
                       </TableCell>
                       <TableCell>{row?.titular}</TableCell>
                       <TableCell>{row?.rotulo || row?.componente}</TableCell>
-                      {/* <TableCell>{newLineText(row?.finalidade) || noDados('Não definido')}</TableCell> */}
                       <TableCell align="right">
                         <Typography variant="body2" noWrap>
                           {row?.montante ? fCurrency(row?.montante) : noDados('Não definido')}

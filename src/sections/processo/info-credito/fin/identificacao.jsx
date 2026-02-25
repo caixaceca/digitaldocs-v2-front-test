@@ -1,7 +1,7 @@
 import { TextRun } from 'docx';
 // utils
 import { gerarTabela } from './gerar-tabela';
-import { formatDate } from '../../../../utils/formatTime';
+import { formatDate } from '@/utils/formatTime';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

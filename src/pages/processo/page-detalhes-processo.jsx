@@ -6,25 +6,24 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
-import { getProximoAnterior } from '../../utils/formatObject';
-import { pertencoEstadoId, gestorEstado, findColaboradores } from '../../utils/validarAcesso';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { getProximoAnterior } from '@/utils/formatObject';
+import { pertencoEstadoId, gestorEstado, findColaboradores } from '@/utils/validarAcesso';
 // redux
-import { useAcesso } from '../../hooks/useAcesso';
-import { useDispatch, useSelector } from '../../redux/store';
-import { getSuccess, getInfoProcesso, setModal, deleteItem } from '../../redux/slices/digitaldocs';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useAcesso } from '@/hooks/useAcesso';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getSuccess, getInfoProcesso, setModal, deleteItem } from '@/redux/slices/digitaldocs';
 // hooks
-import useSettings from '../../hooks/useSettings';
-import { useNotificacao } from '../../hooks/useNotificacao';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
-import { useProcesso, useIdentificacao } from '../../hooks/useProcesso';
+import useSettings from '@/hooks/useSettings';
+import { useNotificacao } from '@/hooks/useNotificacao';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
+import { useProcesso, useIdentificacao } from '@/hooks/useProcesso';
 // components
-import Page from '../../components/Page';
-import { TabCard } from '../../components/TabsWrapper';
-import { DefaultAction, Voltar } from '../../components/Actions';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import DialogPreviewDoc, { DialogConfirmar } from '../../components/CustomDialog';
+import Page from '@/components/Page';
+import { TabCard } from '@/components/TabsWrapper';
+import { DefaultAction, Voltar } from '@/components/Actions';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import DialogPreviewDoc, { DialogConfirmar } from '@/components/CustomDialog';
 // sections
 import {
   AnexosForm,
@@ -36,14 +35,15 @@ import {
   FinalizarNeForm,
   FinalizarOpeForm,
   EliminarReativar,
+  AplicarBancaForm,
   ColocarPendenteForm,
-} from '../../sections/processo/form/intervencao';
-import ProcessoForm from '../../sections/processo/form/form-processo';
-import Intervencao from '../../sections/processo/intervencao-em-serie';
-import { DesarquivarForm } from '../../sections/processo/form/form-arquivo';
-import PareceresComites from '../../sections/processo/info-credito/dialog-pareceres';
+} from '@/sections/processo/form/intervencao';
+import ProcessoForm from '@/sections/processo/form/form-processo';
+import Intervencao from '@/sections/processo/intervencao-em-serie';
+import { DesarquivarForm } from '@/sections/processo/form/form-arquivo';
+import PareceresComites from '@/sections/processo/info-credito/dialog-pareceres';
 //
-import useMenuProcesso from '../../sections/processo/Detalhes/menu';
+import useMenuProcesso from '@/sections/processo/Detalhes/menu';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -62,6 +62,7 @@ export default function PageProcesso() {
 
   const identificador = useIdentificacao({ id });
   const processo = useProcesso({ id, perfilId });
+  const { fluxo = '', titular = '' } = processo || {};
   const { estado = null, status = '', fluxo_id: fluxoId = '', estados = [], htransicoes = [] } = processo || {};
 
   const proxAnt = getProximoAnterior(processos, id);
@@ -104,6 +105,7 @@ export default function PageProcesso() {
         !done.includes('Seguro') &&
         !done.includes('Situação') &&
         !done.includes('Garantia') &&
+        !done.includes('Escalão de decisão') &&
         done !== 'Ficha anexado' &&
         done !== 'Processo aceitado' &&
         done !== 'Pareceres fechado' &&
@@ -252,6 +254,9 @@ export default function PageProcesso() {
         {isOpenModal === 'eliminar-processo' && <EliminarReativar ids={{ id, estadoId }} onClose={() => openModal()} />}
         {isOpenModal === 'desarquivar' && (
           <DesarquivarForm id={id} colaboradores={colaboradoresList} onClose={() => openModal()} />
+        )}
+        {isOpenModal === 'aplicar-banca' && (
+          <AplicarBancaForm onClose={() => openModal()} id={id} assunto={fluxo} titular={titular} />
         )}
         {isOpenModal === 'resgatar' && (
           <ResgatarForm

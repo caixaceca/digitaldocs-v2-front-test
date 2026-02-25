@@ -2,26 +2,22 @@ import { format } from 'date-fns';
 import Snowfall from 'react-snowfall';
 import { NavLink as RouterLink } from 'react-router-dom';
 // @mui
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import { styled, useTheme } from '@mui/material/styles';
 // utils
-import cssStyles from '../../utils/cssStyles';
-import { getIntranetFile } from '../../utils/formatFile';
-// config
-import { NAVBAR, ambiente } from '../../config';
+import cssStyles from '@/utils/cssStyles';
+import { NAVBAR, ambiente } from '@/config';
+import { useSelector } from '@/redux/store';
 // hooks
-import useResponsive from '../../hooks/useResponsive';
-import useCollapseDrawer from '../../hooks/useCollapseDrawer';
-// redux
-import { useSelector } from '../../redux/store';
+import useResponsive from '@/hooks/useResponsive';
+import useCollapseDrawer from '@/hooks/useCollapseDrawer';
 // components
-import Logo from '../../components/Logo';
-import Image from '../../components/Image';
-import Scrollbar from '../../components/Scrollbar';
-import { NavSectionVertical } from '../../components/nav-section';
+import Logo from '@/components/Logo';
+import Scrollbar from '@/components/Scrollbar';
+import { NavSectionVertical } from '@/components/nav-section';
+import { Iso9001Icon, Iso27001Icon } from '@/theme/overrides/CustomIcons';
 //
 import NavConfig from './NavConfig';
 import Aplicacoes from './Aplicacoes';
@@ -42,7 +38,7 @@ const RootStyle = styled('div')(({ theme }) => ({
 export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
   const theme = useTheme();
   const isDesktop = useResponsive('up', 'lg');
-  const { minhasAplicacoes, certificacoes } = useSelector((state) => state.intranet);
+  const { minhasAplicacoes } = useSelector((state) => state.intranet);
 
   const { isCollapse, collapseClick, collapseHover, onToggleCollapse, onHoverEnter, onHoverLeave } =
     useCollapseDrawer();
@@ -89,12 +85,11 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
       />
 
       {!isCollapse && (
-        <Stack spacing={3} alignItems="center" sx={{ p: 5, width: 1, textAlign: 'center' }}>
-          {certificacoes.map(({ designacao, imagem_disco: imagem }, index) => (
-            <Box key={designacao || `cert_${index}`} sx={{ px: 3 }}>
-              <Image alt={designacao} src={getIntranetFile('certificado', imagem)} />
-            </Box>
-          ))}
+        <Stack spacing={3} alignItems="center" sx={{ mt: 'auto', px: 3, py: 6, width: 1, textAlign: 'center' }}>
+          <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+            <Iso27001Icon sx={{ color: 'text.primary', height: { xs: 33, sm: 40 }, width: { xs: 90, sm: 110 } }} />
+            <Iso9001Icon sx={{ color: 'text.primary', height: { xs: 33, sm: 40 }, width: { xs: 90, sm: 110 } }} />
+          </Stack>
         </Stack>
       )}
     </Scrollbar>

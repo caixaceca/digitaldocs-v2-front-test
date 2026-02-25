@@ -16,22 +16,20 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import LinearProgress from '@mui/material/LinearProgress';
 // utils
-import { baralharString } from '../../utils/formatText';
-import { setItemValue } from '../../utils/formatObject';
-import { getIntranetFile } from '../../utils/formatFile';
-import { fYear, fMonthYear } from '../../utils/formatTime';
-import { fNumber, fPercent, fNumber2 } from '../../utils/formatNumber';
-// redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '@/redux/store';
+import { setItemValue } from '@/utils/formatObject';
+import { getIntranetFile } from '@/utils/formatFile';
+import { fYear, fMonthYear } from '@/utils/formatTime';
+import { fNumber, fPercent } from '@/utils/formatNumber';
 // components
-import { BoxMask } from '../../components/Panel';
-import GridItem from '../../components/GridItem';
-import { BarChart } from '../../components/skeleton';
-import { SearchNotFound } from '../../components/table';
-import CustomAvatar from '../../components/custom-avatar';
+import { BoxMask } from '@/components/Panel';
+import GridItem from '@/components/GridItem';
+import { BarChart } from '@/components/skeleton';
+import { SearchNotFound } from '@/components/table';
+import CustomAvatar from '@/components/custom-avatar';
 //
 import { Cabecalho } from './cabecalho-filtrar';
-import { Todos, Media, Maximo } from '../../assets';
+import { Todos, Media, Maximo } from '@/assets';
 import { EntradasTrabalhados } from './entrados-trabalhados';
 import { DuracaoEquipa, Conclusao, Execucao } from './Duracao';
 import { Criacao, DevolvidosTipos, Origem } from './TotalProcessos';
@@ -241,7 +239,7 @@ export function ColaboradorCard({ colaboradorDados, total, assuntos, detail }) {
           />
           <Stack>
             <Typography variant="subtitle1" noWrap>
-              {baralharString(colaborador?.nome)}
+              {colaborador?.nome}
             </Typography>
             <Stack spacing={1} direction="row" alignItems="center" sx={{ color: 'text.success' }}>
               <Typography variant="h6">{fNumber(totalColaborador)}</Typography>
@@ -309,7 +307,7 @@ export function TableIndicadores({ label, label1, dados, total = 0, percentagem 
               )}
             </TableCell>
             <TableCell align="right">
-              {label1 === 'Média em dias' ? fNumber2(row?.total || row?.dias) : fNumber(row?.total || row?.dias)}
+              {label1 === 'Média em dias' ? fNumber(row?.total || row?.dias, 2) : fNumber(row?.total || row?.dias)}
             </TableCell>
             {percentagem && <TableCell align="right">{fPercent((row?.total * 100) / total)}</TableCell>}
           </TableRow>

@@ -1,7 +1,7 @@
 // @mui
 import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 // config
-import { defaultLang } from '../../config';
+import { defaultLang } from '@/config';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

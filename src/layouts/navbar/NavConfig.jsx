@@ -1,10 +1,9 @@
-// config
-import { ambiente } from '../../config';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+// utils
+import { ambiente } from '@/config';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
 // assets
-import { SuporteIcon } from '../../theme/overrides/CustomIcons';
-import { Home, Portal, Arquivo, Controle, Contrato, Dashboard, FilaTrabalho, Parametrizacao } from '../../assets';
+import { SuporteIcon } from '@/theme/overrides/CustomIcons';
+import { Home, Portal, Arquivo, Controle, Contrato, Dashboard, FilaTrabalho, Parametrizacao } from '@/assets';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

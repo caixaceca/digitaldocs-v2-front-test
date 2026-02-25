@@ -15,15 +15,15 @@ import TableContainer from '@mui/material/TableContainer';
 import TextDecreaseIcon from '@mui/icons-material/TextDecrease';
 import TextIncreaseIcon from '@mui/icons-material/TextIncrease';
 // utils
-import { useSelector } from '../../../redux/store';
-import { normalizeText } from '../../../utils/formatText';
-import { fCurrency, fConto, fNumber } from '../../../utils/formatNumber';
+import { useSelector } from '@/redux/store';
+import { normalizeText } from '@/utils/formatText';
+import { fCurrency, fConto, fNumber } from '@/utils/formatNumber';
 // components
 import { EmptyRow } from './resumo';
 import NaoClassificados from './nao-classificados';
+import { SkeletonTable } from '@/components/skeleton';
 import { Segmento, SegmentoStd } from './table-content';
-import { SkeletonTable } from '../../../components/skeleton';
-import { SearchToolbarSimple } from '../../../components/SearchToolbar';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

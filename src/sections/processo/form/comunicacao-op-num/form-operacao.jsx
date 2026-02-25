@@ -8,14 +8,13 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 // utils
-import { fillData } from '../../../../utils/formatTime';
-// redux
-import { updateDados } from '../../../../redux/slices/stepper';
-import { useSelector, useDispatch } from '../../../../redux/store';
+import { fillData } from '@/utils/formatTime';
+import { updateDados } from '@/redux/slices/stepper';
+import { useSelector, useDispatch } from '@/redux/store';
 // components
-import GridItem from '../../../../components/GridItem';
-import { ButtonsStepper } from '../../../../components/Actions';
-import { FormProvider, RHFTextField, RHFDataEntrada, RHFNumberField } from '../../../../components/hook-form';
+import GridItem from '@/components/GridItem';
+import { ButtonsStepper } from '@/components/Actions';
+import { FormProvider, RHFTextField, RHFDataEntrada, RHFNumberField } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

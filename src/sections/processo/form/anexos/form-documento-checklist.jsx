@@ -7,10 +7,10 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // components
+import GridItem from '@/components/GridItem';
 import AnexosExistente from './anexos-existente';
-import GridItem from '../../../../components/GridItem';
-import { DefaultAction } from '../../../../components/Actions';
-import { RHFDatePicker, RHFNumberField, RHFUploadFileSimple } from '../../../../components/hook-form';
+import { DefaultAction } from '@/components/Actions';
+import { RHFDatePicker, RHFNumberField, RHFUploadFileSimple } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

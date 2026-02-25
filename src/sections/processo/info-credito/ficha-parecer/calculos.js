@@ -1,17 +1,17 @@
 import { add } from 'date-fns';
 // utils
-import { ptDate, getIdade } from '../../../../utils/formatTime';
-// hooks
-import { getComparator, applySort } from '../../../../hooks/useTable';
+import { ptDate, getIdade } from '@/utils/formatTime';
+import { getComparator, applySort } from '@/hooks/useTable';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function calcRendimento(rendimento, bruto) {
-  if (!rendimento) return 0;
+export function calcRendimento(dados, bruto) {
+  if (!dados) return 0;
+  const conjuge = !!dados?.conjuge;
 
   const renda = bruto
-    ? [rendimento.renda_bruto_mensal, rendimento.renda_bruto_mensal_conjuge]
-    : [rendimento.renda_liquido_mensal, rendimento.renda_liquido_mensal_conjuge];
+    ? [dados.renda_bruto_mensal, conjuge ? dados.renda_bruto_mensal_conjuge : 0]
+    : [dados.renda_liquido_mensal, conjuge ? dados.renda_liquido_mensal_conjuge : 0];
 
   return renda.reduce((sum, val) => sum + Number(val || 0), 0);
 }
@@ -25,10 +25,8 @@ export function totalDespesas(dados) {
 export function calcValorPrestacao(dados) {
   if (!dados?.montante || !dados?.taxa || !dados?.prazo) return 0;
 
-  const { componente, taxa, montante, prazo } = dados;
-  const isHabitacao = componente?.toLowerCase()?.includes('habitação');
-
-  const taxaAplicado = isHabitacao ? (1 + taxa / 100) ** (1 / 12) - 1 : taxa / 100 / 12;
+  const { taxa, montante, prazo, taxa_equivalente = false } = dados;
+  const taxaAplicado = taxa_equivalente ? (1 + taxa / 100) ** (1 / 12) - 1 : taxa / 100 / 12;
   const prestacao = (montante * taxaAplicado) / (1 - (1 / (1 + taxaAplicado)) ** prazo);
 
   return Number(prestacao.toFixed(0));
@@ -39,16 +37,16 @@ export function prestacaoDividas(dados = []) {
 }
 
 export function totalPrestacao(dados) {
-  const prestacaoCaixa = prestacaoDividas(dados?.dividas);
+  const prestacaoCaixa = prestacaoDividas(dados?.divEf || dados?.dividas || []);
   const prestacaoExterna = prestacaoDividas(dados?.dividasExternas);
 
   return Number(dados?.valorPrestacao) + Number(prestacaoCaixa) + Number(prestacaoExterna);
 }
 
-// --------- DSTI ------------------------------------------------------------------------------------------------------
+// --------- RESPONSABILIDADES -----------------------------------------------------------------------------------------
 
-export const responsabilidadesInfo = (responsabilidades) =>
-  (responsabilidades || []).reduce(
+export const responsabilidadesInfo = (dados) =>
+  (dados || []).reduce(
     (acc, item) => {
       acc.valor += Math.abs(item.valor);
       acc.saldo_divida += Math.abs(item.saldo_divida);
@@ -58,9 +56,9 @@ export const responsabilidadesInfo = (responsabilidades) =>
     { totais: true, valor: 0, saldo_divida: 0, valor_prestacao: 0 }
   );
 
-export function dividasConsolidadas(responsabilidade, solicitado, prestacao) {
-  const caixa = responsabilidadesInfo(responsabilidade?.dividas);
-  const externas = responsabilidadesInfo(responsabilidade?.dividasExternas || responsabilidade?.dividas_externas);
+export function dividasConsolidadas(dados, solicitado, prestacao) {
+  const caixa = responsabilidadesInfo(dados?.divEf || dados?.dividas || []);
+  const externas = responsabilidadesInfo(dados?.dividasExternas || dados?.dividas_externas);
 
   return {
     valor: caixa?.valor + externas.valor + Number(solicitado || 0),
@@ -83,8 +81,8 @@ export function percentagemDsti(dados) {
 
 export function dstiDisponivel(dados) {
   const limite = limiteDsti(dados?.rendimento);
-  const prestacaoCaixa = prestacaoDividas(dados?.dividas);
   const prestacaoExterna = prestacaoDividas(dados?.dividasExternas);
+  const prestacaoCaixa = prestacaoDividas(dados?.divEf || dados?.dividas || []);
 
   return limite - (prestacaoCaixa + prestacaoExterna);
 }
@@ -112,80 +110,57 @@ export function limiteDstiCorrigido(dados) {
 export function extractClientes(data) {
   const totaisPorMoedaMap = new Map();
 
-  const {
-    saldos,
-    titulos,
-    dividas,
-    clientes,
-    restruturacoes,
-    irregularidades,
-    garantiasPrestadas,
-    garantiasRecebidas,
-  } = data.reduce(
-    (acc, cliente) => {
-      // clientes
-      acc.clientes.push({
-        balcao: cliente?.balcao,
-        cliente: cliente?.cliente,
-        relacao: cliente?.relacao,
-        titular: cliente?.titular,
-        titularidade: cliente?.titularidade,
-        data_abertura: cliente?.data_abertura,
-      });
+  const inicial = {
+    saldos: [],
+    titulos: [],
+    dividas: [],
+    clientes: [],
+    restruturacoes: [],
+    irregularidades: [],
+    garantiasPrestadas: [],
+    garantiasRecebidas: [],
+  };
 
-      // saldos
-      (cliente.saldos || []).forEach((saldo) => {
-        acc.saldos.push(saldo);
-        totaisPorMoedaMap.set(saldo.moeda, (totaisPorMoedaMap.get(saldo.moeda) || 0) + saldo.saldo);
-      });
+  const resultado = data.reduce((acc, cliente) => {
+    // Clientes
+    acc.clientes.push({
+      balcao: cliente?.balcao,
+      cliente: cliente?.cliente,
+      relacao: cliente?.relacao,
+      titular: cliente?.titular,
+      titularidade: cliente?.titularidade,
+      data_abertura: cliente?.data_abertura,
+    });
 
-      // titulos
-      (cliente.titulos || []).forEach((titulo) => acc.titulos.push(titulo));
+    (cliente.saldos || []).forEach((s) => {
+      acc.saldos.push(s);
+      const valor = Number(s.saldo) || 0;
+      totaisPorMoedaMap.set(s.moeda, (totaisPorMoedaMap.get(s.moeda) || 0) + valor);
+    });
 
-      // responsabilidades
-      (cliente.responsabilidades || []).forEach((resp) => {
-        if (resp?.classe === 'Garantias Prestadas') acc.garantiasPrestadas.push(resp);
-        else if (resp?.classe === 'Garantias Recebidas') acc.garantiasRecebidas.push(resp);
-        else {
-          acc.dividas.push(resp);
-          if (resp?.maior_irregularidade && resp?.maior_irregularidade !== resp?.situacao) {
-            acc.irregularidades.push(resp);
-          }
-        }
-      });
+    // Títulos
+    if (cliente.titulos) acc.titulos.push(...cliente.titulos);
 
-      // restruturações
-      if (cliente.com_historico_restruturacao) {
-        acc.restruturacoes.push({ cliente: cliente?.cliente, data: cliente?.data_referencia_restruturacao });
+    // Responsabilidades
+    (cliente.responsabilidades || []).forEach((resp) => {
+      if (resp?.classe === 'Garantias Prestadas') acc.garantiasPrestadas.push(resp);
+      else if (resp?.classe === 'Garantias Recebidas') acc.garantiasRecebidas.push(resp);
+      else {
+        acc.dividas.push(resp);
+        if (resp?.maior_irregularidade && resp?.maior_irregularidade !== resp?.situacao) acc.irregularidades.push(resp);
       }
+    });
 
-      return acc;
-    },
-    {
-      saldos: [],
-      titulos: [],
-      dividas: [],
-      clientes: [],
-      restruturacoes: [],
-      irregularidades: [],
-      garantiasPrestadas: [],
-      garantiasRecebidas: [],
+    // Restruturações
+    if (cliente.com_historico_restruturacao) {
+      acc.restruturacoes.push({ cliente: cliente?.cliente, data: cliente?.data_referencia_restruturacao });
     }
-  );
+
+    return acc;
+  }, inicial);
 
   const totalSaldoPorMoeda = Array.from(totaisPorMoedaMap, ([moeda, saldo]) => ({ moeda, saldo, totais: true }));
-
-  return {
-    saldos,
-    dividas,
-    titulos,
-    restruturacoes,
-    irregularidades,
-    garantiasPrestadas,
-    garantiasRecebidas,
-    totalSaldoPorMoeda,
-    clientes: applySort(clientes, getComparator('asc', 'relacao')),
-  };
+  return { ...resultado, totalSaldoPorMoeda, clientes: applySort(resultado.clientes, getComparator('asc', 'relacao')) };
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -196,15 +171,23 @@ export function movimentosConta(movimentos) {
   const totaisDebitoConta = new Map();
   const totaisCreditoConta = new Map();
 
+  const extrairValor = (val) => {
+    if (typeof val === 'object' && val !== null) return Number(val.parsedValue) || 0;
+    return Number(val) || 0;
+  };
+
   movimentos.forEach((row) => {
-    if (row?.valor > 0) {
-      movimentosCredito.push(row);
-      const totalAtual = totaisCreditoConta.get(row?.conta) || 0;
-      totaisCreditoConta.set(row.conta, totalAtual + row.valor);
+    const valorNumerico = extrairValor(row?.valor);
+    const rowProcessada = { ...row, valor: valorNumerico };
+
+    if (valorNumerico > 0) {
+      movimentosCredito.push(rowProcessada);
+      const totalAtual = totaisCreditoConta.get(row.conta) || 0;
+      totaisCreditoConta.set(row.conta, totalAtual + valorNumerico);
     } else {
-      movimentosDebito.push(row);
-      const totalAtual = totaisDebitoConta.get(row?.conta) || 0;
-      totaisDebitoConta.set(row.conta, totalAtual + row.valor);
+      movimentosDebito.push(rowProcessada);
+      const totalAtual = totaisDebitoConta.get(row.conta) || 0;
+      totaisDebitoConta.set(row.conta, totalAtual + valorNumerico);
     }
   });
 

@@ -6,7 +6,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import { styled, alpha } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
 // hooks
-import useSettings from '../../../hooks/useSettings';
+import useSettings from '@/hooks/useSettings';
 //
 import BoxMask from './BoxMask';
 import GridItem from '../../GridItem';

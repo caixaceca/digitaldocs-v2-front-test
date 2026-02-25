@@ -10,17 +10,15 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { vdt } from '../../../../utils/formatObject';
-// redux
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { getFromParametrizacao } from '../../../../redux/slices/parametrizacao';
-import { getInfoProcesso, updateItem } from '../../../../redux/slices/digitaldocs';
-// hooks
-import { getComparator, applySort } from '../../../../hooks/useTable';
+import { vdt } from '@/utils/formatObject';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getComparator, applySort } from '@/hooks/useTable';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
+import { getInfoProcesso, updateItem } from '@/redux/slices/digitaldocs';
 // components
-import { DialogButons } from '../../../../components/Actions';
-import { DialogConfirmar } from '../../../../components/CustomDialog';
-import { FormProvider, RHFTextField, RHFAutocompleteObj } from '../../../../components/hook-form';
+import { DialogButons } from '@/components/Actions';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import { FormProvider, RHFTextField, RHFAutocompleteObj } from '@/components/hook-form';
 
 // --- RESGATAR PROCESSO -----------------------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
 // hooks
-import useSettings from '../../../hooks/useSettings';
+import useSettings from '@/hooks/useSettings';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

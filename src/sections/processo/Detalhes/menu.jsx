@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
 // redux
-import { useSelector } from '../../../redux/store';
+import { useSelector } from '@/redux/store';
 //
 import InfoCon from './info-con';
 import Estados from './estados-processo';
 import DadosGerais from './dados-gerais';
+import InfoCredito from '../info-credito';
 import Versoes from './historico-versoes';
 import TableDetalhes from './table-processo';
 import Views from './historico-visualiacoes';
-import InfoCredito from '../info-credito/info';
 import Transicoes from './historico-transicoes';
 import TodosAnexos from './anexos/todos-anexos';
 import Pareceres, { PareceresEstado } from './historico-pareceres';
@@ -20,7 +20,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
 
   const { estado = null, credito = null, con = null } = processo || {};
   const { valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
-  const { estados = [], htransicoes = [], pareceres_estado: pareceres = [], criado_em: data } = processo || {};
+  const { estados = [], htransicoes = [], pareceres_estado: pareceres = [], criado_em, data_entrada } = processo || {};
 
   const assunto = useMemo(() => `${fluxo ?? ''} - ${titular ?? ''}`, [fluxo, titular]);
 
@@ -31,7 +31,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     if (credito)
       tabs.push({
         value: 'Info. crédito',
-        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em: data, estado }} />,
+        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em, data_entrada, estado }} />,
       });
 
     if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });
@@ -78,7 +78,6 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
   }, [
     id,
     con,
-    data,
     valor,
     estado,
     numero,
@@ -87,9 +86,11 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     credito,
     isAdmin,
     processo,
+    criado_em,
     pareceres,
     htransicoes,
     isAuditoria,
+    data_entrada,
     handleAceitar,
     estados?.length,
   ]);

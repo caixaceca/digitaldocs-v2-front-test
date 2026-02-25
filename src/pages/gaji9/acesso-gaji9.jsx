@@ -2,13 +2,13 @@ import { useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 //
-import { usePermissao } from '../../hooks/useAcesso';
+import { usePermissao } from '@/hooks/useAcesso';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromGaji9, getInfoGaji } from '../../redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromGaji9, getInfoGaji } from '@/redux/slices/gaji9';
 // guards
-import { LoadingPanel } from '../../components/LoadingScreen';
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import { LoadingPanel } from '@/components/LoadingScreen';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

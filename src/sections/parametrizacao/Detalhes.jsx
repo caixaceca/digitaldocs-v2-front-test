@@ -15,22 +15,20 @@ import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fPercent } from '../../utils/formatNumber';
-import { nomeacaoBySexo } from '../../utils/formatText';
-import { ptDateTime, ptDate } from '../../utils/formatTime';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
-// redux
-import { useSelector } from '../../redux/store';
+import { useSelector } from '@/redux/store';
+import { fPercent } from '@/utils/formatNumber';
+import { nomeacaoBySexo } from '@/utils/formatText';
+import { ptDateTime, ptDate } from '@/utils/formatTime';
+import { getComparator, applySort } from '@/hooks/useTable';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import Label from '../../components/Label';
-import Markdown from '../../components/Markdown';
-import { DefaultAction } from '../../components/Actions';
-import { SearchNotFoundSmall } from '../../components/table';
-import { DialogTitleAlt } from '../../components/CustomDialog';
-import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import { Criado, CellChecked, DataLabel } from '../../components/Panel';
+import Label from '@/components/Label';
+import Markdown from '@/components/Markdown';
+import { DefaultAction } from '@/components/Actions';
+import { SearchNotFoundSmall } from '@/components/table';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
+import { Criado, CellChecked, DataLabel } from '@/components/Panel';
 //
 import { DestinatarioForm } from './form-fluxo';
 import DetalhesTransicao from './detalhes-transicao';
@@ -205,7 +203,7 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                         <TableRowItem key={key} title={title} item={<LabelSN item={dados[key]} />} />
                       ) : null
                     )}
-                    <TableRowItem title="Nível de decisão:" text={dados?.nivel_decisao} />
+                    <TableRowItem title="Escalão de decisão:" text={dados?.nivel_decisao} />
                     <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
                   </TableBody>
                 </Table>
@@ -307,7 +305,7 @@ function Notificacoes({ dados, destinatarios }) {
               </TableCell>
               <CellChecked check={row.ativo} />
               <TableCell>
-                <Criado tipo="user" value={row?.modificador || row?.criador} baralhar caption />
+                <Criado tipo="user" value={row?.modificador || row?.criador} caption />
                 <Criado tipo="data" value={ptDateTime(row?.modificado_em || row?.criado_em)} caption />
               </TableCell>
               {ativo && (
@@ -333,8 +331,8 @@ export function Resgisto({ label, por = '', em = '' }) {
       <Typography variant="caption" sx={{ color: 'text.secondary', textAlign: 'center' }}>
         {label}:
       </Typography>
-      {!!por && <Criado tipo="user" value={por} baralhar caption />}
-      {!!em && <Criado tipo="data" value={ptDateTime(em)} baralhar caption />}
+      {!!por && <Criado tipo="user" value={por} caption />}
+      {!!em && <Criado tipo="data" value={ptDateTime(em)} caption />}
     </Stack>
   ) : null;
 }
@@ -348,7 +346,9 @@ export function TableRowItem({ title, id = 0, text = '', item = null }) {
         {title}
       </TableCell>
       <TableCell sx={{ minWidth: '75% !important' }}>
-        {(!!text && !!id && `${text} (ID: ${id})`) || (text && text) || (item && item)}
+        <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+          {(!!text && !!id && `${text} (ID: ${id})`) || (text && text) || (item && item)}
+        </Typography>
       </TableCell>
     </TableRow>
   ) : null;

@@ -9,22 +9,21 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { ptDateTime } from '../../../utils/formatTime';
-import { PATH_DIGITALDOCS } from '../../../routes/paths';
-import { getLocalStorageArray, contarIdsValidos } from '../../../utils/formatObject';
-// hooks
-import useTable, { getComparator } from '../../../hooks/useTable';
+import { ptDateTime } from '@/utils/formatTime';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import useTable, { getComparator } from '@/hooks/useTable';
+import { getLocalStorageArray, contarIdsValidos } from '@/utils/formatObject';
 // redux
-import { dispatch, useSelector } from '../../../redux/store';
-import { getSuccess, setModal } from '../../../redux/slices/gaji9';
+import { dispatch, useSelector } from '@/redux/store';
+import { getSuccess, setModal } from '@/redux/slices/gaji9';
 // Components
-import Scrollbar from '../../../components/Scrollbar';
-import { DefaultAction } from '../../../components/Actions';
-import { Criado, noDados } from '../../../components/Panel';
-import { SkeletonTable } from '../../../components/skeleton';
-import DialogPreviewDoc from '../../../components/CustomDialog';
-import { SearchToolbarSimple } from '../../../components/SearchToolbar';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../../components/table';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { Criado, noDados } from '@/components/Panel';
+import { SkeletonTable } from '@/components/skeleton';
+import DialogPreviewDoc from '@/components/CustomDialog';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 //
 import ClausulaForm from './form-clausula';
 import FiltrarClausulas from './filtrar-clausulas';

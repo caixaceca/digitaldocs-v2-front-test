@@ -1,12 +1,12 @@
 // @mui
 import { Stack, Typography, Box, Paper, Grid } from '@mui/material';
 // utils
-import { ptDate } from '../../../../utils/formatTime';
-import { useSelector } from '../../../../redux/store';
-import { fNumber, fCurrency, fPercent } from '../../../../utils/formatNumber';
+import { ptDate } from '@/utils/formatTime';
+import { useSelector } from '@/redux/store';
+import { fNumber, fCurrency, fPercent } from '@/utils/formatNumber';
 // components
 import TableInfoGarantias from './table-info-garantias';
-import { noDados } from '../../../../components/Panel';
+import { noDados } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

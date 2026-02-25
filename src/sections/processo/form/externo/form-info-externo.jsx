@@ -9,9 +9,8 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 // utils
-import { fillData } from '../../../../utils/formatTime';
-// redux
-import { useSelector, useDispatch } from '../../../../redux/store';
+import { fillData } from '@/utils/formatTime';
+import { useSelector, useDispatch } from '@/redux/store';
 // components
 import {
   FormProvider,
@@ -20,10 +19,10 @@ import {
   RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
-} from '../../../../components/hook-form';
+} from '@/components/hook-form';
 import { Entidades } from '../dados-cliente';
-import GridItem from '../../../../components/GridItem';
-import { ButtonsStepper } from '../../../../components/Actions';
+import GridItem from '@/components/GridItem';
+import { ButtonsStepper } from '@/components/Actions';
 //
 import { entidadesList, submitDados } from '../utils-form-processo';
 

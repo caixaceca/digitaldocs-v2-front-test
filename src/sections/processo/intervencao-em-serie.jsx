@@ -1,16 +1,21 @@
 import { useMemo } from 'react';
 // utils
-import { noEstado, podeArquivar, processoEstadoInicial, gestorEstado } from '../../utils/validarAcesso';
+import {
+  noEstado,
+  gestorEstado,
+  podeArquivar,
+  processoEstadoFinal,
+  processoEstadoInicial,
+} from '@/utils/validarAcesso';
+import useToggle from '@/hooks/useToggle';
+import { applySort, getComparator } from '@/hooks/useTable';
 // redux
-import { resetDados } from '../../redux/slices/stepper';
-import { setModal } from '../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../redux/store';
-// hooks
-import useToggle from '../../hooks/useToggle';
-// components
-import { DefaultAction } from '../../components/Actions';
+import { resetDados } from '@/redux/slices/stepper';
+import { setModal } from '@/redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
 //
 import { ArquivarForm } from './form/form-arquivo';
+import { DefaultAction } from '@/components/Actions';
 import { EncaminharStepper } from './form/intervencao';
 import EnviarContratacao from './info-credito/enviar-contratacao';
 
@@ -24,6 +29,7 @@ export default function Intervencao() {
 
   const { agendado = false, cativos = [], fluxo_id: fluxoId } = processo;
   const { id, estado, uo_origem_id: uoId = '', operacao = '', fluxo = '', status = '' } = processo;
+
   const gerencia = useMemo(() => noEstado(estado?.estado, ['Gerência', 'Caixa Principal']), [estado?.estado]);
   const fromAgencia = useMemo(() => uos?.find(({ id }) => id === uoId)?.tipo === 'Agências', [uoId, uos]);
   const { seguimentos, devolucoes, destinosFora } = useMemo(
@@ -37,6 +43,9 @@ export default function Intervencao() {
 
   return (
     <>
+      {processo?.origem_dform && processoEstadoFinal(meusAmbientes, estado?.estado_id) && (
+        <DefaultAction label="APLICAR NA BANCA" onClick={() => openModal('aplicar-banca', null)} />
+      )}
       {processo?.credito?.situacao_final_mes === 'Aprovado' && !processo?.credito?.enviado_para_contratacao && (
         <EnviarContratacao fab dados={{ ...processo?.credito, processoId: processo?.id }} />
       )}
@@ -128,35 +137,41 @@ export function Encaminhar({ dados }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function destinosProcesso(processo, gerencia) {
-  const devolucoes = [];
-  const seguimentos = [];
-  const destinosFora = [];
   const { segmento = '', fluxo = '', htransicoes = [], destinos = [], uo_origem_id: uoId = '' } = processo;
 
   const aberturaEmpresaSemValGFC =
     gerencia &&
     segmento === 'E' &&
     fluxo === 'Abertura de Conta' &&
-    !htransicoes?.find(({ modo, estado_inicial: estado }) => estado?.includes('Compliance') && modo === 'Seguimento');
+    !htransicoes?.some(({ modo, estado_inicial }) => estado_inicial?.includes('Compliance') && modo === 'Seguimento');
 
-  destinos?.forEach(({ modo, nome, hasopnumero, paralelo, transicao_id: id, is_inicial: inicial, ...res }) => {
-    if (uoId !== res?.uo_id) destinosFora.push(nome);
-    const destino = {
-      id,
-      modo,
-      inicial,
-      paralelo,
-      hasopnumero,
-      label: nome,
-      uo_id: res?.uo_id,
-      estado_final_id: res.estado_id,
-      requer_parecer: res?.requer_parecer,
-    };
-    if (modo === 'Seguimento') {
-      if (aberturaEmpresaSemValGFC && nome?.includes('Compliance')) seguimentos?.push(destino);
-      else if (!aberturaEmpresaSemValGFC) seguimentos?.push(destino);
-    } else devolucoes.push(destino);
-  });
+  const listaOrdenada = applySort(destinos, getComparator('asc', 'nome')) || [];
 
-  return { seguimentos, devolucoes, destinosFora };
+  return listaOrdenada.reduce(
+    (acc, { modo, nome, transicao_id: id, is_inicial: inicial, ...res }) => {
+      if (uoId !== res?.uo_id) acc.destinosFora.push(nome);
+
+      const destino = {
+        id,
+        modo,
+        inicial,
+        label: nome,
+        uo_id: res?.uo_id,
+        paralelo: res.paralelo,
+        hasopnumero: res.hasopnumero,
+        estado_final_id: res.estado_id,
+        requer_parecer: res?.requer_parecer,
+      };
+
+      if (modo === 'Seguimento') {
+        const isCompliance = nome?.includes('Compliance');
+        if (!aberturaEmpresaSemValGFC || isCompliance) acc.seguimentos.push(destino);
+      } else {
+        acc.devolucoes.push(destino);
+      }
+
+      return acc;
+    },
+    { seguimentos: [], devolucoes: [], destinosFora: [] }
+  );
 }

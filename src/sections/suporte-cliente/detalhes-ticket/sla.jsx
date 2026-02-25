@@ -1,9 +1,9 @@
 import React from 'react';
 import { Stack, Paper, Typography } from '@mui/material';
 // utils
-import { ptDateTime } from '../../../utils/formatTime';
+import { ptDateTime } from '@/utils/formatTime';
 // components
-import Label from '../../../components/Label';
+import Label from '@/components/Label';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -24,19 +24,16 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { ptDate } from '../../utils/formatTime';
-import { baralharString } from '../../utils/formatText';
-// hooks
-import useTable from '../../hooks/useTable';
-// redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { updateItem, alterarBalcaopSuccess } from '../../redux/slices/digitaldocs';
+import useTable from '@/hooks/useTable';
+import { ptDate } from '@/utils/formatTime';
+import { useSelector, useDispatch } from '@/redux/store';
+import { updateItem, alterarBalcaopSuccess } from '@/redux/slices/digitaldocs';
 // components
-import GridItem from '../../components/GridItem';
-import { DialogButons } from '../../components/Actions';
-import { TableHeadCustom } from '../../components/table';
-import { DialogTitleAlt } from '../../components/CustomDialog';
-import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObj } from '../../components/hook-form';
+import GridItem from '@/components/GridItem';
+import { DialogButons } from '@/components/Actions';
+import { TableHeadCustom } from '@/components/table';
+import { DialogTitleAlt } from '@/components/CustomDialog';
+import { FormProvider, RHFTextField, RHFDatePicker, RHFAutocompleteObj } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -96,13 +93,13 @@ export function ValidarMultiploForm({ fase, cartoes = [], balcao, onClose }) {
                       <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                         Nº cartão:&nbsp;
                       </Typography>
-                      {baralharString(item?.numero)}
+                      {item?.numero}
                     </Typography>
                     <Typography variant="subtitle2" noWrap sx={{ color: 'info.main' }}>
                       <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }} noWrap>
                         {fase === 'Emissão' ? 'Tipo' : 'Nome'}:&nbsp;
                       </Typography>
-                      {fase === 'Emissão' ? item?.tipo : baralharString(item?.nome)}
+                      {fase === 'Emissão' ? item?.tipo : item?.nome}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ width: 1 }}>

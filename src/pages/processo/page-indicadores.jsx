@@ -3,16 +3,16 @@ import { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 // utils
-import { useSelector } from '../../redux/store';
-import useSettings from '../../hooks/useSettings';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import { useSelector } from '@/redux/store';
+import useSettings from '@/hooks/useSettings';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
-import Page from '../../components/Page';
-import TabsWrapper from '../../components/TabsWrapper';
+import Page from '@/components/Page';
+import TabsWrapper from '@/components/TabsWrapper';
 // sections
-import { DiscoFicheiros } from '../../sections/indicadores/disco-ficheiros';
-import EstatisticaCredito from '../../sections/indicadores/estatistica-credito';
-import { TotalProcessos, Duracao, SGQ } from '../../sections/indicadores/Indicadores';
+import { DiscoFicheiros } from '@/sections/indicadores/disco-ficheiros';
+import EstatisticaCredito from '@/sections/indicadores/estatistica-credito';
+import { TotalProcessos, Duracao, SGQ } from '@/sections/indicadores/Indicadores';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

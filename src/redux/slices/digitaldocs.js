@@ -25,6 +25,7 @@ const initialState = {
   pdfPreview: null,
   filePreview: null,
   selectedItem: null,
+  erros: [],
   cartoes: [],
   pesquisa: [],
   arquivos: [],
@@ -39,6 +40,7 @@ const slice = createSlice({
   initialState,
   reducers: {
     resetProcesso(state) {
+      state.erros = [];
       state.processo = null;
       state.filePreview = null;
       state.objectURLs.forEach(URL.revokeObjectURL);
@@ -158,10 +160,8 @@ export function getFromDigitalDocs(item, params) {
           break;
         }
         case 'cartao': {
-          const response = await axios.get(
-            `${API_FORMINGA_URL}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`,
-            options
-          );
+          const apiUrl = `${API_FORMINGA_URL}/v1/cartoes/validar/emissoes/detalhe/${params?.id}`;
+          const response = await axios.get(apiUrl, options);
           dispatch(slice.actions.getSuccess({ item: 'selectedItem', dados: response.data }));
           break;
         }
@@ -378,12 +378,10 @@ export function getAnexo(item, params) {
 
       let url = anexo?.url || '';
       if (!url) {
-        const response = await axios.get(
-          `${API_FORMINGA_URL}/v2/processos/anexo/file/${perfilId}?anexo_id=${anexo?.id}&processo_id=${
-            params?.processoId
-          }&da_entidade=${!!anexo?.entidade}`,
-          { ...options, responseType: 'arraybuffer' }
-        );
+        const headers = { ...options, responseType: 'arraybuffer' };
+        const query = `anexo_id=${anexo?.id}&processo_id=${params?.processoId}&da_entidade=${!!anexo?.entidade}`;
+        // const query = `anexo_id=${anexo?.id}&anexo=${anexo?.anexo}&processo_id=${params?.processoId}&da_entidade=${!!anexo?.entidade}`;
+        const response = await axios.get(`${API_FORMINGA_URL}/v2/processos/anexo/file/${perfilId}?${query}`, headers);
         const file = await new File([response.data], anexo?.nome, { type: anexo?.conteudo || 'application/pdf' });
         url = URL.createObjectURL(file);
         dispatch(slice.actions.getFileSuccess({ url, anexo: anexo?.anexo }));
@@ -425,9 +423,10 @@ export function createProcesso(item, dados, params) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function createItem(item, dados, params) {
+export function createItem(item, body, params) {
   return async (dispatch, getState) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
+    if (item === 'aplicar') dispatch(slice.actions.getSuccess({ item: 'erros', dados: [] }));
 
     try {
       const accessToken = await getAccessToken();
@@ -438,6 +437,7 @@ export function createItem(item, dados, params) {
         await axios.put(`${API_FORMINGA_URL}${apiUrl}`, params?.anexo, options);
       }
       const apiUrl =
+        (item === 'aplicar' && `${API_FORMINGA_URL}/api/v1/dform/aplicar/banka`) ||
         (item === 'seguros' && `${API_FORMINGA_URL}/v2/processos/${params?.processoId}/credito/seguros`) ||
         (item === 'parecer-credito' && `${API_FORMINGA_URL}/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
         (item === 'garantias' &&
@@ -445,12 +445,14 @@ export function createItem(item, dados, params) {
         '';
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
-        const response = await axios.post(apiUrl, dados, options);
+        const response = await axios.post(apiUrl, body, options);
         if (item === 'garantias' || item === 'seguros')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
+      if (item === 'aplicar')
+        dispatch(slice.actions.getSuccess({ item: 'erros', dados: error?.response?.data?.mensagens }));
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {
       dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: false }));
@@ -488,6 +490,7 @@ export function updateItem(item, dados, params) {
         (item === 'confirmar emissao por data' && `/v1/cartoes/validar/todas/emissoes`) ||
         (item === 'desarquivar' && `/v2/processos/desarquivar/${perfilId}/${params?.id}`) ||
         (item === 'alterar balcao' && `/v1/cartoes/alterar/balcao/entrega/${params?.id}`) ||
+        (item === 'escalaoDecisao' && `/v2/processos/${params?.id}/redefinir/escalao/credito`) ||
         (item === 'pendencia' && `/v2/processos/pender/${perfilId}?processo_id=${params?.id}`) ||
         (item === 'domiciliar' && `/v2/processos/domiciliar/${perfilId}?processo_id=${params?.id}`) ||
         (item === 'confirmar rececao multiplo' && `/v1/cartoes/validar/rececoes?balcao=${params?.balcao}`) ||

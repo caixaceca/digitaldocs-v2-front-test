@@ -8,18 +8,13 @@ import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
+import { useSelector } from '@/redux/store';
 import { seguroSchema } from './schemaFileds';
-import { useSelector } from '../../../../../redux/store';
 // components
-import {
-  RHFTextField,
-  RHFNumberField,
-  RHFAutocompleteSmp,
-  RHFAutocompleteObj,
-} from '../../../../../components/hook-form';
-import GridItem from '../../../../../components/GridItem';
-import { SemDados } from '../../../../../components/Panel';
-import { AddItem, DefaultAction } from '../../../../../components/Actions';
+import GridItem from '@/components/GridItem';
+import { SemDados } from '@/components/Panel';
+import { AddItem, DefaultAction } from '@/components/Actions';
+import { RHFTextField, RHFNumberField, RHFAutocompleteSmp, RHFAutocompleteObj } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

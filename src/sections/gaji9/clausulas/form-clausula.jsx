@@ -22,13 +22,13 @@ import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 // utils
-import { vdt } from '../../../utils/formatObject';
-import { PATH_DIGITALDOCS } from '../../../routes/paths';
-import { numeroParaLetra } from '../../../utils/formatText';
+import { vdt } from '@/utils/formatObject';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { numeroParaLetra } from '@/utils/formatText';
 // redux
-import { useSelector, useDispatch } from '../../../redux/store';
-import { updateDados, resetDados, backStep, gotoStep } from '../../../redux/slices/stepper';
-import { getSuccess, getFromGaji9, createItem, updateItem } from '../../../redux/slices/gaji9';
+import { useSelector, useDispatch } from '@/redux/store';
+import { updateDados, resetDados, backStep, gotoStep } from '@/redux/slices/stepper';
+import { getSuccess, getFromGaji9, createItem, updateItem } from '@/redux/slices/gaji9';
 // components
 import {
   FormProvider,
@@ -36,13 +36,13 @@ import {
   RHFNumberField,
   RHFAutocompleteObj,
   RHFAutocompleteSmp,
-} from '../../../components/hook-form';
-import Steps from '../../../components/Steps';
-import { SemDados, newLineText } from '../../../components/Panel';
-import { DialogTitleAlt, DialogConfirmar } from '../../../components/CustomDialog';
-import { AddItem, DefaultAction, ButtonsStepper } from '../../../components/Actions';
+} from '@/components/hook-form';
+import Steps from '@/components/Steps';
+import { SemDados } from '@/components/Panel';
+import { DialogTitleAlt, DialogConfirmar } from '@/components/CustomDialog';
+import { AddItem, DefaultAction, ButtonsStepper } from '@/components/Actions';
 //
-import { sitClausulas } from '../../../_mock';
+import { sitClausulas } from '@/_mock';
 import { listaTitrulares, listaGarantias, subTiposGarantia } from '../applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -442,14 +442,14 @@ function Resumo({ onClose, clausula }) {
           <Stack direction="row" key={`res_alinea_${index}`} spacing={1} sx={{ py: 0.75 }}>
             <Typography variant="subtitle2">{num}.</Typography>
             <Stack>
-              <Typography variant="body2" sx={{ textAlign: 'justify' }}>
-                {newLineText(conteudo)}
+              <Typography variant="body2" sx={{ textAlign: 'justify', whiteSpace: 'pre-line' }}>
+                {conteudo}
               </Typography>
               {alineas?.map(({ conteudo, numero_ordem: num }, index1) => (
                 <Stack direction="row" key={`res_alinea_${index}_sub_alinea_${index1}`} spacing={1} sx={{ py: 0.25 }}>
                   <Typography variant="subtitle2">{numeroParaLetra(num)}.</Typography>
-                  <Typography variant="body2" sx={{ textAlign: 'justify' }}>
-                    {newLineText(conteudo)}
+                  <Typography variant="body2" sx={{ textAlign: 'justify', whiteSpace: 'pre-line' }}>
+                    {conteudo}
                   </Typography>
                 </Stack>
               ))}
@@ -491,7 +491,11 @@ function TableRowItem({ title, text = '', item = null }) {
           {title}
         </Typography>
       </TableCell>
-      <TableCell sx={{ minWidth: '100% !important' }}>{newLineText(text) || item}</TableCell>
+      <TableCell sx={{ minWidth: '100% !important' }}>
+        <Typography variant="body2" sx={{ textAlign: 'justify', whiteSpace: 'pre-line' }}>
+          {text || item}
+        </Typography>
+      </TableCell>
     </TableRow>
   ) : null;
 }

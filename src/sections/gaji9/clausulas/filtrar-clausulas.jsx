@@ -4,12 +4,12 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-// redux
-import { getFromGaji9 } from '../../../redux/slices/gaji9';
-import { useDispatch, useSelector } from '../../../redux/store';
-//
-import { sitClausulas } from '../../../_mock';
+// utils
+import { getFromGaji9 } from '@/redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
 import { listaTitrulares, listaGarantias } from '../applySortFilter';
+//
+import { sitClausulas } from '@/_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -6,12 +6,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 // utils
-import { ptDateTime } from '../../utils/formatTime';
-import { getIntranetFile, getFileThumb } from '../../utils/formatFile';
+import { ptDateTime } from '@/utils/formatTime';
+import { getIntranetFile, getFileThumb } from '@/utils/formatFile';
 //
 import { Criado } from '../Panel';
 import { DefaultAction } from '../Actions';
-import { IconClick } from '../../assets/icons';
+import { IconClick } from '@/assets/icons';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

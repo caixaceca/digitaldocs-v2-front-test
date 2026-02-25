@@ -10,21 +10,15 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 // utils
+import { vdt } from '@/utils/formatObject';
+import { fillData } from '@/utils/formatTime';
 import { submitDados } from '../utils-form-processo';
-import { vdt } from '../../../../utils/formatObject';
-import { fillData } from '../../../../utils/formatTime';
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { getComparator, applySort } from '../../../../hooks/useTable';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getComparator, applySort } from '@/hooks/useTable';
 // components
-import {
-  FormProvider,
-  RHFTextField,
-  RHFDataEntrada,
-  RHFNumberField,
-  RHFAutocompleteObj,
-} from '../../../../components/hook-form';
-import GridItem from '../../../../components/GridItem';
-import { ButtonsStepper } from '../../../../components/Actions';
+import GridItem from '@/components/GridItem';
+import { ButtonsStepper } from '@/components/Actions';
+import { FormProvider, RHFTextField, RHFDataEntrada, RHFNumberField, RHFAutocompleteObj } from '@/components/hook-form';
 // sections
 import { listaTitrulares, listaProdutos } from '../../../gaji9/applySortFilter';
 

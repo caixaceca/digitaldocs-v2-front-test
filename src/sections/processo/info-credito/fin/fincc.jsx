@@ -5,15 +5,15 @@ import { Packer, Document, Paragraph } from 'docx';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
-import { useSelector } from '../../../../redux/store';
+import { useSelector } from '@/redux/store';
 import { mapearPayloadParaFINCC } from './dados-mapper';
-import { CabecalhoWord, RodapeWord, createStyles } from '../../../../components/exportar-dados/word';
+import { CabecalhoWord, RodapeWord, createStyles } from '@/components/exportar-dados/word';
 // components
 import { custos } from './custos';
 import { assinaturas } from './assinaturas';
 import { identificacao } from './identificacao';
+import DownloadModeloDoc from '@/components/Actions';
 import { principaisCaracteristicas } from './caracteristicas';
-import DownloadModeloDoc from '../../../../components/Actions';
 import { planoFinanceiro, informacaoGeral } from './informacao-geral';
 
 // ---------------------------------------------------------------------------------------------------------------------

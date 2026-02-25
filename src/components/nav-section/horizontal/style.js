@@ -3,9 +3,8 @@ import Popover from '@mui/material/Popover';
 import { alpha, styled } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 // utils
-import cssStyles from '../../../utils/cssStyles';
-// config
-import { NAVBAR } from '../../../config';
+import { NAVBAR } from '@/config';
+import cssStyles from '@/utils/cssStyles';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

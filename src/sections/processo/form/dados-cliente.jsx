@@ -5,11 +5,11 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import InputAdornment from '@mui/material/InputAdornment';
 // utils
-import { fluxosGmkt, bancaDigital } from '../../../utils/validarAcesso';
+import { fluxosGmkt, bancaDigital } from '@/utils/validarAcesso';
 // components
-import GridItem from '../../../components/GridItem';
-import { AddItem, DeleteBox } from '../../../components/Actions';
-import { RHFTextField, RHFNumberField, RHFDataEntrada } from '../../../components/hook-form';
+import GridItem from '@/components/GridItem';
+import { AddItem, DeleteBox } from '@/components/Actions';
+import { RHFTextField, RHFNumberField, RHFDataEntrada } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

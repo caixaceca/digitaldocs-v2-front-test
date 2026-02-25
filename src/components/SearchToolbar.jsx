@@ -171,7 +171,7 @@ export function SearchToolbarProcessos({
               sx={{ width: { md: 170 } }}
               options={['Particulares', 'Empresas']}
               renderInput={(params) => <TextField {...params} label="Segmento" />}
-              onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento')}
+              onChange={(event, newValue) => setItemValue(newValue, setSegmento, 'segmento-processo')}
             />
           )}
           {(tab === 'Retidos' || tab === 'Atribuídos') && (
@@ -189,12 +189,12 @@ export function SearchToolbarProcessos({
         </Stack>
       )}
       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexGrow: 1 }}>
-        <SearchField item="filterP" filter={filter} setFilter={setFilter} />
+        <SearchField item="filter-processo" filter={filter} setFilter={setFilter} />
         {(filter || segmento) && (
           <RemoverFiltros
             removerFiltro={() => {
-              setItemValue('', setFilter, 'filterP');
-              setItemValue('', setSegmento, 'segmento');
+              setItemValue('', setFilter, 'filter-processo');
+              setItemValue('', setSegmento, 'segmento-processo');
             }}
           />
         )}

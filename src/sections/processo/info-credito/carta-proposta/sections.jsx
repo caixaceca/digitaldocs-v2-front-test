@@ -2,14 +2,15 @@
 import { TextRun } from 'docx';
 // utils
 import { gerarTabela } from '../fin/gerar-tabela';
-import { fCurrency, fPercent } from '../../../../utils/formatNumber';
+import { extrairDescricaoGarantias } from './garantias';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export const condicoesGerais = (dados) =>
   gerarTabela({
     columns: 2,
-    columnsWidth: [40, 60],
+    columnsWidth: [35, 65],
     title: 'CONDIÇÕES GERAIS',
     rows: [
       { cells: 2, label: 'Modalidade', value: 'Mútuo, na modalidade de CrediCaixa' },
@@ -17,14 +18,14 @@ export const condicoesGerais = (dados) =>
         cells: 2,
         label: `Montante aprovado`,
         value: `${fCurrency(dados?.montante) || 'XX CVE'}, corresponde a ${
-          fCurrency(dados?.meses_vencimento) || 'XX'
+          dados?.meses_vencimento || 'XX'
         } meses de vencimento do proponente.`,
       },
       {
         cells: 2,
         label: `Desembolso`,
         value: `Numa única tranche no prazo máximo de ${
-          dados?.prazo_entrega_contrato || 'XX'
+          dados?.prazo_entrega_contrato || '15'
         } dias úteis após entrega do contrato com as assinaturas reconhecidas perante o Notário.`,
       },
       { cells: 2, label: `Forma de utilização`, value: 'Imediata, na data de disponibilização do crédito.' },
@@ -37,7 +38,9 @@ export const condicoesGerais = (dados) =>
         cells: 2,
         label: `Taxa de juro anual nominal (TAN)`,
         value: [
-          new TextRun({ text: `${fPercent(dados?.tan) || 'X%'} ao ano, sujeito às alterações do preçário da Caixa` }),
+          new TextRun({
+            text: `${fPercent(dados?.tan, 3) || 'X%'} ao ano, sujeito às alterações do preçário da Caixa`,
+          }),
           new TextRun({
             text: 'Os juros serão contados sobre o capital utilizado e efetivamente em dívida e serão incluídos nas prestações de reembolso.',
             break: 2,
@@ -47,37 +50,14 @@ export const condicoesGerais = (dados) =>
       {
         cells: 2,
         label: `TAEG`,
-        value: `${fPercent(dados?.taeg) || 'X%'} conforme cálculo efetuado nos termos legais.`,
+        value: `${fPercent(dados?.taeg, 3) || 'X%'} conforme cálculo efetuado nos termos legais.`,
       },
       {
         cells: 2,
         label: `Taxa de juro de mora`,
-        value: `${fPercent(dados?.taxa_mora) || 'X%'} a.a. que acresce à TAN, em caso de mora.`,
+        value: `${fPercent(dados?.taxa_mora) || '2%'} a.a. que acresce à TAN, em caso de mora.`,
       },
-      {
-        cells: 2,
-        label: `Garantia`,
-        value:
-          dados?.fiadores?.length > 0
-            ? [
-                new TextRun({
-                  text: 'Fiança solidária sem benefício de excussão prévia, prestada por:',
-                  bold: false,
-                }),
-                ...dados.fiadores.flatMap((f, index) => [
-                  new TextRun({
-                    text: `${index + 1}. ${f.nome}`,
-                    break: 1,
-                    bold: true,
-                  }),
-                  new TextRun({
-                    text: `, Estado Civil: ${f.estadoCivil}, NIF: ${f.nif}.`,
-                    bold: false,
-                  }),
-                ]),
-              ]
-            : 'Garantia constituída por livrança subscrita pelo proponente.',
-      },
+      { cells: 2, label: `Garantia`, value: extrairDescricaoGarantias(dados?.garantias_brutas) },
       {
         cells: 2,
         label: `Reembolso`,
@@ -93,7 +73,7 @@ export const condicoesGerais = (dados) =>
 export const encargos = (dados) =>
   gerarTabela({
     columns: 2,
-    columnsWidth: [40, 60],
+    columnsWidth: [35, 65],
     title: 'ENCARGOS INICIAIS',
     rows: [
       {
@@ -132,7 +112,7 @@ export const encargos = (dados) =>
 export const obrigacoes = (dados) =>
   gerarTabela({
     columns: 2,
-    columnsWidth: [40, 60],
+    columnsWidth: [35, 65],
     title: 'OUTRAS OBRIGAÇÕES',
     rows: [
       {
@@ -143,9 +123,16 @@ export const obrigacoes = (dados) =>
       },
       {
         cells: 2,
+        label: 'Seguros',
+        value: dados?.tem_seguro
+          ? `Obrigatória a manutenção do seguro (${dados?.descricao_seguro}) durante a vigência do contrato.`
+          : 'Não aplicável (salvo condições específicas de preçário).',
+      },
+      {
+        cells: 2,
         label: 'Contratualização',
         value: `O contrato deverá ser assinado e devolvido no prazo máximo de ${
-          dados?.prazo_entrega_contrato ?? 'XX'
+          dados?.prazo_entrega_contrato ?? '15'
         } dias úteis, sob pena da proposta ser considerada sem efeito.`,
       },
     ],

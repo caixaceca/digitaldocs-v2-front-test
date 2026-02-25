@@ -4,8 +4,8 @@ import Paper from '@mui/material/Paper';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 // utils
-import { fData } from '../../utils/formatNumber';
-import { getFileData } from '../../utils/formatFile';
+import { fData } from '@/utils/formatNumber';
+import { getFileData } from '@/utils/formatFile';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

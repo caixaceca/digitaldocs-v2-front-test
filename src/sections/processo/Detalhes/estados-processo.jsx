@@ -7,16 +7,17 @@ import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 // utils
-import { ptDateTime, fDistance, dataMaior } from '../../../utils/formatTime';
-import { pertencoEstadoId, gestorEstado } from '../../../utils/validarAcesso';
+import { ptDateTime, fDistance, dataMaior } from '@/utils/formatTime';
+import { pertencoEstadoId, gestorEstado } from '@/utils/validarAcesso';
 // redux
-import { setModal } from '../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../redux/store';
+import { setModal } from '@/redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
 // components
-import { DefaultAction } from '../../../components/Actions';
-import { Criado, newLineText } from '../../../components/Panel';
-import { AvatarBadge } from '../../../components/custom-avatar';
+import { Criado } from '@/components/Panel';
+import { DefaultAction } from '@/components/Actions';
+import { AvatarBadge } from '@/components/custom-avatar';
 //
 import Pareceres from './historico-pareceres';
 import { Encaminhar, destinosProcesso } from '../intervencao-em-serie';
@@ -173,16 +174,14 @@ export function Info({ dados, colaboradores }) {
   return (
     <>
       {dados?.motivo && (
-        <Typography sx={{ pt: 1.5 }}>
-          <Typography component="span" variant="body2" sx={{ color: 'info.main' }}>
-            Motivo:&nbsp;
-          </Typography>
-          {dados?.motivo}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ pt: 1 }}>
+          <ErrorOutlineIcon color="info" sx={{ mr: 0.5, width: 18, height: 18 }} />
+          <Typography>{dados?.motivo}</Typography>
+        </Stack>
       )}
       {(dados?.observacao || dados?.descritivo) && !dados?.temPareceres && (
-        <Typography sx={{ textAlign: 'justify', pt: 1 }}>
-          {newLineText(dados?.observacao || dados?.descritivo)}
+        <Typography sx={{ pt: 1, textAlign: 'justify', whiteSpace: 'pre-line' }}>
+          {dados?.observacao || dados?.descritivo}
         </Typography>
       )}
 

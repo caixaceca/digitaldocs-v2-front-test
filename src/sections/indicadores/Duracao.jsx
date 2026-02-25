@@ -14,21 +14,17 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fNumber, fNumber2, converterSegundos } from '../../utils/formatNumber';
-// hooks
-import useTable, { getComparator, applySort } from '../../hooks/useTable';
-// redux
-import { useSelector } from '../../redux/store';
+import { meses } from '@/_mock';
+import { useSelector } from '@/redux/store';
+import { fNumber, converterSegundos } from '@/utils/formatNumber';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // components
-import GridItem from '../../components/GridItem';
-import Chart, { useChart } from '../../components/chart';
-import { SkeletonTable } from '../../components/skeleton';
-import { ExportarIndicadores } from '../../components/exportar-dados/excel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-//
+import GridItem from '@/components/GridItem';
+import Chart, { useChart } from '@/components/chart';
+import { SkeletonTable } from '@/components/skeleton';
+import { ExportarIndicadores } from '@/components/exportar-dados/excel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 import { IndicadorItem, CardInfo, TableIndicadores, TabView, dadosResumo } from './Indicadores';
-// _mock_
-import { meses } from '../../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -215,7 +211,7 @@ export function Conclusao({ indicadores }) {
   const chartOptions = useChart({
     stroke: { show: false },
     plotOptions: { bar: { columnWidth: '25%' } },
-    tooltip: { y: { formatter: (value) => fNumber2(value) } },
+    tooltip: { y: { formatter: (value) => fNumber(value, 2) } },
     xaxis: { categories: conclusaoByItem?.map(({ label }) => label) },
     grid: { strokeDashArray: 2, xaxis: { lines: { show: false } } },
     yaxis: { title: { text: 'Dias' }, labels: { formatter: (value) => fNumber(value) } },

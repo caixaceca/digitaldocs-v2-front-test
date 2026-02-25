@@ -3,25 +3,29 @@ import { pdf } from '@react-pdf/renderer';
 import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // utils
-import useToggle from '../../../../../hooks/useToggle';
+import { updateItem } from '@/redux/slices/digitaldocs';
+import { useDispatch, useSelector } from '@/redux/store';
+import useToggle, { useToggle1 } from '@/hooks/useToggle';
 import { appendAnexos } from '../../../form/anexos/utils-anexos';
-import { updateItem } from '../../../../../redux/slices/digitaldocs';
-import { useDispatch, useSelector } from '../../../../../redux/store';
-import { getFromParametrizacao } from '../../../../../redux/slices/parametrizacao';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 //
 import FichaPdf from './index';
-import { DefaultAction } from '../../../../../components/Actions';
-import { DialogConfirmar } from '../../../../../components/CustomDialog';
+import { DefaultAction } from '@/components/Actions';
+import DialogPreviewDoc, { DialogConfirmar } from '@/components/CustomDialog';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function AnexarFicha({ dados }) {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
+
+  const [url, setUrl] = useState('');
   const [gerando, setGerando] = useState(false);
   const { toggle: open, onOpen, onClose } = useToggle();
+  const { toggle1: open1, onOpen1, onClose1 } = useToggle1();
 
   const { cc } = useSelector((state) => state.intranet);
   const { checklist } = useSelector((state) => state.parametrizacao);
@@ -37,7 +41,7 @@ export default function AnexarFicha({ dados }) {
     dispatch(getFromParametrizacao('checklist', { fluxoId: processo?.fluxo_id, reset: { val: [] } }));
   }, [dispatch, processo?.fluxo_id]);
 
-  const handleAnexarNoProcesso = async () => {
+  const anexarNoProcesso = async () => {
     setGerando(true);
     try {
       const doc = <FichaPdf dados={{ ...dados, analista: cc?.nome, uo: cc?.uo_label }} />;
@@ -56,16 +60,47 @@ export default function AnexarFicha({ dados }) {
     }
   };
 
+  const onPreview = async () => {
+    onOpen1();
+    setGerando(true);
+    try {
+      const doc = <FichaPdf dados={{ ...dados, analista: cc?.nome, uo: cc?.uo_label }} />;
+      const blob = await pdf(doc).toBlob();
+      const blobUrl = URL.createObjectURL(blob);
+      setUrl(blobUrl);
+    } catch {
+      enqueueSnackbar('Erro ao processar ficheiro', { variant: 'error' });
+    } finally {
+      setGerando(false);
+    }
+  };
+
+  useEffect(
+    () => () => {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    },
+    [url]
+  );
+
   return (
-    <>
+    <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
+      <DefaultAction button icon="pdf" onClick={() => onPreview()} label="Pré-visualizar" />
       <DefaultAction button icon="pdf" onClick={onOpen} variant="contained" label="ANEXAR AO PROCESSO" />
+      {open1 && (
+        <DialogPreviewDoc
+          onClose={onClose1}
+          params={{ titulo: 'Ficha de Análise e Parecer de Crédito', isLoading: gerando, url }}
+        />
+      )}
       {open && (
         <DialogConfirmar
           color="success"
           onClose={onClose}
           title="Anexar Ficha"
           isSaving={gerando || isSaving}
-          handleOk={handleAnexarNoProcesso}
+          handleOk={anexarNoProcesso}
           content={
             <>
               <Typography>
@@ -80,6 +115,6 @@ export default function AnexarFicha({ dados }) {
           }
         />
       )}
-    </>
+    </Stack>
   );
 }

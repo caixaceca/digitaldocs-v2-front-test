@@ -8,8 +8,8 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // utils
-import { fData } from '../../utils/formatNumber';
-import { getFileThumb, getFileData } from '../../utils/formatFile';
+import { fData } from '@/utils/formatNumber';
+import { getFileThumb, getFileData } from '@/utils/formatFile';
 //
 import Image from '../Image';
 

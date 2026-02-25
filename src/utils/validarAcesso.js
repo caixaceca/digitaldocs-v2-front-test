@@ -27,64 +27,93 @@ export function temNomeacao(colaborador) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function emailCheck(mail, check = 'vc.axiac@arove.ordnavi') {
-  if (typeof mail !== 'string') return false;
-  const reversedMail = mail.split('').reverse().join('').toLowerCase();
-  return reversedMail === check.toLowerCase();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function ColaboradoresAcesso(colaboradores, cc, isAdmin, meusAmbientes) {
-  let dados = [];
-  if (isAdmin || cc?.nomeacao === 'Administrador Executivo') dados = colaboradores;
-  else if (cc?.uo_label === 'DCN')
-    dados = colaboradores?.filter(({ uo_tipo: tipo, uo_regiao: regiao }) => tipo === 'Agências' && regiao === 'Norte');
-  else if (cc?.uo_label === 'DCS')
-    dados = colaboradores?.filter(({ uo_tipo: tipo, uo_regiao: regiao }) => tipo === 'Agências' && regiao === 'Sul');
-  else if (cc?.uo_label === 'DOP') dados = colaboradores?.filter(({ uo_label: label }) => label?.includes('DOP'));
-  else if (UosGerente(meusAmbientes)?.length > 0)
-    dados = colaboradores?.filter(({ uo_id: uoId }) => UosGerente(meusAmbientes)?.includes(Number(uoId)));
-  else if (temNomeacao(cc)) dados = colaboradores?.filter(({ uo_id: uoId }) => Number(uoId) === Number(cc?.uo_id));
-  else dados = colaboradores?.filter(({ id }) => id === cc?.id);
+  if (!colaboradores) return [];
 
-  return dados?.map(({ id: cid, perfil_id: id, nome, uo_id: uoId }) => ({ id, cid, label: nome, uoId }));
+  const uoLabel = cc?.uo_label;
+  const uosGerenciadas = UosGerente(meusAmbientes) || [];
+  const isExecutivo = cc?.nomeacao === 'Administrador Executivo';
+
+  const filtrar = () => {
+    if (isAdmin || isExecutivo) return colaboradores;
+
+    if (uoLabel === 'DCN') return colaboradores.filter((c) => c.uo_tipo === 'Agências' && c.uo_regiao === 'Norte');
+    if (uoLabel === 'DCS') return colaboradores.filter((c) => c.uo_tipo === 'Agências' && c.uo_regiao === 'Sul');
+    if (uoLabel === 'DOP') return colaboradores.filter((c) => c.uo_label?.includes('DOP'));
+
+    if (uosGerenciadas.length > 0) return colaboradores.filter((c) => uosGerenciadas.includes(Number(c.uo_id)));
+    if (temNomeacao(cc)) return colaboradores.filter((c) => Number(c.uo_id) === Number(cc?.uo_id));
+
+    return colaboradores.filter((c) => c.id === cc?.id);
+  };
+
+  const dadosFiltrados = filtrar();
+
+  return dadosFiltrados.map(({ id: cid, perfil_id: id, nome, uo_id: uoId }) => ({ id, cid, label: nome, uoId }));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function UosAcesso(uos, cc, acessoAll, meusAmbientes, key) {
-  let uosList = [];
-  if (acessoAll || cc?.nomeacao === 'Administrador Executivo') uosList = uos;
-  else if (cc?.uo_label === 'DCN')
-    uosList = uos?.filter(({ tipo, regiao }) => tipo === 'Agências' && regiao === 'Norte');
-  else if (cc?.uo_label === 'DCS') uosList = uos?.filter(({ tipo, regiao }) => tipo === 'Agências' && regiao === 'Sul');
-  else if (cc?.uo_label === 'DOP') uosList = uos?.filter(({ label }) => label?.includes('DOP'));
-  else if (meusAmbientes?.length > 0)
-    uosList = uos?.filter(({ id }) => meusAmbientes?.map(({ uo_id: uoId }) => Number(uoId))?.includes(Number(id)));
-  else uosList = uos?.filter(({ id }) => id === cc?.uo_id);
+  if (!uos) return [];
 
-  return uosList?.map(({ id, balcao, label }) => ({ id: key === 'balcao' ? balcao : id, label }));
+  const uoLabel = cc?.uo_label;
+  const isExecutivo = cc?.nomeacao === 'Administrador Executivo';
+  const idsAmbientes = new Set((meusAmbientes || []).map((m) => Number(m.uo_id)));
+
+  const obterListaFiltrada = () => {
+    if (acessoAll || isExecutivo) return uos;
+
+    if (uoLabel === 'DCN') return uos.filter((u) => u.tipo === 'Agências' && u.regiao === 'Norte');
+    if (uoLabel === 'DCS') return uos.filter((u) => u.tipo === 'Agências' && u.regiao === 'Sul');
+    if (uoLabel === 'DOP') return uos.filter((u) => u.label?.includes('DOP'));
+
+    if (idsAmbientes.size > 0) return uos.filter((u) => idsAmbientes.has(Number(u.id)));
+
+    return uos.filter((u) => u.id === cc?.uo_id);
+  };
+
+  const listaFinal = obterListaFiltrada();
+
+  return listaFinal.map(({ id, balcao, label }) => ({ id: key === 'balcao' ? balcao : id, label }));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function estadosAcesso(uos, cc, isAdmin, estados, meusAmbientes) {
-  let estadosList = [];
-  const uosDOP = uos?.filter(({ label }) => label?.includes('DOP'))?.map(({ id }) => id);
-  const uosDCS = uos?.filter(({ tipo, regiao }) => tipo === 'Agências' && regiao === 'Sul')?.map(({ id }) => id);
-  const uosDCN = uos?.filter(({ tipo, regiao }) => tipo === 'Agências' && regiao === 'Norte')?.map(({ id }) => id);
+  if (!estados) return [];
 
-  if (isAdmin || cc?.nomeacao === 'Administrador Executivo') estadosList = estados;
-  else if (cc?.uo_label === 'DCN') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCN?.includes(Number(uoId)));
-  else if (cc?.uo_label === 'DCS') estadosList = estados?.filter(({ uo_id: uoId }) => uosDCS?.includes(Number(uoId)));
-  else if (cc?.uo_label === 'DOP') estadosList = estados?.filter(({ uo_id: uoId }) => uosDOP?.includes(Number(uoId)));
-  else estadosList = meusAmbientes?.filter((item) => item?.id > 0);
+  const uoLabel = cc?.uo_label;
+  const isExecutivo = cc?.nomeacao === 'Administrador Executivo';
 
-  return applySort(
-    estadosList?.map(({ id, nome }) => ({ id, label: nome })),
-    getComparator('asc', 'label')
-  );
+  const obterEstadosFiltrados = () => {
+    if (isAdmin || isExecutivo) return estados;
+
+    const getUoIdsByCritery = (filterFn) => new Set(uos?.filter(filterFn).map((u) => Number(u.id)));
+
+    if (uoLabel === 'DCN') {
+      const uosDCN = getUoIdsByCritery((u) => u.tipo === 'Agências' && u.regiao === 'Norte');
+      return estados.filter((e) => uosDCN.has(Number(e.uo_id)));
+    }
+
+    if (uoLabel === 'DCS') {
+      const uosDCS = getUoIdsByCritery((u) => u.tipo === 'Agências' && u.regiao === 'Sul');
+      return estados.filter((e) => uosDCS.has(Number(e.uo_id)));
+    }
+
+    if (uoLabel === 'DOP') {
+      const uosDOP = getUoIdsByCritery((u) => u.label?.includes('DOP'));
+      return estados.filter((e) => uosDOP.has(Number(e.uo_id)));
+    }
+
+    const idsMeusAmbientes = new Set(meusAmbientes?.filter((i) => i.id > 0).map((i) => Number(i.id)));
+    return estados.filter((e) => idsMeusAmbientes.has(Number(e.id)));
+  };
+
+  const listaFinal = obterEstadosFiltrados();
+  const formatados = listaFinal.map(({ id, nome }) => ({ id, label: nome }));
+
+  return applySort(formatados, getComparator('asc', 'label'));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -166,12 +195,26 @@ export function estadoFixo(assunto) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export function emailCheck(mail, check = 'vc.axiac@arove.ordnavi') {
+  if (typeof mail !== 'string') return false;
+  const reversedMail = mail.split('').reverse().join('').toLowerCase();
+  return reversedMail === check.toLowerCase();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export function noEstado(estado, labels) {
   return !!labels?.find((row) => estado?.includes(row));
 }
 
 export function processoEstadoInicial(meusAmbientes, estadoId) {
-  return !!meusAmbientes?.find(({ id }) => id === Number(estadoId))?.isinicial;
+  const estado = meusAmbientes?.find(({ id }) => id === Number(estadoId));
+  return !!(estado?.isinicial === true);
+}
+
+export function processoEstadoFinal(meusAmbientes, estadoId) {
+  const estado = meusAmbientes?.find(({ id }) => id === Number(estadoId));
+  return !!(estado?.isfinal === true && estado?.isinicial === false);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

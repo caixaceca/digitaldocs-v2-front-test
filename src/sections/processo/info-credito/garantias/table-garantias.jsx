@@ -7,17 +7,17 @@ import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
 // utils
-import { deleteItem } from '../../../../redux/slices/digitaldocs';
-import { useSelector, useDispatch } from '../../../../redux/store';
-import { fCurrency, fPercent } from '../../../../utils/formatNumber';
+import { deleteItem } from '@/redux/slices/digitaldocs';
+import { useSelector, useDispatch } from '@/redux/store';
+import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
-import { DefaultAction } from '../../../../components/Actions';
-import { CellChecked, noDados } from '../../../../components/Panel';
-import { DialogConfirmar } from '../../../../components/CustomDialog';
+import { DefaultAction } from '@/components/Actions';
+import { CellChecked, noDados } from '@/components/Panel';
+import { DialogConfirmar } from '@/components/CustomDialog';
+import { TableSearchNotFound } from '@/components/table/SearchNotFound';
 //
 import DetalhesGarantia from './detalhes-garantia';
 import FormGarantias from '../../form/credito/garantias/form-garantias-credito';
-import { TableSearchNotFound } from '../../../../components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 import { View, Text, Image } from '@react-pdf/renderer';
 // utils
-import { formatDate, ptDate } from '../../../utils/formatTime';
+import { formatDate, ptDate } from '@/utils/formatTime';
 //
 import styles from './pdf-styles';
 

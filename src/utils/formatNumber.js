@@ -1,5 +1,4 @@
 import numeral from 'numeral';
-import replace from 'lodash/replace';
 
 numeral.register('locale', 'cv-cv', {
   delimiters: { thousands: ' ', decimal: ',' },
@@ -34,23 +33,19 @@ export function fConto(value, sufixo) {
   return `${fNumber(contos)}${sufixo ? ` ${label}` : ''}`;
 }
 
-export function fPercent(value) {
+export function fPercent(value, cd) {
   if (value === '' || value === null || value === undefined) return '';
 
   const number = Number(value);
   if (Number.isNaN(number)) return '';
 
-  return numeral(number / 100).format('0.00%');
+  return numeral(number / 100).format((cd === 3 && '0.000%') || '0.00%');
 }
 
 export function fNumber(number, cd) {
   const casasDec =
     (cd === 1 && '0,0.0') || (cd === 2 && '0,0.00') || (cd === 3 && '0,0.000') || (cd === 4 && '0,0.0000') || '';
   return numeral(number || 0).format(casasDec);
-}
-
-export function fNumber2(number) {
-  return replace(numeral(number || 0).format('0.00'), '.00', '');
 }
 
 export function fShortenNumber(number) {

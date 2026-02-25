@@ -9,24 +9,22 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { fToNow, ptDateTime } from '../../utils/formatTime';
-import { normalizeText, baralharString, contaCliEnt } from '../../utils/formatText';
-// hooks
-import useTable, { getComparator, applySort } from '../../hooks/useTable';
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { fToNow, ptDateTime } from '@/utils/formatTime';
+import { normalizeText, contaCliEnt } from '@/utils/formatText';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores } from '../../redux/slices/indicadores';
-import { getListaProcessos, setModal } from '../../redux/slices/digitaldocs';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getIndicadores } from '@/redux/slices/indicadores';
+import { getListaProcessos, setModal } from '@/redux/slices/digitaldocs';
 // Components
-import Scrollbar from '../../components/Scrollbar';
-import { Criado, noDados } from '../../components/Panel';
-import { SkeletonTable } from '../../components/skeleton';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { SearchToolbarProcessos } from '../../components/SearchToolbar';
-import { AddItem, DefaultAction, MaisProcessos } from '../../components/Actions';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
+import Scrollbar from '@/components/Scrollbar';
+import { Criado, noDados } from '@/components/Panel';
+import { SkeletonTable } from '@/components/skeleton';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarProcessos } from '@/components/SearchToolbar';
+import { AddItem, DefaultAction, MaisProcessos } from '@/components/Actions';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -47,11 +45,11 @@ export default function TableProcessos({ from }) {
   } = useTable({
     defaultOrder: 'asc',
     defaultOrderBy: 'transitado_em',
-    defaultRowsPerPage: Number(localStorage.getItem('rowsPerPage') || 25),
+    defaultRowsPerPage: (from === 'Tarefas' && 27) || Number(localStorage.getItem('rowsPerPage') || 25),
   });
   const [colaborador, setColaborador] = useState(null);
-  const [filter, setFilter] = useState(localStorage.getItem('filterP') || '');
-  const [segmento, setSegmento] = useState(localStorage.getItem('segmento') || null);
+  const [filter, setFilter] = useState(localStorage.getItem('filter-processo') || '');
+  const [segmento, setSegmento] = useState(localStorage.getItem('segmento-processo') || null);
 
   const { colaboradores } = useSelector((state) => state.intranet);
   const { isLoading, cursor, processos } = useSelector((state) => state.digitaldocs);
@@ -163,7 +161,7 @@ export default function TableProcessos({ from }) {
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${row?.id}_${index}`}>
                       <TableCell align="right">{row?.entrada}</TableCell>
-                      <TableCell>{row?.titular ? baralharString(row?.titular) : noDados()}</TableCell>
+                      <TableCell>{row?.titular ? row?.titular : noDados()}</TableCell>
                       <TableCell>{contaCliEnt(row)}</TableCell>
                       <TableCell>{row?.assunto ? row?.assunto : meuFluxo?.assunto}</TableCell>
                       <TableCell>{row?.estado}</TableCell>
@@ -218,6 +216,7 @@ export default function TableProcessos({ from }) {
             count={dataFiltered.length}
             onChangeDense={onChangeDense}
             onChangeRowsPerPage={onChangeRowsPerPage}
+            options={from === 'Tarefas' ? [10, 27, 54, 100] : ''}
           />
         )}
       </Card>
@@ -253,10 +252,7 @@ function applySortFilter({ dados, comparator, filter, colaborador, from }) {
   return dados;
 }
 
-export function colorProcesso(cor) {
-  return (
-    (cor?.toLowerCase() === 'verde' && 'text.success') ||
-    (cor?.toLowerCase() === 'vermelha' && 'text.error') ||
-    (cor?.toLowerCase() === 'amarela' && 'text.warning')
-  );
+export function colorProcesso(color) {
+  const cor = color?.toLowerCase();
+  return `text.${(cor === 'verde' && 'success') || (cor === 'vermelha' && 'error') || (cor === 'amarela' && 'warning')}`;
 }

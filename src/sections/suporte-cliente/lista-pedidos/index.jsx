@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 // utils
-import { normalizeText } from '../../../utils/formatText';
+import { normalizeText } from '@/utils/formatText';
 import { statusList, injectCollaboratorName } from '../utils';
-import useTable, { getComparator, applySort } from '../../../hooks/useTable';
+import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // redux
-import { useDispatch, useSelector } from '../../../redux/store';
-import { getInSuporte } from '../../../redux/slices/suporte-cliente';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getInSuporte } from '@/redux/slices/suporte-cliente';
 // Components
-import HeaderBreadcrumbs from '../../../components/HeaderBreadcrumbs';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 //
 import TablePedidos from './table-pedidos';
 import SearchToolbar from './search-toolbar';

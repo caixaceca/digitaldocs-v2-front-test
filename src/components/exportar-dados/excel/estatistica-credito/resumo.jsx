@@ -1,16 +1,12 @@
 import { sumBy } from 'lodash';
 // utils
-import {
-  segmentos,
-  filtrarSegLinha,
-  dadosNaoClassificados,
-} from '../../../../sections/indicadores/estatistica-credito/resumo';
+import { ptDate } from '@/utils/formatTime';
 import { estiloCabecalho } from '../formatacoes';
-import { ptDate } from '../../../../utils/formatTime';
 //
 import { dadosPorItem } from './dados-fase';
 import { addNaoClassificados } from './index';
 import { valorMoeda, colunasSI, celulasConteudo } from './formatacoes';
+import { segmentos, filtrarSegLinha, dadosNaoClassificados } from '@/sections/indicadores/estatistica-credito/resumo';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

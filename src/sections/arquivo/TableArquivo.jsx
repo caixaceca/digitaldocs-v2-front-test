@@ -13,29 +13,26 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
-import { entidadesParse, baralharString } from '../../utils/formatText';
-import { ptDateTime, getDataLS, dataValido, setDataUtil } from '../../utils/formatTime';
-// hooks
-import useTable, { getComparator } from '../../hooks/useTable';
-// redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores } from '../../redux/slices/indicadores';
-import { getListaProcessos } from '../../redux/slices/digitaldocs';
-// routes
-import { PATH_DIGITALDOCS } from '../../routes/paths';
-// components
-import Scrollbar from '../../components/Scrollbar';
-import ItemAnalytic from '../../components/ItemAnalytic';
-import { SkeletonTable } from '../../components/skeleton';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { DefaultAction, MaisProcessos } from '../../components/Actions';
-import { Criado, ColaboradorInfo, noDados } from '../../components/Panel';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-//
+import { PATH_DIGITALDOCS } from '@/routes/paths';
+import { entidadesParse } from '@/utils/formatText';
+import useTable, { getComparator } from '@/hooks/useTable';
 import { applySortFilter } from '../parametrizacao/applySortFilter';
-// guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
+import { ptDateTime, getDataLS, dataValido, setDataUtil } from '@/utils/formatTime';
+// redux
+import { useDispatch, useSelector } from '@/redux/store';
+import { getIndicadores } from '@/redux/slices/indicadores';
+import { getListaProcessos } from '@/redux/slices/digitaldocs';
+// components
+import Scrollbar from '@/components/Scrollbar';
+import ItemAnalytic from '@/components/ItemAnalytic';
+import { SkeletonTable } from '@/components/skeleton';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { DefaultAction, MaisProcessos } from '@/components/Actions';
+import { Criado, ColaboradorInfo, noDados } from '@/components/Panel';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
+//
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -192,10 +189,8 @@ export default function TableArquivo({ tab }) {
                       )) || (
                         <TableRow hover key={`${tab}_arq_${index}`}>
                           <TableCell>{row.referencia}</TableCell>
-                          <TableCell>{row?.titular ? baralharString(row.titular) : noDados()}</TableCell>
-                          <TableCell>
-                            {row?.entidades ? baralharString(entidadesParse(row?.entidades)) : noDados()}
-                          </TableCell>
+                          <TableCell>{row?.titular ? row.titular : noDados()}</TableCell>
+                          <TableCell>{row?.entidades ? entidadesParse(row?.entidades) : noDados()}</TableCell>
                           <TableCell>{row.assunto}</TableCell>
                           <TableCell width={10}>
                             {row?.uo && <Criado value={row?.uo} />}

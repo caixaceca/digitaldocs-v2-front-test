@@ -11,19 +11,13 @@ import DialogContent from '@mui/material/DialogContent';
 // utils
 import { mapConcelhoToBackend } from './utils';
 import { applyList, rolesList, phasesList } from '../utils';
-import { useSelector, useDispatch } from '../../../redux/store';
-import { createInSuporte, updateInSuporte } from '../../../redux/slices/suporte-cliente';
+import { useSelector, useDispatch } from '@/redux/store';
+import { createInSuporte, updateInSuporte } from '@/redux/slices/suporte-cliente';
 // components
-import {
-  RHFSwitch,
-  FormProvider,
-  RHFTextField,
-  RHFNumberField,
-  RHFAutocompleteObj,
-} from '../../../components/hook-form';
-import { DialogButons } from '../../../components/Actions';
-import { FormLoading } from '../../../components/skeleton';
-import { SearchNotFoundSmall } from '../../../components/table/SearchNotFound';
+import { DialogButons } from '@/components/Actions';
+import { FormLoading } from '@/components/skeleton';
+import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
+import { RHFSwitch, FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObj } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
