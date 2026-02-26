@@ -246,7 +246,10 @@ export function TextItem({ title = '', text = '', label = null, situacao = null,
       {text && (
         <Typography
           variant="body2"
-          sx={text === 'Não definido' && { fontStyle: 'italic', color: 'text.disabled', whiteSpace: 'pre-line' }}
+          sx={{
+            whiteSpace: 'pre-line',
+            ...(text === 'Não definido' ? { fontStyle: 'italic', color: 'text.disabled' } : {}),
+          }}
         >
           {text}
         </Typography>

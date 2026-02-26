@@ -47,6 +47,7 @@ export default function TableProcessos({ from }) {
     defaultOrderBy: 'transitado_em',
     defaultRowsPerPage: (from === 'Tarefas' && 27) || Number(localStorage.getItem('rowsPerPage') || 25),
   });
+
   const [colaborador, setColaborador] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem('filter-processo') || '');
   const [segmento, setSegmento] = useState(localStorage.getItem('segmento-processo') || null);

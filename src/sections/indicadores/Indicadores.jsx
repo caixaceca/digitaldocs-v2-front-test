@@ -347,8 +347,8 @@ export function TabView({ vista, setVista, exportar = null }) {
 
 export function dadosResumo(dados, item, label) {
   const total = sumBy(dados, item);
-  const maximo = Math.max(...dados?.map((row) => row[item]));
-  const minimo = Math.min(...dados?.map((row) => row[item]));
+  const maximo = Math.max(...(dados?.map((row) => row[item]) ?? []));
+  const minimo = Math.min(...(dados?.map((row) => row[item]) ?? []));
   return [
     ...[
       label === 'assunto'

@@ -97,7 +97,16 @@ export default function PageFilaTrabalho() {
                 <DefaultAction small color="inherit" variant="outlined" label="Nº PROCESSOS" onClick={onOpen} />
               )}
             </Stack>
-            {cc && <DefaultAction small color="inherit" label="ATAULIZAR" onClick={onRefresh} loading={loadingConf} />}
+            {cc && (
+              <DefaultAction
+                small
+                color="inherit"
+                label="ATAULIZAR"
+                variant="outlined"
+                onClick={onRefresh}
+                loading={loadingConf}
+              />
+            )}
           </Stack>
 
           <TabsWrapperStyle>

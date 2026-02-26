@@ -25,7 +25,7 @@ import AcessoGaji9 from './acesso-gaji9';
 import InfoCredito from '@/sections/gaji9/credito/info-credito';
 import { TableInfoCredito } from '@/sections/gaji9/credito/table-info';
 import CreditoForm, { PreviewForm } from '@/sections/gaji9/credito/form-credito';
-import MetadadosCredito from '@/sections/processo/info-credito/metadados-credito';
+import MetadadosCredito from '@/sections/processo/info-credito/metadados/credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

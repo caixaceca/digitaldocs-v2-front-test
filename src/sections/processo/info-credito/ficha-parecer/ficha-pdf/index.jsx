@@ -52,7 +52,7 @@ export default function FichaPdf({ dados }) {
           {temRegistos ? (
             <View wrap={false} style={[styles.borderCinza, styles.tableRowFicha]}>
               {columns.map((col, index) => (
-                <View key={`column_${index}`} style={[...col?.options, styles.px0, { height: '100%' }]}>
+                <View key={`column_${index}`} style={[...(col?.options ?? []), styles.px0, { height: '100%' }]}>
                   <Text
                     style={[
                       styles.textCellFicha,

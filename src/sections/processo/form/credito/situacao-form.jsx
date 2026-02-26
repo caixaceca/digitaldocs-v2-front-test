@@ -186,7 +186,7 @@ export function FormNivelDecisao({ id, onClose }) {
     motivo: Yup.string().required().label('Motivo'),
   });
 
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: { nivel: null, motivo: null } });
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: { nivel: null, motivo: '' } });
   const { handleSubmit } = methods;
 
   const onSubmit = async (values) => {

@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import { ptDate } from '@/utils/formatTime';
 import { fNumber } from '@/utils/formatNumber';
 // components
-import { TableRowItem } from '../../parametrizacao/Detalhes';
+import { TableRowItem } from '@/sections/parametrizacao/Detalhes';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
