@@ -4,8 +4,8 @@ import { createSlice } from '@reduxjs/toolkit';
 import { InteractionRequiredAuthError } from '@azure/msal-browser';
 //
 import { callMsGraph } from '@/graph';
-import { loginRequest, msalInstance } from '@/config';
 import { addRole, getFromParametrizacao } from './parametrizacao';
+import { loginRequest, msalInstance, popupRedirectUri } from '@/config';
 import { API_INTRANET_URL, API_SLIM_URL, API_CORENET_URL } from '@/utils/apisUrl';
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
@@ -28,6 +28,7 @@ const initialState = {
   perfil: null,
   docPdex: null,
   dateUpdate: null,
+  fichaFiador: null,
   selectedItem: null,
   docIdentificacao: null,
   fichaInformativa: null,
@@ -88,27 +89,33 @@ export function authenticateColaborador() {
 }
 
 export async function getAccessToken() {
-  const activeAccount = msalInstance.getActiveAccount();
+  await msalInstance.initialize();
+
+  const activeAccount = msalInstance.getActiveAccount() ?? msalInstance.getAllAccounts()[0] ?? null;
 
   if (!activeAccount) {
-    msalInstance.loginRedirect(loginRequest);
+    await msalInstance.loginRedirect({ ...loginRequest, redirectUri: popupRedirectUri });
     return null;
   }
 
-  const tokenRequest = { ...loginRequest, account: activeAccount };
+  const tokenRequest = { ...loginRequest, account: activeAccount, redirectUri: popupRedirectUri };
 
   try {
     const response = await msalInstance.acquireTokenSilent(tokenRequest);
     return response.accessToken;
   } catch (error) {
-    if (error instanceof InteractionRequiredAuthError || error.errorCode === 'timed_out') {
+    const deveUsarPopup =
+      error.errorCode === 'timed_out' ||
+      error.errorCode === 'monitor_window_timeout' ||
+      error instanceof InteractionRequiredAuthError;
+
+    if (deveUsarPopup) {
       try {
         const response = await msalInstance.acquireTokenPopup(tokenRequest);
         return response.accessToken;
       } catch (popupError) {
-        const { errorCode } = popupError;
-        if (errorCode === 'popup_window_error' || errorCode === 'popup_blocked' || errorCode === 'timed_out') {
-          msalInstance.acquireTokenRedirect(tokenRequest);
+        if (popupError.errorCode === 'popup_window_error' || popupError.errorCode === 'popup_blocked') {
+          await msalInstance.acquireTokenRedirect(tokenRequest);
           return null;
         }
         throw popupError;
@@ -148,7 +155,7 @@ export function getInfoInicial(id, inicial) {
 
 export function getFromIntranet(item, params) {
   return async (dispatch, getState) => {
-    dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
+    if (!params?.noLoading) dispatch(slice.actions.getSuccess({ item: 'isLoading', dados: true }));
     if (params?.reset) dispatch(slice.actions.getSuccess({ item, dados: params?.reset?.dados }));
 
     try {
@@ -197,6 +204,7 @@ export function getFromIntranet(item, params) {
           (item === 'minhasAplicacoes' && `${API_INTRANET_URL}/aplicacao/aplicacoes/me`) ||
           (item === 'documentosAjuda' && `${API_INTRANET_URL}/atc?categoria=documentosAjuda`) ||
           (item === 'cc' && `${API_CORENET_URL}/v2/portal/cls/detail?colaborador_id=${params?.id}`) ||
+          (item === 'fichaFiador' && `${API_SLIM_URL}/v1/fichas/dcs/ficha?entidade=${params?.entidade}`) ||
           (item === 'disposicao' && `${API_INTRANET_URL}/disposicao/by_data/${params?.id}/${params?.data}`) ||
           (item === 'fichaInformativa' && `${API_SLIM_URL}/v1/fichas/dcs/ficha?entidade=${params?.entidade}`) ||
           (item === 'docIdentificacao' &&
@@ -205,14 +213,15 @@ export function getFromIntranet(item, params) {
         if (apiUrl) {
           const response = await axios.get(apiUrl, options);
           if (item === 'disposicao') dispatch(slice.actions.getSuccess({ item, dados: !!response.data }));
-          else if (item === 'fichaInformativa')
+          else if (item === 'fichaInformativa' || item === 'fichaFiador') {
             dispatch(slice.actions.getSuccess({ item, dados: { ...response.data.objeto, numero: params?.entidade } }));
-          else {
+          } else {
             const data = response.data?.objeto || response.data;
             dispatch(slice.actions.getSuccess({ item, dados: data, label: params?.label || '' }));
           }
         }
       }
+      params?.onClose?.();
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
     } finally {

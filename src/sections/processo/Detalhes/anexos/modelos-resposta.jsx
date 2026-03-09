@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver';
 import { useSnackbar } from 'notistack';
 import { Packer, TextRun, Document, Paragraph, AlignmentType } from 'docx';
 // @mui
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 // utils
 import { useSelector } from '@/redux/store';
@@ -69,9 +69,7 @@ export default function ModelosRespostas() {
         tipo !== 'Cliente sem saldo' && cativos?.length > 0
           ? processo.cativos.map(({ conta, saldo_cve: saldo, tipo: tipoConta = '' }) =>
               createBullet(
-                `${conta}, com saldo de ${fCurrency(saldo)} (${valorPorExtenso(Number(saldo))}) à ${
-                  tipoConta || 'ordem/prazo'
-                };`
+                `${conta}, com saldo de ${fCurrency(saldo)} (${valorPorExtenso(Number(saldo))}) à ${tipoConta || 'ordem/prazo'};`
               )
             )
           : [createBullet(`${conta || cliente || 'xxxxxxxxxxxx'}, com saldo de 0 CVE (zero escudos);`)];

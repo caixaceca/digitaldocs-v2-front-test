@@ -71,7 +71,7 @@ export default function MetadadosCredito({ dados, prazo = '', modificar = false,
                   }}
                   sx={{ py: 1.25, bgcolor: 'background.neutral' }}
                 />
-                <CardContent sx={{ py: 2 }}>
+                <CardContent sx={{ p: 2 }}>
                   <Stack spacing={1} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
                     {card.dados
                       .filter((d) => d.value)

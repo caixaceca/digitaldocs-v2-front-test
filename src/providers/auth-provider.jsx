@@ -1,8 +1,24 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { BrowserAuthError, EventType } from '@azure/msal-browser';
-import { msalInstance, loginRequest } from '../config';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+//
+import { EventType } from '@azure/msal-browser';
+import { msalInstance, loginRequest, popupRedirectUri } from '../config';
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 const AuthContext = createContext();
+
+const resolveAccount = () => {
+  const active = msalInstance.getActiveAccount();
+  if (active) return active;
+  const all = msalInstance.getAllAccounts();
+  if (all.length > 0) {
+    msalInstance.setActiveAccount(all[0]);
+    return all[0];
+  }
+  return null;
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
@@ -10,96 +26,85 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
 
-  const loadActiveAccount = async () => {
-    await msalInstance.initialize();
-    let currentAccount = msalInstance.getActiveAccount();
-    if (currentAccount) {
-      setAccount(currentAccount);
-      return;
-    }
-
-    const allAccounts = msalInstance.getAllAccounts();
-    if (allAccounts.length > 0) {
-      currentAccount = allAccounts[0];
-      msalInstance.setActiveAccount(currentAccount);
-      setAccount(currentAccount);
-    }
-  };
-
   useEffect(() => {
+    let callbackId = null;
+
     const init = async () => {
       try {
         await msalInstance.initialize();
-        const response = await msalInstance.handleRedirectPromise();
 
-        if (response?.account) {
-          msalInstance.setActiveAccount(response.account);
-          setAccount(response.account);
-        } else loadActiveAccount();
+        const redirectResponse = await msalInstance.handleRedirectPromise();
+
+        if (redirectResponse?.account) {
+          msalInstance.setActiveAccount(redirectResponse.account);
+          setAccount(redirectResponse.account);
+        } else {
+          setAccount(resolveAccount());
+        }
       } catch (err) {
-        console.error('Initialization Error:', err);
+        console.error('[AuthProvider] Erro na inicialização:', err);
         setError(err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    init();
-
-    const callbackId = msalInstance.addEventCallback((event) => {
-      if (event.eventType === EventType.LOGIN_SUCCESS && event.payload?.account) {
-        msalInstance.setActiveAccount(event.payload.account);
-        loadActiveAccount();
+    callbackId = msalInstance.addEventCallback((event) => {
+      if (event.eventType === EventType.LOGIN_SUCCESS || event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
+        const eventAccount = event.payload?.account;
+        if (eventAccount) {
+          msalInstance.setActiveAccount(eventAccount);
+          setAccount(eventAccount);
+        }
       }
 
-      if (event.eventType === EventType.LOGOUT_SUCCESS) setAccount(null);
+      if (event.eventType === EventType.LOGOUT_SUCCESS) {
+        setAccount(null);
+      }
+
+      if (event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
+        console.warn('[AuthProvider] Falha ao adquirir token:', event.error);
+        const erroDeInteracao =
+          event.error?.errorCode === 'timed_out' || event.error?.errorCode === 'monitor_window_timeout';
+
+        if (!erroDeInteracao && !resolveAccount()) {
+          setAccount(null);
+        }
+      }
     });
+
+    init();
 
     return () => {
       if (callbackId) msalInstance.removeEventCallback(callbackId);
     };
   }, []);
 
-  const login = async () => {
+  const login = useCallback(async () => {
     if (loginLoading) return;
-
     setLoginLoading(true);
+    setError(null);
     try {
-      const response = await msalInstance.loginRedirect(loginRequest);
-      msalInstance.setActiveAccount(response.account);
-      setAccount(response.account);
+      await msalInstance.loginRedirect({ ...loginRequest, redirectUri: popupRedirectUri });
     } catch (err) {
-      if (
-        err instanceof BrowserAuthError &&
-        (err.errorCode === 'popup_window_error' || err.errorCode === 'popup_blocked')
-      ) {
-        msalInstance.loginRedirect(loginRequest);
-      } else {
-        console.error('Login Error:', err);
-        setError(err);
-      }
-    } finally {
+      console.error('[AuthProvider] Erro no login:', err);
+      setError(err);
       setLoginLoading(false);
     }
-  };
+  }, [loginLoading]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     const activeAccount = msalInstance.getActiveAccount();
-
-    if (activeAccount) {
-      msalInstance.logoutRedirect({
-        account: activeAccount,
-        logoutHint: activeAccount.username,
-        postLogoutRedirectUri: window.location.origin,
-      });
-    } else {
-      msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
-    }
-  };
+    msalInstance.logoutRedirect({
+      account: activeAccount ?? undefined,
+      logoutHint: activeAccount?.username,
+      postLogoutRedirectUri: popupRedirectUri,
+    });
+  }, []);
 
   return (
     <AuthContext.Provider
-      value={{ account, isAuthenticated: !!account, isLoading, loginLoading, error, login, logout }}
+      value={{ account, error, isLoading, loginLoading, login, logout, isAuthenticated: !!account }}
     >
       {children}
     </AuthContext.Provider>

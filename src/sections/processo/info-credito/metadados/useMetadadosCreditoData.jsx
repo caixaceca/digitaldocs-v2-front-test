@@ -16,9 +16,9 @@ export function useMetadadosCreditoData(dados) {
 
     const financeiroPrincipal = [
       { label: 'Valor da prestação', value: fCurrency(dados?.valor_prestacao), color: 'primary' },
-      { label: 'Custo total', value: fCurrency(dados?.custo_total), color: 'info' },
-      { label: 'TAEG', value: fPercent(dados?.taxa_taeg, 3), color: 'error' },
-      { label: 'TAN', value: fPercent(Number(dados?.taxa_tan), 3), color: 'warning' },
+      { label: 'TAEG', value: fPercent(dados?.taxa_taeg, 3), color: 'info' },
+      { label: 'Custo total', value: fCurrency(dados?.custo_total), color: 'warning' },
+      { label: 'Taxa de Mora', value: fPercent(Number(dados?.taxa_mora), 2), color: 'error' },
     ];
 
     const allCards = [
@@ -75,11 +75,10 @@ export function useMetadadosCreditoData(dados) {
             value: <Label color="info">{dados?.modo_taxa_equivalente ? 'Equivalente' : 'Proporcional'}</Label>,
           },
           { title: 'Juro precário', value: fPercent(dados?.taxa_juro_precario) },
-          {
-            title: 'Juro desconto',
-            value: Number(dados?.taxa_juro_desconto) > 0 ? fPercent(dados?.taxa_juro_desconto) : '',
-            bold: true,
-          },
+          ...(dados?.taxa_juro_desconto && Number(dados?.taxa_juro_desconto) > 0
+            ? [{ title: 'Juro desconto', value: fPercent(dados?.taxa_juro_desconto), bold: true }]
+            : []),
+
           { title: 'Comissão de abertura', value: fPercent(dados?.taxa_comissao_abertura) },
           {
             title: 'Comissão de imobilização',

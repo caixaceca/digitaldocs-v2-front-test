@@ -15,6 +15,7 @@ import Identificacao from './identificacao';
 import Financiamento from './financiamento';
 import ResumoMovimentos from './resumo-movimentos';
 import Responsabilidades from './responsabilidades';
+import AnaliseFiadoresPdf from './analise-fiadores';
 import { RowFicha, RowCR, ItemValue, TitleFicha, NadaConsta } from './pdf-fragments';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -31,9 +32,13 @@ export default function FichaPdf({ dados }) {
     garantiasPrestadas,
     garantiasRecebidas,
   } = useMemo(() => extractClientes(dados?.clientes || []), [dados?.clientes]);
+  const { fiadores = [], movimentos = [] } = dados || {};
   const { dividas_externas: dividasExternas = [], avales_externas: avalesExternos = [] } = dados || {};
+  const { numero, analista, uo, fiancas, entidade, mensagens, central_risco: cr, montante } = dados || {};
   const { rendimento = null, parecer = '', credito = null, proposta = null, valorPrestacao = 0 } = dados || {};
-  const { numero, analista, uo, fiancas, entidade, mensagens, central_risco: cr, movimentos = [] } = dados || {};
+
+  const temFiadores = fiadores?.length > 0;
+  const financiamentoParaFiador = { valor: montante, saldo_divida: montante, valor_prestacao: valorPrestacao };
 
   const parecerInline = useMemo(() => {
     try {
@@ -80,7 +85,7 @@ export default function FichaPdf({ dados }) {
                   index === items.length - 1 ? { borderBottom: '1px solid #ddd' } : {},
                 ]}
               >
-                {renderItem(item)}
+                {renderItem(item, index)}
               </View>
             ))}
           </>
@@ -211,8 +216,20 @@ export default function FichaPdf({ dados }) {
 
           <Financiamento dados={dados} />
 
+          {temFiadores && (
+            <View style={{ marginTop: '5mm' }}>
+              <TitleFicha title="17. Análise dos Fiadores" options={{ success: true, final: true }} />
+              <AnaliseFiadoresPdf
+                fiadores={fiadores}
+                rendimento={rendimento}
+                renderSection={renderSection}
+                financiamento={financiamentoParaFiador}
+              />
+            </View>
+          )}
+
           <View style={{ marginTop: '4mm' }}>
-            <TitleFicha title="17. Parecer do Analista" options={{ success: true }} />
+            <TitleFicha title={`${temFiadores ? '18' : '17'}. Parecer`} options={{ success: true }} />
             {parecer ? (
               <View style={[styles.borderCinza, styles.tCell_100, { paddingTop: 5, borderBottom: '1px solid #ddd' }]}>
                 <Html>{parecerInline}</Html>
@@ -223,7 +240,7 @@ export default function FichaPdf({ dados }) {
           </View>
 
           <View style={{ marginTop: '4mm' }} wrap={false}>
-            <TitleFicha title="18. Proposta de Financiamento" />
+            <TitleFicha title={`${temFiadores ? '19' : '18'}. Proposta de Financiamento`} />
             {proposta ? (
               <>
                 <RowFicha small title="Tipo de crédito" value={credito?.componente} />

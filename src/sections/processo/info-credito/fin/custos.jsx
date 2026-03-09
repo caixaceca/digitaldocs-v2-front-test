@@ -9,7 +9,7 @@ export const custos = (dados) =>
     title: 'C. CUSTOS DO CRÉDITO',
     rows: [
       { label: '1. Taxa de juro anual nominal (TAN)' },
-      { cells: 2, level: 2, label: '1.1. Taxa de juro nominal', value: dados?.tan ?? '--' },
+      { cells: 2, level: 2, label: '1.1. Taxa de juro nominal', value: dados?.taxa_juro ?? '--' },
       { cells: 2, level: 2, label: '1.2. Regime  de taxa de juro', value: dados?.regime_taxa_juro ?? '--' },
       { cells: 2, level: 2, label: '1.3. Taxa de juro nominal fixa', value: dados?.taxa_juro_nominal_fixa ?? '--' },
       { cells: 2, level: 3, label: '1.3.1. Taxa base (se aplicável)', value: dados?.taxa_base ?? '--' },
@@ -89,8 +89,8 @@ export const custos = (dados) =>
       { cells: 2, level: 2, label: '2.6. Anuidades (se aplicável)', value: dados?.anuidades ?? '--' },
       { cells: 2, level: 2, label: '2.7. Seguros exigidos (se aplicável)', value: dados?.seguros ?? '--' },
       { level: 2, label: '2.8. Imposto de selo (se aplicável)' },
-      { cells: 2, level: 3, label: 'Capital', value: dados?.capital ?? '--' },
-      { cells: 2, level: 3, label: 'Juros', value: dados?.juros ?? '--' },
+      { cells: 2, level: 3, label: 'Capital', value: dados?.valor_imposto_selo ?? '--' },
+      { cells: 2, level: 3, label: 'Juros', value: dados?.taxa_imposto_selo_utilizacao ?? '--' },
       { cells: 2, level: 3, label: 'Comissões', value: dados?.comissoes ?? '--' },
       {
         cells: 2,

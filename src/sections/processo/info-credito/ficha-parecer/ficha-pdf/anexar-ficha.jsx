@@ -103,7 +103,7 @@ export default function AnexarFicha({ dados }) {
           handleOk={anexarNoProcesso}
           content={
             <>
-              <Typography>
+              <Typography component="spam">
                 Deseja gerar e anexar automaticamente a <b>Ficha de Análise e Parecer de Crédito</b> ao processo?
               </Typography>
               {temFicha && (

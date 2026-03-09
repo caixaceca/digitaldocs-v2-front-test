@@ -1,17 +1,16 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 // utils
 import { calcValorPrestacao } from './calculos';
-import { setModal } from '@/redux/slices/intranet';
 import { useDispatch, useSelector } from '@/redux/store';
+import { setModal, updateFicha } from '@/redux/slices/intranet';
+import { extrairFiadores } from '../carta-proposta/dados-mapper';
 //
 import Ficha from './conteudos';
-import FormFicha from './form-ficha';
 import { SearchEntidade } from './procurar';
-import { DefaultAction } from '@/components/Actions';
 import SearchNotFound from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -36,6 +35,15 @@ export default function FichaAnalise() {
     [credito, fichaInformativa]
   );
 
+  const fiadores = useMemo(
+    () => fichaInformativa?.fiadores || extrairFiadores(credito?.garantias),
+    [credito?.garantias, fichaInformativa?.fiadores]
+  );
+
+  useEffect(() => {
+    dispatch(updateFicha({ fiadores }));
+  }, [dispatch, fiadores]);
+
   const actionModal = ({ modal = '' }) => dispatch(setModal({ modal }));
 
   return (
@@ -52,17 +60,7 @@ export default function FichaAnalise() {
         <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
           Ficha de Análise e Parecer
         </Typography>
-        <Stack direction="row" spacing={2} alignItems="center">
-          {fichaInformativa && (
-            <DefaultAction
-              button
-              icon="adicionar"
-              label="Info. adicional"
-              onClick={() => actionModal({ modal: 'form-ficha' })}
-            />
-          )}
-          <SearchEntidade entidades={entidades} />
-        </Stack>
+        <SearchEntidade entidades={entidades} actionModal={actionModal} credito={credito} />
       </Stack>
       {isLoading ? (
         <Stack spacing={3}>
@@ -81,13 +79,10 @@ export default function FichaAnalise() {
               valorPrestacao={valorPrestacao}
               credito={{ titular, ...credito }}
               estadoId={processo?.estado?.estado_id}
+              montante={fichaInformativa?.proposta?.montante || credito?.montante_solicitado}
             />
           ) : (
             <SearchNotFound message="Informação da entidade não encontrada..." />
-          )}
-
-          {modalIntranet === 'form-ficha' && (
-            <FormFicha credito={credito} ficha={fichaInformativa} onClose={() => actionModal({ modal: '' })} />
           )}
         </>
       )}

@@ -7,10 +7,13 @@ import Typography from '@mui/material/Typography';
 import { colorLabel } from '@/utils/getColorPresets';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 import { formatPrazoAmortizacao } from '@/utils/formatText';
+//
+import { noDados } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function Kpis({ credito }) {
+  const nivel = credito?.nivel_decisao || '';
   const situacao = (credito?.situacao_final_mes || 'em análise').toLowerCase();
 
   return (
@@ -19,7 +22,7 @@ export default function Kpis({ credito }) {
         <CardItem
           title="Situação"
           value={
-            <Chip color={colorLabel(situacao)} variant="filled" label={situacao} sx={{ textTransform: 'uppercase' }} />
+            <Chip variant="filled" label={situacao} color={colorLabel(situacao)} sx={{ textTransform: 'uppercase' }} />
           }
         />
         <CardItem title="Montante solicitado" value={fCurrency(credito?.montante_solicitado)} />
@@ -27,6 +30,19 @@ export default function Kpis({ credito }) {
         <CardItem title="Montante aprovado" value={fCurrency(credito?.montante_aprovado)} />
         <CardItem title="Taxa juro" value={fPercent(credito?.taxa_juro)} />
         <CardItem title="Prazo" value={formatPrazoAmortizacao(credito?.prazo_amortizacao)} />
+        <CardItem
+          title="Escalão de decisão"
+          value={
+            nivel ? (
+              <Chip
+                sx={{ textTransform: 'uppercase' }}
+                label={`${nivel} - Comité ${(nivel === 1 && 'Base') || (nivel === 2 && 'Diretor') || (nivel === 3 && 'Superior')}`}
+              />
+            ) : (
+              noDados('(Não definido...)')
+            )
+          }
+        />
       </Stack>
     </Card>
   );
@@ -34,7 +50,7 @@ export default function Kpis({ credito }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function CardItem({ title, value }) {
+function CardItem({ title = '', value = '' }) {
   return value ? (
     <Card sx={{ p: 1.5, textAlign: 'center', boxShadow: 'none', flexGrow: 1 }}>
       <Typography variant="overline" sx={{ color: 'text.secondary' }}>

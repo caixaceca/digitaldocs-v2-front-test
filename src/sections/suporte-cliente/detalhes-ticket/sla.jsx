@@ -1,5 +1,7 @@
 import React from 'react';
-import { Stack, Paper, Typography } from '@mui/material';
+import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 // utils
 import { ptDateTime } from '@/utils/formatTime';
 // components

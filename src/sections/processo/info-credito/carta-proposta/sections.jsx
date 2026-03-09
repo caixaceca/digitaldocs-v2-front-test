@@ -39,7 +39,7 @@ export const condicoesGerais = (dados) =>
         label: `Taxa de juro anual nominal (TAN)`,
         value: [
           new TextRun({
-            text: `${fPercent(dados?.tan, 3) || 'X%'} ao ano, sujeito às alterações do preçário da Caixa`,
+            text: `${fPercent(dados?.taxa_juro, 2) || 'X%'} ao ano, sujeito às alterações do preçário da Caixa`,
           }),
           new TextRun({
             text: 'Os juros serão contados sobre o capital utilizado e efetivamente em dívida e serão incluídos nas prestações de reembolso.',
@@ -102,7 +102,7 @@ export const encargos = (dados) =>
         label: 'Total de encargos iniciais',
         value: `${
           fCurrency(dados?.valor_encargos_iniciais) || 'XX CVE'
-        }. Todos os pagamentos serão efetuados por débito na conta nº ${dados?.conta_pagamento ?? 'XX'} do proponente.`,
+        }. Todos os pagamentos serão efetuados por débito na conta nº ${dados?.conta_pagamento ?? 'XXXXXXXXXX'} do proponente.`,
       },
     ],
   });

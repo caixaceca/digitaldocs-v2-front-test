@@ -20,7 +20,6 @@ import { fCurrency } from '@/utils/formatNumber';
 import { ptDate, fToNow } from '@/utils/formatTime';
 // components
 import Label from '@/components/Label';
-import { noDados } from '@/components/Panel';
 import { TextItem } from '../Detalhes/detalhes';
 import { DefaultAction } from '@/components/Actions';
 import { FormSituacao, EliminarDadosSituacao, FormNivelDecisao } from '../form/credito/situacao-form';
@@ -35,7 +34,6 @@ const itemStyleAlt = { p: 0, mt: 0, minHeight: 20, backgroundColor: 'transparent
 
 export default function VisaoGeral({ dados, modificar = false }) {
   const [open, setOpen] = useState('');
-  const nivel = dados?.nivel_decisao || '';
   const gerencia = noEstado(dados?.estado?.estado, ['Gerência']);
   const situacao = (dados?.situacao_final_mes || 'em análise').toLowerCase();
 
@@ -75,17 +73,11 @@ export default function VisaoGeral({ dados, modificar = false }) {
             )}
           </Stack>
         )}
-        <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} sx={{ mb: 3 }}>
-          <Typography variant="body2">Escalão de decisão final:</Typography>
-          {nivel ? (
-            <Chip
-              sx={{ typography: 'overline' }}
-              label={`${nivel} - Comité ${(nivel === 1 && 'Base') || (nivel === 2 && 'Diretor') || (nivel === 3 && 'Superior')}`}
-            />
-          ) : (
-            noDados('(Não definido...)')
-          )}
-          {dados?.enviado_para_contratacao && (
+
+        <TextItem label={<Datas dados={dados} arquivado={dados?.estado?.estado === 'Arquivo'} />} />
+
+        {dados?.enviado_para_contratacao && (
+          <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} sx={{ my: 2 }}>
             <Chip
               color="success"
               variant="outlined"
@@ -93,10 +85,8 @@ export default function VisaoGeral({ dados, modificar = false }) {
               sx={{ typography: 'overline' }}
               icon={<InfoOutlinedIcon sx={{ width: 22 }} />}
             />
-          )}
-        </Stack>
-
-        <TextItem label={<Datas dados={dados} arquivado={dados?.estado?.estado === 'Arquivo'} />} />
+          </Stack>
+        )}
 
         {situacao === 'em análise' && <Fincc />}
         {situacao === 'aprovado' && <ModeloCartaProposta />}
@@ -112,20 +102,28 @@ export default function VisaoGeral({ dados, modificar = false }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Datas({ dados, arquivado }) {
+  const itensConfig = [
+    { title: 'Entrada', value: dados?.data_entrada, color: 'info' },
+    { title: 'Aprovado', value: dados?.data_aprovacao, color: 'success' },
+    { title: 'Indeferido', value: dados?.data_indeferido, color: 'error' },
+    { title: 'Desistido', value: dados?.data_desistido, color: 'warning' },
+    { title: 'Contratado', value: dados?.data_contratacao, color: 'success' },
+  ];
+
+  const itensVisiveis = itensConfig.filter((item) => !!item.value);
+
   return (
     <Timeline sx={{ py: 0.25, px: 1 }}>
-      <DataItem title="Contratado" value={dados?.data_contratacao} arquivado={arquivado} />
-      <DataItem title="Desistido" value={dados?.data_desistido} color="warning" arquivado={arquivado} />
-      <DataItem title="Indeferido" value={dados?.data_indeferido} color="error" arquivado={arquivado} />
-      <DataItem title="Aprovado" value={dados?.data_aprovacao} arquivado={arquivado} />
-      <DataItem title="Entrada" value={dados?.data_entrada} color="info" last arquivado={arquivado} />
+      {itensVisiveis.map((item, index) => (
+        <DataItem key={item.title} {...item} arquivado={arquivado} last={index === itensVisiveis.length - 1} />
+      ))}
     </Timeline>
   );
 }
 
 function DataItem({ title, value, color = 'success', last = false, arquivado }) {
   return value ? (
-    <TimelineItem sx={{ minHeight: last ? '22px' : '27px', '&:before': { display: 'none' } }}>
+    <TimelineItem sx={{ minHeight: last ? '20px' : '30px', '&:before': { display: 'none' } }}>
       <TimelineOppositeContent sx={{ pl: 0, py: 0, flex: 0, minWidth: 80 }}>
         <Typography sx={{ typography: 'body2', color: 'text.secondary' }}>{title}</Typography>
       </TimelineOppositeContent>

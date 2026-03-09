@@ -69,7 +69,11 @@ function Seguros({ fields = [], remove, prefixo, tipo = false }) {
               <RHFNumberField name={`${prefixo}[${index}].premio`} label="Prémio" tipo="CVE" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFTextField name={`${prefixo}[${index}].periodicidade`} label="Periodicidade" />
+              <RHFAutocompleteSmp
+                label="Periodicidade"
+                name={`${prefixo}[${index}].periodicidade`}
+                options={['Único', 'Mensal', 'Trimestral', 'Semestral', 'Anual']}
+              />
             </GridItem>
             <GridItem sm={6} md={3}>
               <RHFNumberField name={`${prefixo}[${index}].percentagem_cobertura`} label="Cobertura" tipo="%" />

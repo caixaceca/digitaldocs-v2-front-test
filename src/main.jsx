@@ -62,6 +62,10 @@ setLocale({
   },
 });
 
+// if (import.meta.env.DEV) {
+//   import('./utils/devTools.js');
+// }
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 const domNode = document.getElementById('root');

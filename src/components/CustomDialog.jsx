@@ -107,3 +107,18 @@ export default function DialogPreviewDoc({ params, onClose }) {
     </Dialog>
   );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function DialogActionsBasic({ label = 'OK', onClose, handleOk, loading = false, disabled = false, color }) {
+  return (
+    <DialogActions>
+      <Button color="inherit" variant="outlined" onClick={onClose}>
+        Cancelar
+      </Button>
+      <Button variant="soft" loading={loading} onClick={handleOk} color={color} disabled={disabled || loading}>
+        {label}
+      </Button>
+    </DialogActions>
+  );
+}

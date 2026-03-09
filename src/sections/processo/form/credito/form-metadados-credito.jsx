@@ -106,43 +106,41 @@ function RegimeEspecial({ onClose, dados, dispatch, dadosStepper }) {
   const values = useWatch({ control });
 
   return (
-    <>
-      <FormProvider
-        methods={methods}
-        onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-      >
-        <Title title="Regime especial" />
-        <Grid container spacing={3} sx={{ mt: 1 }}>
-          <GridItem xs={6} md={3} children={<RHFSwitch name="bonificado" label="Bonificado" mt />} />
-          <GridItem xs={6} md={3} children={<RHFSwitch name="jovem_bonificado" label="Jovem bonificado" mt />} />
-          <GridItem xs={6} md={3} children={<RHFSwitch name="revolving" label="Revolving" mt />} />
-          <GridItem xs={6} md={3} children={<RHFSwitch name="credibolsa" label="Credibolsa" mt />} />
-          <GridItem sm={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" mt />} />
-          <GridItem sm={6} md={4}>
-            <RHFSwitch name="tem_isencao_imposto_selo" label="Isento de imposto de selo" mt />
-          </GridItem>
-          <GridItem sm={6} md={4}>
-            <RHFSwitch name="colaborador_empresa_parceira" label="Colaborador de empresa parceira" mt />
-          </GridItem>
-          {values?.credibolsa && (
-            <>
-              <GridItem sm={6} md={3}>
-                <RHFTextField name="montante_tranches_credibolsa" label="Montante das tranches" />
-              </GridItem>
-              <GridItem sm={6} md={3} children={<RHFTextField name="nivel_formacao" label="Nível de formação" />} />
-              <GridItem sm={6} children={<RHFTextField name="designacao_curso" label="Designação do curso" />} />
-              <GridItem sm={6}>
-                <RHFTextField name="estabelecimento_ensino" label="Estabelecimento de ensino" />
-              </GridItem>
-              <GridItem sm={6}>
-                <RHFTextField name="localizacao_estabelecimento_ensino" label="Localização" />
-              </GridItem>
-            </>
-          )}
-        </Grid>
-        <ButtonsStepper onClose={onClose} labelCancel="Cancelar" />
-      </FormProvider>
-    </>
+    <FormProvider
+      methods={methods}
+      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
+    >
+      <Title title="Regime especial" />
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        <GridItem xs={6} md={3} children={<RHFSwitch name="bonificado" label="Bonificado" mt />} />
+        <GridItem xs={6} md={3} children={<RHFSwitch name="jovem_bonificado" label="Jovem bonificado" mt />} />
+        <GridItem xs={6} md={3} children={<RHFSwitch name="revolving" label="Revolving" mt />} />
+        <GridItem xs={6} md={3} children={<RHFSwitch name="credibolsa" label="Credibolsa" mt />} />
+        <GridItem sm={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" mt />} />
+        <GridItem sm={6} md={4}>
+          <RHFSwitch name="tem_isencao_imposto_selo" label="Isento de imposto de selo" mt />
+        </GridItem>
+        <GridItem sm={6} md={4}>
+          <RHFSwitch name="colaborador_empresa_parceira" label="Colaborador de empresa parceira" mt />
+        </GridItem>
+        {values?.credibolsa && (
+          <>
+            <GridItem sm={6} md={3}>
+              <RHFTextField name="montante_tranches_credibolsa" label="Montante das tranches" />
+            </GridItem>
+            <GridItem sm={6} md={3} children={<RHFTextField name="nivel_formacao" label="Nível de formação" />} />
+            <GridItem sm={6} children={<RHFTextField name="designacao_curso" label="Designação do curso" />} />
+            <GridItem sm={6}>
+              <RHFTextField name="estabelecimento_ensino" label="Estabelecimento de ensino" />
+            </GridItem>
+            <GridItem sm={6}>
+              <RHFTextField name="localizacao_estabelecimento_ensino" label="Localização" />
+            </GridItem>
+          </>
+        )}
+      </Grid>
+      <ButtonsStepper onClose={onClose} labelCancel="Cancelar" />
+    </FormProvider>
   );
 }
 
@@ -152,6 +150,9 @@ function Condicoes({ dados, dispatch, dadosStepper }) {
   const formSchema = Yup.object().shape({
     // data_vencimento_prestacao1: Yup.date().required().label('Data 1ª prestação'),
     numero_prestacao: Yup.number().positive().integer().required().label('Nº de prestações'),
+    capital_max_isento_imposto_selo: dadosStepper?.tem_isencao_imposto_selo
+      ? Yup.number().positive().required().label('Capital máx. isento imp. selo')
+      : Yup.mixed().notRequired(),
   });
 
   const defaultValues = useMemo(
@@ -175,41 +176,39 @@ function Condicoes({ dados, dispatch, dadosStepper }) {
   const values = useWatch({ control });
 
   return (
-    <>
-      <FormProvider
-        methods={methods}
-        onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-      >
-        <Title title="Condições & Ciclo do Crédito" />
-        <Grid container spacing={3} sx={{ mt: 3 }} justifyContent="center">
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="conta_do_renda" label="Conta DO renda" noFormat />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="capital_max_isento_imposto_selo" label="Capital máx. isento imp. selo" tipo="CVE" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="numero_prestacao" label="Nº de prestações" tipo="meses" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="meses_vencimento" label="Meses de vencimento" tipo="meses" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="periodo_carencia" label="Período de carência" tipo="meses" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="prazo_utilizacao" label="Prazo de utilização" tipo="meses" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFDatePicker name="data_utilizacao" label="Data de utilização" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFDatePicker name="data_vencimento_prestacao1" label="Data 1ª prestação" />
-          </GridItem>
-        </Grid>
-        <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
-      </FormProvider>
-    </>
+    <FormProvider
+      methods={methods}
+      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
+    >
+      <Title title="Condições & Ciclo do Crédito" />
+      <Grid container spacing={3} sx={{ mt: 3 }} justifyContent="center">
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="conta_do_renda" label="Conta DO renda" noFormat />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="capital_max_isento_imposto_selo" label="Capital máx. isento imp. selo" tipo="CVE" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="numero_prestacao" label="Nº de prestações" tipo="meses" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="meses_vencimento" label="Meses de vencimento" tipo="meses" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="periodo_carencia" label="Período de carência" tipo="meses" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="prazo_utilizacao" label="Prazo de utilização" tipo="meses" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFDatePicker name="data_utilizacao" label="Data de utilização" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFDatePicker name="data_vencimento_prestacao1" label="Data 1ª prestação" />
+        </GridItem>
+      </Grid>
+      <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
+    </FormProvider>
   );
 }
 
@@ -220,6 +219,7 @@ function Taxas({ dados }) {
   const { dadosStepper } = useSelector((state) => state.stepper);
 
   const formSchema = Yup.object().shape({
+    taxa_mora: Yup.number().min(0).max(100).required().label('Taxa de mora'),
     taxa_juro_desconto: Yup.number().min(0).max(100).required().label('Taxa de juros desconto'),
     taxa_imposto_selo: Yup.number().positive().max(100).required().label('Taxa de imposto selo'),
     taxa_juro_precario: Yup.number().positive().max(100).required().label('Taxa de juros precário'),
@@ -230,7 +230,7 @@ function Taxas({ dados }) {
 
   const defaultValues = useMemo(
     () => ({
-      taxa_tan: dadosStepper?.taxa_tan || dados?.taxa_tan || '',
+      taxa_mora: dadosStepper?.taxa_mora || dados?.taxa_mora || 2,
       taxa_imposto_selo: dadosStepper?.taxa_imposto_selo || dados?.taxa_imposto_selo || 3.5,
       taxa_juro_desconto: dadosStepper?.taxa_juro_desconto || dados?.taxa_juro_desconto || 0,
       taxa_juro_precario: dadosStepper?.taxa_juro_precario || dados?.taxa_juro_precario || 11,
@@ -248,39 +248,37 @@ function Taxas({ dados }) {
   const values = useWatch({ control });
 
   return (
-    <>
-      <FormProvider
-        methods={methods}
-        onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-      >
-        <Title title="Taxas" />
-        <Grid container spacing={3} sx={{ mt: 3 }}>
-          <GridItem children={<RHFSwitch name="modo_taxa_equivalente" label="Taxa equivalente" />} />
-          <GridItem xs={6} md={3}>
-            <RHFNumberField name="taxa_tan" label="TAN" tipo="%" />
-          </GridItem>
-          <GridItem xs={6} md={3}>
-            <RHFNumberField name="taxa_imposto_selo" label="Taxa de imposto selo" tipo="%" />
-          </GridItem>
-          <GridItem xs={6} md={3}>
-            <RHFNumberField name="taxa_juro_precario" label="Taxa juros precário" tipo="%" />
-          </GridItem>
-          <GridItem xs={6} md={3}>
-            <RHFNumberField name="taxa_juro_desconto" label="Taxa juros desconto" tipo="%" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="taxa_comissao_abertura" label="Taxa comissão abertura" tipo="%" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="taxa_imposto_selo_utilizacao" label="Taxa imp. selo utlização" tipo="%" />
-          </GridItem>
-          <GridItem xs={6} md={4}>
-            <RHFNumberField name="taxa_comissao_imobilizacao" label="Taxa comissão imobilização" tipo="%" />
-          </GridItem>
-        </Grid>
-        <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
-      </FormProvider>
-    </>
+    <FormProvider
+      methods={methods}
+      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
+    >
+      <Title title="Taxas" />
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        <GridItem children={<RHFSwitch name="modo_taxa_equivalente" label="Taxa equivalente" />} />
+        <GridItem xs={6} md={3}>
+          <RHFNumberField name="taxa_juro_precario" label="Taxa juros precário" tipo="%" />
+        </GridItem>
+        <GridItem xs={6} md={3}>
+          <RHFNumberField name="taxa_juro_desconto" label="Taxa juros desconto" tipo="%" />
+        </GridItem>
+        <GridItem xs={6} md={3}>
+          <RHFNumberField name="taxa_mora" label="Taxa de mora" tipo="%" />
+        </GridItem>
+        <GridItem xs={6} md={3}>
+          <RHFNumberField name="taxa_imposto_selo" label="Taxa de imposto selo" tipo="%" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="taxa_comissao_abertura" label="Taxa comissão abertura" tipo="%" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="taxa_imposto_selo_utilizacao" label="Taxa imp. selo utlização" tipo="%" />
+        </GridItem>
+        <GridItem xs={6} md={4}>
+          <RHFNumberField name="taxa_comissao_imobilizacao" label="Taxa comissão imobilização" tipo="%" />
+        </GridItem>
+      </Grid>
+      <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
+    </FormProvider>
   );
 }
 
@@ -309,26 +307,24 @@ function Objeto({ dados, dispatch, dadosStepper }) {
   const values = useWatch({ control });
 
   return (
-    <>
-      <FormProvider
-        methods={methods}
-        onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
-      >
-        <Title title="Objeto do Financiamento" />
-        <Grid container spacing={3} sx={{ mt: 3 }}>
-          <GridItem sm={6}>
-            <RHFAutocompleteObj name="tipo_imovel_id" label="Tipo de imóvel" options={imoveisList} />
-          </GridItem>
-          <GridItem sm={6}>
-            <RHFTextField name="bem_servico_financiado" label="Bem/Serviço financiado" />
-          </GridItem>
-          <GridItem>
-            <RHFTextField name="finalidade_credito_habitacao" label="Finalidade cred. habitação" />
-          </GridItem>
-        </Grid>
-        <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
-      </FormProvider>
-    </>
+    <FormProvider
+      methods={methods}
+      onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
+    >
+      <Title title="Objeto do Financiamento" />
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        <GridItem sm={6}>
+          <RHFAutocompleteObj name="tipo_imovel_id" label="Tipo de imóvel" options={imoveisList} />
+        </GridItem>
+        <GridItem sm={6}>
+          <RHFTextField name="bem_servico_financiado" label="Bem/Serviço financiado" />
+        </GridItem>
+        <GridItem>
+          <RHFTextField name="finalidade_credito_habitacao" label="Finalidade cred. habitação" />
+        </GridItem>
+      </Grid>
+      <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
+    </FormProvider>
   );
 }
 
@@ -376,12 +372,12 @@ function Entidade({ dados, ids, onClose, dispatch, dadosStepper }) {
         prazo_utilizacao: rawData.prazo_utilizacao ? Number(rawData.prazo_utilizacao) : undefined,
         tipo_imovel_id: rawData.tipo_imovel_id?.id ? Number(rawData.tipo_imovel_id?.id) : undefined,
 
+        taxa_mora: String(rawData.taxa_mora || '0'),
         taxa_imposto_selo: String(rawData.taxa_imposto_selo || '0'),
         taxa_juro_precario: String(rawData.taxa_juro_precario || '0'),
         taxa_juro_desconto: String(rawData.taxa_juro_desconto || '0'),
         modo_taxa_equivalente: Boolean(rawData.modo_taxa_equivalente),
         taxa_comissao_abertura: String(rawData.taxa_comissao_abertura || '0'),
-        taxa_tan: rawData.taxa_tan ? String(rawData.taxa_tan?.replace(',', '.') || '0') : undefined,
         taxa_imposto_selo_utilizacao: String(rawData.taxa_imposto_selo_utilizacao || '0'),
         taxa_comissao_imobilizacao: rawData.taxa_comissao_imobilizacao
           ? String(rawData.taxa_comissao_imobilizacao)
@@ -433,30 +429,24 @@ function Entidade({ dados, ids, onClose, dispatch, dadosStepper }) {
   };
 
   return (
-    <>
-      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-        <Title title="Entidade Vendedora / Fornecedora" />
-        <Grid container spacing={3} sx={{ mt: 3 }}>
-          <GridItem sm={6}>
-            <RHFTextField name="nome_empresa_fornecedora" label="Empresa fornecedora" />
-          </GridItem>
-          <GridItem sm={6}>
-            <RHFNumberField name="nib_vendedor_ou_fornecedor" label="NIB vendedor/fornecedor" noFormat />
-          </GridItem>
-          <GridItem sm={6}>
-            <RHFTextField label="Instituição de crédito" name="instituicao_credito_conta_vendedor_ou_fornecedor" />
-          </GridItem>
-          <GridItem sm={6}>
-            <RHFNumberField
-              tipo="CVE"
-              label="Valor a transferir"
-              name="valor_transferir_conta_vendedor_ou_fornecedor"
-            />
-          </GridItem>
-        </Grid>
-        <ButtonsStepper label="Guardar" isSaving={isSaving} onClose={() => dispatch(backStep())} />
-      </FormProvider>
-    </>
+    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+      <Title title="Entidade Vendedora / Fornecedora" />
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        <GridItem sm={6}>
+          <RHFTextField name="nome_empresa_fornecedora" label="Empresa fornecedora" />
+        </GridItem>
+        <GridItem sm={6}>
+          <RHFNumberField name="nib_vendedor_ou_fornecedor" label="NIB vendedor/fornecedor" noFormat />
+        </GridItem>
+        <GridItem sm={6}>
+          <RHFTextField label="Instituição de crédito" name="instituicao_credito_conta_vendedor_ou_fornecedor" />
+        </GridItem>
+        <GridItem sm={6}>
+          <RHFNumberField tipo="CVE" label="Valor a transferir" name="valor_transferir_conta_vendedor_ou_fornecedor" />
+        </GridItem>
+      </Grid>
+      <ButtonsStepper label="Guardar" isSaving={isSaving} onClose={() => dispatch(backStep())} />
+    </FormProvider>
   );
 }
 

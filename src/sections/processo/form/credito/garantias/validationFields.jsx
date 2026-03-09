@@ -62,7 +62,7 @@ const shapeSeguros = (tipo) =>
       percentagem_cobertura: shapePercentagem('Cobertura'),
       seguradora: Yup.mixed().required().label('Seguradora'),
       tipo: validacao(tipo, Yup.mixed().required().label('Tipo')),
-      periodicidade: Yup.string().required().label('Periodicidade'),
+      periodicidade: Yup.mixed().required().label('Periodicidade'),
     })
   );
 

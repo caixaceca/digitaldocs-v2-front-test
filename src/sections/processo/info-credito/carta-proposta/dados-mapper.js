@@ -11,10 +11,10 @@ function mapCondicoes(modelo) {
   const meta = credito?.gaji9_metadados ?? {};
 
   return {
-    tan: meta?.taxa_tan || 0,
     taeg: meta?.taxa_taeg || 0,
+    taxa_mora: meta?.taxa_mora || '2',
+    taxa_juro: credito?.taxa_juro || 0,
     agencia: modelo?.uo?.nome || 'Agência',
-    taxa_mora: meta?.taxa_juro_mora || '2',
     nome_proponente: modelo?.titular || '---',
     data_entrada: modelo?.data_entrada,
     montante: credito?.montante_aprovado || credito?.montante_solicitado || 0,
@@ -23,7 +23,7 @@ function mapCondicoes(modelo) {
     prazo_amortizacao: credito?.prazo_amortizacao || '---',
     prazo_entrega_contrato: 15,
     garantias_brutas: credito?.garantias || [],
-    fiadores: extrairFiadoresSimples(credito?.garantias),
+    fiadores: extrairFiadores(credito?.garantias),
   };
 }
 
@@ -56,7 +56,7 @@ function mapObrigacoes(modelo) {
   };
 }
 
-function extrairFiadoresSimples(garantias) {
+export function extrairFiadores(garantias) {
   if (!garantias) return [];
-  return garantias.flatMap((g) => g.metadados?.fiadores || []).map((f) => ({ nome: f?.nome_entidade || '---' }));
+  return garantias.flatMap((g) => g.metadados?.fiadores || []).map((f) => ({ ...f, nome: f?.nome_entidade || '---' }));
 }

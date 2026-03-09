@@ -257,10 +257,13 @@ function RespExterna({ dados }) {
   );
 }
 
-function Dividas({ name }) {
+export function Dividas({ name }) {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
-  const title = name === 'dividas_externas' ? 'Dívidas em outros bancos' : 'Avales/Fianças em outros bancos';
+  const title =
+    (name === 'fiancas' && 'Avales/Fianças') ||
+    (name === 'dividas_externas' && 'Dívidas em outros bancos') ||
+    'Avales/Fianças em outros bancos';
 
   return (
     <Stack spacing={3}>

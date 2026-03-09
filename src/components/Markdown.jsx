@@ -2,8 +2,11 @@ import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 // @mui
+import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
+import Divider from '@mui/material/Divider';
 import { styled } from '@mui/material/styles';
-import { Link, Divider, Typography, Box } from '@mui/material';
+import Typography from '@mui/material/Typography';
 // componentes
 import Image from './Image';
 

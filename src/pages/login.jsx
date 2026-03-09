@@ -18,6 +18,8 @@ import { useAuthContext } from '../providers/auth-provider';
 import Page from '../components/Page';
 import Logo from '../components/Logo';
 
+// ---------------------------------------------------------------------------------------------------------------------
+
 const RootStyle = styled(Page)(() => ({
   display: 'flex',
   minHeight: '100vh',
@@ -27,6 +29,8 @@ const RootStyle = styled(Page)(() => ({
   backgroundRepeat: 'no-repeat',
   backgroundImage: 'url(/assets/Shape.svg)',
 }));
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 export default function PageLogin() {
   const { login, loginLoading } = useAuthContext();

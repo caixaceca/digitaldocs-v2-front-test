@@ -1,5 +1,9 @@
 import React, { memo, useMemo } from 'react';
-import { Box, useTheme } from '@mui/material';
+// @mui
+import Box from '@mui/material/Box';
+import { useTheme } from '@mui/material/styles';
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 const DocIllustration = memo((props) => {
   const theme = useTheme();

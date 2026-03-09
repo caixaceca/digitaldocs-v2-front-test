@@ -8,7 +8,7 @@ export const seguroSchema = {
   valor: '',
   premio: '',
   apolice: '',
-  periodicidade: '',
+  periodicidade: null,
   percentagem_cobertura: '',
 };
 

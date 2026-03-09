@@ -132,7 +132,7 @@ export function DefaultAction({
       </Icon>
     )) ||
     ((icon === 'Procurar' || label === 'Procurar' || label === 'PROCURAR') && (
-      <SearchIcon sx={{ width: small ? 18 : 24 }} />
+      <SearchIcon sx={{ width: small ? 18 : 22, height: small ? 18 : 22 }} />
     )) ||
     ((label === 'ENCAMINHAR' || label === 'DESPACHO' || label === 'Encaminhar') && (
       <Seguimento sx={{ width: small ? 18 : 22 }} />

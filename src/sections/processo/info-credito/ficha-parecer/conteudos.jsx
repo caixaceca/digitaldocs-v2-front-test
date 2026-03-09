@@ -21,6 +21,7 @@ import {
   SituacaoProfissional,
 } from './info-solvabilidade';
 import { FormParecer } from './form-ficha';
+import AnaliseFiadores from './analise-fiadores';
 import AnexarFicha from './ficha-pdf/anexar-ficha';
 import { AddItem, DefaultAction } from '@/components/Actions';
 import Responsabilidades, { AvalesFiancas, Liquidacoes } from './responsabilidades';
@@ -28,7 +29,7 @@ import { Saldos, Clientes, Mensagens, Movimentos, Identificcao, CentralRisco, Re
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Ficha({ credito, ficha, valorPrestacao, cliente, modalIntranet, actionModal }) {
+export default function Ficha({ credito, montante, ficha, valorPrestacao, cliente, modalIntranet, actionModal }) {
   const {
     saldos,
     titulos,
@@ -41,14 +42,16 @@ export default function Ficha({ credito, ficha, valorPrestacao, cliente, modalIn
     totalSaldoPorMoeda,
   } = useMemo(() => extractClientes(ficha?.clientes || []), [ficha?.clientes]);
 
-  const { rendimento = null, despesas = [], liquidacoes = [], parecer = '' } = ficha || {};
   const { dividas_externas: dividasExternas = [], avales_externas: avalesExternos = [] } = ficha || {};
+  const { rendimento = null, despesas = [], liquidacoes = [], fiadores = [], parecer = '' } = ficha || {};
   const { numero, fiancas, entidade, mensagens, central_risco: cr, movimentos = [], proposta = null } = ficha || {};
+
   const divEf = useMemo(() => dividas?.filter((r) => !liquidacoes?.includes(r?.conta)), [dividas, liquidacoes]);
   const { movimentosDebito, movimentosCredito, totaisDebConta, totaisCredConta } = useMemo(
     () => movimentosConta(movimentos),
     [movimentos]
   );
+  const temFiadores = fiadores?.length > 0;
 
   return (
     <Stack spacing={2}>
@@ -111,8 +114,20 @@ export default function Ficha({ credito, ficha, valorPrestacao, cliente, modalIn
         }
       />
       <AccordionItem title="16. Limite máximo Aval/Fiança" children={<LimiteAval rendimento={rendimento} />} />
+      {temFiadores && (
+        <AccordionItem
+          title="17. Análise dos fiadores"
+          children={
+            <AnaliseFiadores
+              fiadores={fiadores}
+              rendimento={rendimento}
+              financiamento={{ valor: montante, saldo_divida: montante, valor_prestacao: valorPrestacao }}
+            />
+          }
+        />
+      )}
       <AccordionItem
-        title="17. Parecer"
+        title={`${temFiadores ? '18' : '17'}. Parecer`}
         children={<Parecer parecer={ficha?.parecer || ''} />}
         action={
           proposta ? (
@@ -126,18 +141,20 @@ export default function Ficha({ credito, ficha, valorPrestacao, cliente, modalIn
         }
       />
       <AccordionItem
-        title="18. Proposta de Financiamento"
+        title={`${temFiadores ? '19' : '18'}. Proposta de Financiamento`}
         children={<Proposta dados={{ valorPrestacao, credito, proposta }} />}
       />
 
       {ficha?.parecer && (
-        <AnexarFicha dados={{ valorPrestacao, dividas, divEf, cliente, credito, parecer, ...ficha }} />
+        <AnexarFicha
+          dados={{ valorPrestacao, montante, dividas, divEf, cliente, credito, parecer, fiadores, ...ficha }}
+        />
       )}
 
       {modalIntranet === 'form-parecer' && (
         <FormParecer
           onClose={() => actionModal({})}
-          ficha={{ valorPrestacao, cliente, dividas, divEf, credito, liquidacoes, ...ficha }}
+          ficha={{ valorPrestacao, cliente, dividas, divEf, credito, liquidacoes, fiadores, ...ficha }}
         />
       )}
       {modalIntranet === 'liquidacao' && (
