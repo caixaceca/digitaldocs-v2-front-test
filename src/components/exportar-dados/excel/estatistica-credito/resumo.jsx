@@ -3,8 +3,8 @@ import { sumBy } from 'lodash';
 import { ptDate } from '@/utils/formatTime';
 import { estiloCabecalho } from '../formatacoes';
 //
+import { addNaoClassificados } from '.';
 import { dadosPorItem } from './dados-fase';
-import { addNaoClassificados } from './index';
 import { valorMoeda, colunasSI, celulasConteudo } from './formatacoes';
 import { segmentos, filtrarSegLinha, dadosNaoClassificados } from '@/sections/indicadores/estatistica-credito/resumo';
 

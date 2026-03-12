@@ -23,7 +23,7 @@ import { SkeletonTable } from '../../components/skeleton';
 import { SearchToolbarSimple } from '../../components/SearchToolbar';
 import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
 //
-import { Detalhes } from './Detalhes';
+import Detalhes from './details';
 import { applySortFilter } from './applySortFilter';
 import { MotivoTransicaoForm, MotivoPendenciaForm } from './ParametrizacaoForm';
 

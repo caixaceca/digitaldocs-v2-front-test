@@ -33,9 +33,9 @@ export const shapeNumberZero = (label, opcoes, item) =>
     otherwise: () => Yup.mixed().notRequired(),
   });
 
-export const shapeText = (label, sit1, sit2, item) =>
+export const shapeText = (item, opcoes, label) =>
   Yup.mixed().when(item, {
-    is: (val) => val === sit1 || (sit2 && val === sit2),
+    is: (val) => opcoes?.includes(val),
     then: () => Yup.string().required().label(label),
     otherwise: () => Yup.mixed().notRequired(),
   });
@@ -47,9 +47,9 @@ export const shapeMixed = (label, sit1, sit2, item) =>
     otherwise: () => Yup.mixed().notRequired(),
   });
 
-export const shapeDate = (label, sit1, sit2, item) =>
+export const shapeDate = (item, opcoes, label) =>
   Yup.mixed().when(item, {
-    is: (val) => val === sit1 || (sit2 && val === sit2),
+    is: (val) => opcoes?.includes(val),
     then: () => Yup.date().typeError().required().label(label),
     otherwise: () => Yup.mixed().notRequired(),
   });

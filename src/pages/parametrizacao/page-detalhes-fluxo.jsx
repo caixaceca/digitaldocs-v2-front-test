@@ -32,7 +32,7 @@ import {
 } from '@/sections/parametrizacao/form-fluxo';
 import TableInfoFluxo from '@/sections/parametrizacao/table-info-fluxo';
 import TableTransicoes from '@/sections/parametrizacao/table-transicoes';
-import { Detalhes, DetalhesContent } from '@/sections/parametrizacao/Detalhes';
+import Detalhes, { DetalhesContent } from '@/sections/parametrizacao/details';
 // guards
 import RoleBasedGuard from '@/guards/RoleBasedGuard';
 

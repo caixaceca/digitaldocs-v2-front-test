@@ -8,23 +8,22 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { transicoesList, transicaoDesc } from '../../utils/formatObject';
-// hooks
-import useTable, { applySort, getComparator } from '../../hooks/useTable';
-// redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getFromParametrizacao, getSuccess, setModal } from '../../redux/slices/parametrizacao';
-// Components
-import Markdown from '../../components/Markdown';
-import Scrollbar from '../../components/Scrollbar';
-import { DefaultAction } from '../../components/Actions';
-import { SkeletonTable } from '../../components/skeleton';
-import { CellChecked, noDados } from '../../components/Panel';
-import { SearchToolbarSimple } from '../../components/SearchToolbar';
-import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '../../components/table';
-//
 import { applySortFilter } from './applySortFilter';
-import { EstadoDetail } from './TableParametrizacao';
+import { transicoesList, transicaoDesc } from '@/utils/formatObject';
+import useTable, { applySort, getComparator } from '@/hooks/useTable';
+// redux
+import { useDispatch, useSelector } from '@/redux/store';
+import { getFromParametrizacao, getSuccess, setModal } from '@/redux/slices/parametrizacao';
+// Components
+import Markdown from '@/components/Markdown';
+import Scrollbar from '@/components/Scrollbar';
+import { DefaultAction } from '@/components/Actions';
+import { SkeletonTable } from '@/components/skeleton';
+import { CellChecked, noDados } from '@/components/Panel';
+import { SearchToolbarSimple } from '@/components/SearchToolbar';
+import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/components/table';
+//
+import { EstadoDetail } from './details/estado-detail';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

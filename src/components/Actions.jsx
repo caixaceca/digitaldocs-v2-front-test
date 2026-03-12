@@ -190,14 +190,14 @@ export function DefaultAction({
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function AddItem({ dados = {}, onClick = null }) {
+export function AddItem({ variant = 'soft', dados = {}, onClick = null }) {
   const { small = false, label = 'Adicionar' } = dados;
   const dispatch = useDispatch();
 
   return (
     <Stack>
       <Button
-        variant="soft"
+        variant={variant}
         size={small ? 'small' : 'medium'}
         startIcon={<AddIcon sx={{ width: small ? 20 : 22 }} />}
         onClick={() => {

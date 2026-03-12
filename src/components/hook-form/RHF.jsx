@@ -30,6 +30,7 @@ export function RHFNumberField({ name, tipo, small = false, noFormat = false, ..
         <TextField
           {...field}
           fullWidth
+          defaultValue=""
           error={!!error}
           helperText={error?.message}
           size={small ? 'small' : 'medium'}

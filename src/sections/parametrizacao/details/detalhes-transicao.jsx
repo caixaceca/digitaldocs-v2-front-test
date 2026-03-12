@@ -1,25 +1,31 @@
 import { useState, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
+import ListItem from '@mui/material/ListItem';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import TableHead from '@mui/material/TableHead';
+import Typography from '@mui/material/Typography';
 // utils
-import { fPercent } from '../../utils/formatNumber';
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import { fPercent } from '@/utils/formatNumber';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { getFromParametrizacao } from '../../redux/slices/parametrizacao';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getComparator, applySort } from '@/hooks/useTable';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // components
-import { CellChecked } from '../../components/Panel';
-import { DefaultAction } from '../../components/Actions';
-import { SearchNotFoundSmall } from '../../components/table';
-import { TabsWrapperSimple } from '../../components/TabsWrapper';
+import Label from '@/components/Label';
+import { CellChecked } from '@/components/Panel';
+import { DefaultAction } from '@/components/Actions';
+import { SearchNotFoundSmall } from '@/components/table';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
-import { RegrasForm } from './form-estado';
-import { DetalhesContent } from './Detalhes';
+import { DetalhesContent } from '.';
+import { RegrasForm } from '../form-estado';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -106,5 +112,24 @@ function RegrasTransicoes({ dados }) {
         />
       )}
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function FluxosTransicoes({ fluxos }) {
+  return (
+    <List>
+      <ListItem disableGutters divider sx={{ pb: 0.5 }}>
+        <Typography variant="subtitle1">Fluxos</Typography>
+      </ListItem>
+      <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ py: 1 }} spacing={1}>
+        {fluxos?.length > 0 ? (
+          applySort(fluxos, getComparator('asc', 'fluxo'))?.map((row) => <Label key={row?.id}>{row?.fluxo}</Label>)
+        ) : (
+          <Label>Todos</Label>
+        )}
+      </Stack>
+    </List>
   );
 }

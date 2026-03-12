@@ -18,7 +18,7 @@ import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
 import ImoveisGarantia from './imoveis-garantia';
 import TableInfoGarantias from './table-info-garantias';
-import { Resgisto, TableRowItem } from '../../../parametrizacao/Detalhes';
+import { Resgisto, TableRowItem } from '../../../parametrizacao/details';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

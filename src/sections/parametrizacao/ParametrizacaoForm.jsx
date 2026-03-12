@@ -33,7 +33,7 @@ import ListSelect from '@/components/ListSelect';
 import { FormLoading } from '@/components/skeleton';
 import { DialogButons } from '@/components/Actions';
 import { SearchNotFoundSmall } from '@/components/table';
-import { shapeDate } from '@/components/hook-form/yup-shape';
+import { shapeDate, shapeText } from '@/components/hook-form/yup-shape';
 // _mock
 import { codacessos, objetos, listaFreguesias } from '@/_mock';
 
@@ -468,10 +468,10 @@ export function DocumentoForm({ onClose }) {
   const formSchema = Yup.object().shape({
     tipo: Yup.mixed().required().label('Tipo'),
     codigo: Yup.string().required().label('Código'),
+    titulo: shapeText('tipo', ['Formulário'], 'Título'),
     designacao: Yup.string().required().label('Designação'),
-    data_formulario: shapeDate('Data', 'Formulário', '', 'tipo'),
-    titulo: Yup.mixed().when('formulario', { is: true, then: () => Yup.string().required().label('Título') }),
-    sub_titulo: Yup.mixed().when('formulario', { is: true, then: () => Yup.string().required().label('Subtítulo') }),
+    data_formulario: shapeDate('tipo', ['Formulário'], 'Data'),
+    sub_titulo: shapeText('tipo', ['Formulário'], 'Subtítulo'),
   });
 
   const defaultValues = useMemo(
@@ -505,10 +505,9 @@ export function DocumentoForm({ onClose }) {
         ...values,
         anexo: values.tipo === 'Anexo',
         formulario: values.tipo === 'Formulário',
-        titulo: values?.formulario ? values?.titulo : null,
-        sub_titulo: values?.formulario ? values?.sub_titulo : null,
-        data_formulario:
-          values?.formulario && values?.data_formulario ? format(values.data_formulario, 'yyyy-MM-dd') : null,
+        titulo: values.tipo === 'Formulário' ? values?.titulo : null,
+        sub_titulo: values.tipo === 'Formulário' ? values?.sub_titulo : null,
+        data_formulario: values.tipo === 'Formulário' ? format(values.data_formulario, 'yyyy-MM-dd') : null,
       };
       const params = { id: selectedItem?.id, msg: `Documento ${isEdit ? 'atualizado' : 'adicionado'}` };
       dispatch((isEdit ? updateItem : createItem)('documentos', JSON.stringify(formData), params));

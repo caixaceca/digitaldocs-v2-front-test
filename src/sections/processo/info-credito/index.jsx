@@ -39,7 +39,12 @@ export default function InfoCredito({ dados }) {
           modificar={modificar}
           dados={dados?.gaji9_metadados}
           prazo={dados?.prazo_amortizacao}
-          ids={{ processoId: dados?.processoId, creditoId: dados?.id }}
+          ids={{
+            creditoId: dados?.id,
+            linhaId: dados?.linha_id,
+            processoId: dados?.processoId,
+            componenteId: dados?.componente_id,
+          }}
         />
       ),
     },

@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-//
 import { EventType } from '@azure/msal-browser';
-import { msalInstance, loginRequest, popupRedirectUri } from '../config';
+import { msalInstance, loginRequest, redirectUri } from '../config';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -29,12 +28,40 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     let callbackId = null;
 
+    callbackId = msalInstance.addEventCallback((event) => {
+      if (event.eventType === EventType.LOGIN_SUCCESS || event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
+        const eventAccount = event.payload?.account;
+        if (eventAccount) {
+          msalInstance.setActiveAccount(eventAccount);
+          setAccount(eventAccount);
+        }
+      }
+      if (event.eventType === EventType.LOGOUT_SUCCESS) {
+        setAccount(null);
+      }
+      if (event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
+        console.warn('[AuthProvider] Falha ao adquirir token:', event.error);
+        const erroDeInteracao =
+          event.error?.errorCode === 'timed_out' || event.error?.errorCode === 'monitor_window_timeout';
+        if (!erroDeInteracao && !resolveAccount()) setAccount(null);
+      }
+    });
+
+    const handleTokenRefreshed = (event) => {
+      const refreshedAccount = event.detail?.account ?? resolveAccount();
+      if (refreshedAccount) {
+        console.info('[AuthProvider] Token renovado via popup');
+        msalInstance.setActiveAccount(refreshedAccount);
+        setAccount(refreshedAccount);
+      }
+    };
+
+    window.addEventListener('msal:tokenRefreshed', handleTokenRefreshed);
+
     const init = async () => {
       try {
         await msalInstance.initialize();
-
         const redirectResponse = await msalInstance.handleRedirectPromise();
-
         if (redirectResponse?.account) {
           msalInstance.setActiveAccount(redirectResponse.account);
           setAccount(redirectResponse.account);
@@ -49,34 +76,11 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    callbackId = msalInstance.addEventCallback((event) => {
-      if (event.eventType === EventType.LOGIN_SUCCESS || event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
-        const eventAccount = event.payload?.account;
-        if (eventAccount) {
-          msalInstance.setActiveAccount(eventAccount);
-          setAccount(eventAccount);
-        }
-      }
-
-      if (event.eventType === EventType.LOGOUT_SUCCESS) {
-        setAccount(null);
-      }
-
-      if (event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
-        console.warn('[AuthProvider] Falha ao adquirir token:', event.error);
-        const erroDeInteracao =
-          event.error?.errorCode === 'timed_out' || event.error?.errorCode === 'monitor_window_timeout';
-
-        if (!erroDeInteracao && !resolveAccount()) {
-          setAccount(null);
-        }
-      }
-    });
-
     init();
 
     return () => {
       if (callbackId) msalInstance.removeEventCallback(callbackId);
+      window.removeEventListener('msal:tokenRefreshed', handleTokenRefreshed);
     };
   }, []);
 
@@ -85,7 +89,7 @@ export const AuthProvider = ({ children }) => {
     setLoginLoading(true);
     setError(null);
     try {
-      await msalInstance.loginRedirect({ ...loginRequest, redirectUri: popupRedirectUri });
+      await msalInstance.loginRedirect({ ...loginRequest, redirectUri });
     } catch (err) {
       console.error('[AuthProvider] Erro no login:', err);
       setError(err);
@@ -98,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     msalInstance.logoutRedirect({
       account: activeAccount ?? undefined,
       logoutHint: activeAccount?.username,
-      postLogoutRedirectUri: popupRedirectUri,
+      postLogoutRedirectUri: redirectUri,
     });
   }, []);
 

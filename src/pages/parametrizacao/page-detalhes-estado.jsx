@@ -23,7 +23,7 @@ import { DialogConfirmar } from '@/components/CustomDialog';
 import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 // sections
 import TableInfoEstado from '@/sections/parametrizacao/table-info-estado';
-import { Detalhes, DetalhesContent } from '@/sections/parametrizacao/Detalhes';
+import Detalhes, { DetalhesContent } from '@/sections/parametrizacao/details';
 import { EstadoForm, PerfisEstadoForm, RegrasForm, EstadosPerfilForm } from '@/sections/parametrizacao/form-estado';
 // guards
 import RoleBasedGuard from '@/guards/RoleBasedGuard';

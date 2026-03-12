@@ -12,7 +12,7 @@ import { useSelector } from '@/redux/store';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 //
 import { labelTitular } from '../applySortFilter';
-import { Resgisto, LabelSN } from '../../parametrizacao/Detalhes';
+import { Resgisto, LabelSN } from '../../parametrizacao/details';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

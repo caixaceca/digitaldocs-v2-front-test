@@ -1,13 +1,12 @@
 // Global styles
 import 'react-quill-new/dist/quill.snow.css';
+import 'yet-another-react-lightbox/styles.css';
 import 'simplebar-react/dist/simplebar.min.css';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 import 'react-lazy-load-image-component/src/effects/black-and-white.css';
-import 'yet-another-react-lightbox/styles.css';
 // Highlight
 import './utils/highlight';
-
 import { setLocale } from 'yup';
 import pt from 'date-fns/locale/pt';
 import { createRoot } from 'react-dom/client';
@@ -17,8 +16,9 @@ import { Provider as ReduxProvider } from 'react-redux';
 // @mui
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-// redux
+// utils
 import { store } from './redux/store';
+import { msalInstance } from './config';
 //
 import App from './App';
 
@@ -56,29 +56,46 @@ setLocale({
   },
   array: {
     required: '${label} é obrigatório',
-    min: '${label} deve conter no mínimo ${min} ${min, plural, one {item} other {itens}}',
-    max: '${label} deve conter no máximo ${max} ${max, plural, one {item} other {itens}}',
+    min: '${label} deve conter no mínimo ${min} item',
+    max: '${label} deve conter no máximo ${max} item',
     notType: 'Introduza uma lista válida para ${label}',
   },
 });
 
-// if (import.meta.env.DEV) {
-//   import('./utils/devTools.js');
-// }
+if (import.meta.env.DEV) {
+  import('./utils/devTools.js');
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 const domNode = document.getElementById('root');
 const root = createRoot(domNode);
 
-root.render(
-  <ReduxProvider store={store}>
-    <BrowserRouter>
-      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={pt}>
-        <HelmetProvider>
-          <App />
-        </HelmetProvider>
-      </LocalizationProvider>
-    </BrowserRouter>
-  </ReduxProvider>
-);
+if (window.opener && window.opener !== window) {
+  msalInstance
+    .initialize()
+    .then(() => msalInstance.handleRedirectPromise())
+    .then(() => {
+      setTimeout(() => {
+        if (!window.closed) window.close();
+      }, 3000);
+    })
+    .catch((err) => {
+      console.error('[popup] Erro:', err);
+      setTimeout(() => {
+        if (!window.closed) window.close();
+      }, 1000);
+    });
+} else {
+  root.render(
+    <ReduxProvider store={store}>
+      <BrowserRouter>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={pt}>
+          <HelmetProvider>
+            <App />
+          </HelmetProvider>
+        </LocalizationProvider>
+      </BrowserRouter>
+    </ReduxProvider>
+  );
+}

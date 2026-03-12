@@ -81,14 +81,14 @@ function Rendimento({ dados, onClose }) {
   const { enqueueSnackbar } = useSnackbar();
 
   const formSchema = Yup.object().shape({
-    nome_conjuge: shapeText('Nome', true, '', 'conjuge'),
+    nome_conjuge: shapeText('conjuge', [true], 'Nome'),
     tipo_contrato: Yup.mixed().required().label('Situação laboral'),
     local_trabalho: Yup.string().required().label('Local de trabalho'),
     renda_bruto_mensal: Yup.number().positive().label('Rendimento bruto'),
+    local_trabalho_conjuge: shapeText('conjuge', [true], 'Local de trabalho'),
     renda_liquido_mensal: Yup.number().positive().label('Rendimento liquido'),
     tipo_contrato_conjuge: shapeMixed('Situação laboral', true, '', 'conjuge'),
-    local_trabalho_conjuge: shapeText('Local de trabalho', true, '', 'conjuge'),
-    data_nascimento_conjuge: shapeDate('Data de nascimento', true, '', 'conjuge'),
+    data_nascimento_conjuge: shapeDate('conjuge', [true], 'Data de nascimento'),
     renda_bruto_mensal_conjuge: shapeNumber('Rendimento bruto', true, '', 'conjuge'),
     renda_liquido_mensal_conjuge: shapeNumber('Rendimento liquido', true, '', 'conjuge'),
   });

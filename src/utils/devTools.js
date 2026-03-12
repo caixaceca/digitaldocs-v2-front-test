@@ -97,11 +97,26 @@ export function limparSessaoMsal() {
 // ─── Expõe no window -------------------------------------------------------------------------------------------------
 
 if (import.meta.env.DEV) {
-  window.__dev = { inspecionarTokens, limparSessaoMsal };
+  window.__dev = {
+    inspecionarTokens,
+    limparSessaoMsal,
+    forcarPopup: () => {
+      window.__DEV_FORCE_POPUP__ = true;
+      console.info('🧪 [devTools] Popup forçado ativo — faz uma ação na app para disparar.');
+      console.info('💡 Para desativar: __dev.cancelarForcarPopup()');
+    },
+    // ✏️ ADICIONADO: cancela o forçar popup
+    cancelarForcarPopup: () => {
+      window.__DEV_FORCE_POPUP__ = false;
+      console.info('✅ [devTools] Popup forçado desativado.');
+    },
+  };
 
   console.info(
     '🛠️ [devTools] Funções disponíveis:\n' +
       '  __dev.inspecionarTokens()     — estado atual dos tokens\n' +
-      '  __dev.limparSessaoMsal()      — limpa sessão completa\n'
+      '  __dev.limparSessaoMsal()      — limpa sessão completa\n' +
+      '  __dev.forcarPopup()           — força popup na próxima ação\n' +
+      '  __dev.cancelarForcarPopup()   — desativa o forçar popup'
   );
 }

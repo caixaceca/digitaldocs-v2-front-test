@@ -5,8 +5,8 @@ import { InteractionRequiredAuthError } from '@azure/msal-browser';
 //
 import { callMsGraph } from '@/graph';
 import { addRole, getFromParametrizacao } from './parametrizacao';
-import { loginRequest, msalInstance, popupRedirectUri } from '@/config';
 import { API_INTRANET_URL, API_SLIM_URL, API_CORENET_URL } from '@/utils/apisUrl';
+import { loginRequest, msalInstance, redirectUri, popupRedirectUri } from '@/config';
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -94,11 +94,11 @@ export async function getAccessToken() {
   const activeAccount = msalInstance.getActiveAccount() ?? msalInstance.getAllAccounts()[0] ?? null;
 
   if (!activeAccount) {
-    await msalInstance.loginRedirect({ ...loginRequest, redirectUri: popupRedirectUri });
+    await msalInstance.loginRedirect({ ...loginRequest, redirectUri });
     return null;
   }
 
-  const tokenRequest = { ...loginRequest, account: activeAccount, redirectUri: popupRedirectUri };
+  const tokenRequest = { ...loginRequest, account: activeAccount, redirectUri };
 
   try {
     const response = await msalInstance.acquireTokenSilent(tokenRequest);
@@ -111,11 +111,17 @@ export async function getAccessToken() {
 
     if (deveUsarPopup) {
       try {
-        const response = await msalInstance.acquireTokenPopup(tokenRequest);
+        const response = await msalInstance.acquireTokenPopup({ ...tokenRequest, redirectUri: popupRedirectUri });
+
+        if (response?.account) {
+          msalInstance.setActiveAccount(response.account);
+          window.dispatchEvent(new CustomEvent('msal:tokenRefreshed', { detail: { account: response.account } }));
+        }
+
         return response.accessToken;
       } catch (popupError) {
         if (popupError.errorCode === 'popup_window_error' || popupError.errorCode === 'popup_blocked') {
-          await msalInstance.acquireTokenRedirect(tokenRequest);
+          await msalInstance.acquireTokenRedirect({ ...tokenRequest, redirectUri });
           return null;
         }
         throw popupError;

@@ -35,6 +35,7 @@ export function applySortFilter({ dados, filter, comparator }) {
       'designacao',
       'seguimento',
       'referencia',
+      'componente',
     ];
 
     dados = dados.filter((row) =>

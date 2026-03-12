@@ -40,6 +40,7 @@ const initialState = {
   estado: null,
   origem: null,
   meuFluxo: null,
+  precario: null,
   meuAmbiente: null,
   estadoRegra: null,
   selectedItem: null,
@@ -49,6 +50,7 @@ const initialState = {
   acessos: [],
   origens: [],
   despesas: [],
+  precarios: [],
   checklist: [],
   documentos: [],
   meusFluxos: [],
@@ -163,6 +165,7 @@ export function getFromParametrizacao(item, params) {
 
       const apiUrl =
         // DETALHES
+        (item === 'precario' && `/v1/precarios/${params?.id}`) ||
         (item === 'fluxo' && `/v1/fluxos/${params?.id}/${perfilId}`) ||
         (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'origem' && `/v1/origens/${params?.id}/${perfilId}`) ||
@@ -173,6 +176,7 @@ export function getFromParametrizacao(item, params) {
         (item === 'checklistitem' &&
           `/v1/tipos_documentos/checklist/detail?perfil_cc_id=${perfilId}&id=${params?.id}`) ||
         // LISTA
+        (item === 'precarios' && `/v1/precarios`) ||
         (item === 'linhas' && `/v1/linhas/${perfilId}`) ||
         (item === 'fluxos' && `/v1/fluxos/${perfilId}`) ||
         (item === 'estados' && `/v1/estados/${perfilId}`) ||
@@ -190,6 +194,8 @@ export function getFromParametrizacao(item, params) {
         (item === 'estadosPerfil' && `/v1/estados/asscc/byperfilid/${params?.estadoId}/${perfilId}`) ||
         (item === 'despesas' && `/v1/despesas/tipos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
         (item === 'documentos' && `/v1/tipos_documentos/lista?perfil_cc_id=${perfilId}&ativo=${!params?.inativos}`) ||
+        (item === 'pesquizar-precario' &&
+          `/v1/precarios/pesquisar?linha_id=${params?.linhaId}&componente_id=${params?.componenteId}`) ||
         (item === 'motivosTransicao' &&
           `/v1/motivos_transicoes/lista?ativo=${!params?.inativos}${`&para_seguimento=${
             params?.modo === 'Seguimento' ? 'true' : 'false'
@@ -248,6 +254,7 @@ export function createItem(item, body, params) {
         (item === 'acessos' && `/v1/acessos`) ||
         (item === 'origens' && `/v1/origens`) ||
         (item === 'acessos' && `/v1/acessos`) ||
+        (item === 'precarios' && `/v1/precarios`) ||
         (item === 'clonar fluxo' && `/v1/fluxos`) ||
         (item === 'notificacoes' && `/v1/notificacoes`) ||
         (item === 'estado' && `/v1/estados/${perfilId}`) ||
@@ -311,6 +318,7 @@ export function updateItem(item, body, params) {
         (item === 'linhas' && `/v1/linhas/${params?.id}`) ||
         (item === 'acessos' && `/v1/acessos/${params?.id}`) ||
         (item === 'origens' && `/v1/origens/${params?.id}`) ||
+        (item === 'precarios' && `/v1/precarios/${params?.id}`) ||
         (item === 'transicoes' && `/v1/transicoes/${params?.id}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/${params?.id}`) ||
         (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
@@ -355,6 +363,7 @@ export function deleteItem(item, params) {
       const options = headerOptions({ accessToken, mail, cc: true, ct: false, mfd: false });
 
       const apiUrl =
+        (item === 'precarios' && `/v1/precarios/${params?.id}`) ||
         (item === 'notificacoes' && `/v1/notificacoes/${params?.id}`) ||
         (item === 'estado' && `/v1/estados/${params?.id}/${perfilId}`) ||
         (item === 'acessos' && `/v1/acessos/${perfilId}/${params?.id}`) ||

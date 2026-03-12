@@ -55,9 +55,9 @@ export default function FormInfoInterno({ dados }) {
       Yup.number().positive().integer().required().label('Nº de conta'),
     // agendamento
     diadomes: shapeNumber('Dia do mês', true, '', 'agendado'),
-    data_inicio: shapeDate('Data de início', true, '', 'agendado'),
+    data_inicio: shapeDate('agendado', [true], 'Data de início'),
     periodicidade: shapeMixed('Periodicidade', true, '', 'agendado'),
-    data_arquivamento: shapeDate('Data de término', true, '', 'agendado'),
+    data_arquivamento: shapeDate('agendado', [true], 'Data de término'),
   });
 
   const defaultValues = useMemo(

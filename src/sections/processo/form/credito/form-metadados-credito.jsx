@@ -1,4 +1,3 @@
-import * as Yup from 'yup';
 import { useMemo, useEffect, useCallback } from 'react';
 // form
 import { useForm, useWatch } from 'react-hook-form';
@@ -9,12 +8,23 @@ import Paper from '@mui/material/Paper';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { formatDate, fillData } from '@/utils/formatTime';
+import {
+  schemaTaxas,
+  buildPayload,
+  schemaRegime,
+  getDefaultsTaxas,
+  getDefaultsObjeto,
+  getDefaultsRegime,
+  getSchemaCondicoes,
+  getDefaultsEntidade,
+  getDefaultsCondicoes,
+} from './metadados-utils';
 // redux
 import { getFromGaji9 } from '@/redux/slices/gaji9';
 import { updateItem } from '@/redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '@/redux/store';
 import { updateDados, resetDados, backStep } from '@/redux/slices/stepper';
+import { getFromParametrizacao, getSuccess } from '@/redux/slices/parametrizacao';
 // components
 import {
   RHFSwitch,
@@ -26,42 +36,55 @@ import {
 } from '@/components/hook-form';
 import Steps from '@/components/Steps';
 import GridItem from '@/components/GridItem';
+import { FormLoading } from '@/components/skeleton';
 import { ButtonsStepper } from '@/components/Actions';
 import { DialogTitleAlt } from '@/components/CustomDialog';
-import { shapeText } from '@/components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function MetadadosCreditoForm({ onClose, dados = null, ids }) {
   const dispatch = useDispatch();
   const { activeStep, dadosStepper } = useSelector((state) => state.stepper);
+  const { precario, isLoading } = useSelector((state) => state.parametrizacao);
+
+  useEffect(() => {
+    dispatch(getFromGaji9('tiposImoveis'));
+    dispatch(getFromParametrizacao('pesquizar-precario', { ...ids, item: 'precario' }));
+  }, [dispatch, ids]);
 
   const handleClose = useCallback(() => {
     onClose();
     dispatch(resetDados());
+    dispatch(getSuccess({ item: 'precario', dados: null }));
   }, [onClose, dispatch]);
 
-  const commonProps = { dados, dadosStepper, dispatch, onClose: handleClose };
+  const commonProps = { dados, dadosStepper, dispatch, precario: precario?.precario };
 
   return (
     <Dialog open fullWidth maxWidth="md">
       <DialogTitleAlt
-        onClose={() => handleClose()}
+        onClose={handleClose}
         title="Outras informações do crédito"
         content={
           <Steps
             sx={{ mt: 4, mb: 3 }}
             activeStep={activeStep}
-            steps={['Regime', 'Condicões', 'Taxas', 'Objeto', 'Entidade']}
+            steps={['Regime', 'Condições', 'Taxas', 'Objeto', 'Entidade']}
           />
         }
       />
       <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
-        {activeStep === 0 && <RegimeEspecial {...commonProps} />}
-        {activeStep === 1 && <Condicoes {...commonProps} />}
-        {activeStep === 2 && <Taxas {...commonProps} />}
-        {activeStep === 3 && <Objeto {...commonProps} />}
-        {activeStep === 4 && <Entidade {...commonProps} ids={ids} />}
+        {isLoading ? (
+          <FormLoading rows={1} />
+        ) : (
+          <>
+            {activeStep === 0 && <RegimeEspecial {...commonProps} onClose={handleClose} />}
+            {activeStep === 1 && <Condicoes {...commonProps} />}
+            {activeStep === 2 && <Taxas {...commonProps} />}
+            {activeStep === 3 && <Objeto {...commonProps} />}
+            {activeStep === 4 && <Entidade {...commonProps} ids={ids} onClose={handleClose} />}
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -69,41 +92,16 @@ export default function MetadadosCreditoForm({ onClose, dados = null, ids }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function RegimeEspecial({ onClose, dados, dispatch, dadosStepper }) {
-  const formSchema = Yup.object().shape({
-    nivel_formacao: shapeText('Nível de formação', true, '', 'credibolsa'),
-    designacao_curso: shapeText('Designação do curso', true, '', 'credibolsa'),
-    localizacao_estabelecimento_ensino: shapeText('Localização', true, '', 'credibolsa'),
-    estabelecimento_ensino: shapeText('Estabelecimento de ensino', true, '', 'credibolsa'),
-    montante_tranches_credibolsa: shapeText('Montante das tranches', true, '', 'credibolsa'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      revolving: dadosStepper?.revolving || dados?.revolving || false,
-      bonificado: dadosStepper?.bonificado || dados?.bonificado || false,
-      jovem_bonificado: dadosStepper?.jovem_bonificado || dados?.jovem_bonificado || false,
-      credibolsa: dadosStepper?.credibolsa || Number(dados?.montante_tranches_credibolsa) > 0,
-      colaborador_empresa_parceira:
-        dadosStepper?.colaborador_empresa_parceira || dados?.colaborador_empresa_parceira || false,
-      //
-      nivel_formacao: dadosStepper?.nivel_formacao || dados?.nivel_formacao || '',
-      designacao_curso: dadosStepper?.designacao_curso || dados?.designacao_curso || '',
-      estabelecimento_ensino: dadosStepper?.estabelecimento_ensino || dados?.estabelecimento_ensino || '',
-      montante_tranches_credibolsa:
-        dadosStepper?.montante_tranches_credibolsa || dados?.montante_tranches_credibolsa || '',
-      localizacao_estabelecimento_ensino:
-        dados?.localizacao_estabelecimento_ensino || dados?.localizacao_estabelecimento_ensino || '',
-      //
-      isento_comissao: dadosStepper?.isento_comissao || dados?.isento_comissao || false,
-      tem_isencao_imposto_selo: dadosStepper?.tem_isencao_imposto_selo || dados?.tem_isencao_imposto_selo || false,
-    }),
-    [dadosStepper, dados]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { control, handleSubmit } = methods;
+function RegimeEspecial({ onClose, dados, dispatch, dadosStepper, precario }) {
+  const defaultValues = getDefaultsRegime({ dadosStepper, dados, precario });
+  const methods = useForm({ resolver: yupResolver(schemaRegime), defaultValues });
+  const { control, reset, handleSubmit } = methods;
   const values = useWatch({ control });
+
+  useEffect(() => {
+    if (precario) reset(getDefaultsRegime({ dadosStepper, dados, precario }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [precario]);
 
   return (
     <FormProvider
@@ -146,32 +144,9 @@ function RegimeEspecial({ onClose, dados, dispatch, dadosStepper }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Condicoes({ dados, dispatch, dadosStepper }) {
-  const formSchema = Yup.object().shape({
-    // data_vencimento_prestacao1: Yup.date().required().label('Data 1ª prestação'),
-    numero_prestacao: Yup.number().positive().integer().required().label('Nº de prestações'),
-    capital_max_isento_imposto_selo: dadosStepper?.tem_isencao_imposto_selo
-      ? Yup.number().positive().required().label('Capital máx. isento imp. selo')
-      : Yup.mixed().notRequired(),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      conta_do_renda: dadosStepper?.conta_do_renda || dados?.conta_do_renda || '',
-      periodo_carencia: dadosStepper?.periodo_carencia || dados?.periodo_carencia || '',
-      meses_vencimento: dadosStepper?.meses_vencimento || dados?.meses_vencimento || '',
-      prazo_utilizacao: dadosStepper?.prazo_utilizacao || dados?.prazo_utilizacao || '',
-      data_utilizacao: dadosStepper?.data_utilizacao || fillData(dados?.data_utilizacao, null),
-      numero_prestacao: dadosStepper?.numero_prestacao || dados?.numero_prestacao || dados?.prazo || '',
-      capital_max_isento_imposto_selo:
-        dadosStepper?.capital_max_isento_imposto_selo || dados?.capital_max_isento_imposto_selo || '',
-      data_vencimento_prestacao1:
-        dadosStepper?.data_vencimento_prestacao1 || fillData(dados?.data_vencimento_prestacao1, null),
-    }),
-    [dadosStepper, dados]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+function Condicoes({ dados, dispatch, dadosStepper, precario }) {
+  const defaultValues = getDefaultsCondicoes({ dadosStepper, dados, precario });
+  const methods = useForm({ resolver: yupResolver(getSchemaCondicoes(dadosStepper)), defaultValues });
   const { control, handleSubmit } = methods;
   const values = useWatch({ control });
 
@@ -214,36 +189,10 @@ function Condicoes({ dados, dispatch, dadosStepper }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function Taxas({ dados }) {
+function Taxas({ dados, dadosStepper, precario }) {
   const dispatch = useDispatch();
-  const { dadosStepper } = useSelector((state) => state.stepper);
-
-  const formSchema = Yup.object().shape({
-    taxa_mora: Yup.number().min(0).max(100).required().label('Taxa de mora'),
-    taxa_juro_desconto: Yup.number().min(0).max(100).required().label('Taxa de juros desconto'),
-    taxa_imposto_selo: Yup.number().positive().max(100).required().label('Taxa de imposto selo'),
-    taxa_juro_precario: Yup.number().positive().max(100).required().label('Taxa de juros precário'),
-    taxa_comissao_abertura: Yup.number().min(0).max(100).required().label('Taxa de comissão abertura'),
-    taxa_imposto_selo_utilizacao: Yup.number().min(0).max(100).required().label('Taxa imp. selo utilização'),
-    taxa_comissao_imobilizacao: Yup.number().min(0).max(100).required().label('Taxa de comissão imobilização'),
-  });
-
-  const defaultValues = useMemo(
-    () => ({
-      taxa_mora: dadosStepper?.taxa_mora || dados?.taxa_mora || 2,
-      taxa_imposto_selo: dadosStepper?.taxa_imposto_selo || dados?.taxa_imposto_selo || 3.5,
-      taxa_juro_desconto: dadosStepper?.taxa_juro_desconto || dados?.taxa_juro_desconto || 0,
-      taxa_juro_precario: dadosStepper?.taxa_juro_precario || dados?.taxa_juro_precario || 11,
-      modo_taxa_equivalente: dadosStepper?.modo_taxa_equivalente || dados?.modo_taxa_equivalente || false,
-      taxa_comissao_abertura: dadosStepper?.taxa_comissao_abertura || dados?.taxa_comissao_abertura || 1.75,
-      taxa_comissao_imobilizacao: dadosStepper?.taxa_comissao_imobilizacao || dados?.taxa_comissao_imobilizacao || 0,
-      taxa_imposto_selo_utilizacao:
-        dadosStepper?.taxa_imposto_selo_utilizacao || dados?.taxa_imposto_selo_utilizacao || 0.5,
-    }),
-    [dadosStepper, dados]
-  );
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const defaultValues = getDefaultsTaxas({ dadosStepper, dados, precario });
+  const methods = useForm({ resolver: yupResolver(schemaTaxas), defaultValues });
   const { control, handleSubmit } = methods;
   const values = useWatch({ control });
 
@@ -288,20 +237,7 @@ function Objeto({ dados, dispatch, dadosStepper }) {
   const { tiposImoveis } = useSelector((state) => state.gaji9);
   const imoveisList = useMemo(() => tiposImoveis.map((i) => ({ id: i?.id, label: i?.tipo })), [tiposImoveis]);
 
-  useEffect(() => {
-    dispatch(getFromGaji9('tiposImoveis'));
-  }, [dispatch]);
-
-  const defaultValues = useMemo(
-    () => ({
-      bem_servico_financiado: dadosStepper?.bem_servico_financiado || dados?.bem_servico_financiado || '',
-      tipo_imovel_id: dadosStepper?.tipo_imovel_id || imoveisList?.find((i) => i.id === dados?.tipo_imovel_id) || null,
-      finalidade_credito_habitacao:
-        dadosStepper?.finalidade_credito_habitacao || dados?.finalidade_credito_habitacao || '',
-    }),
-    [dadosStepper, imoveisList, dados]
-  );
-
+  const defaultValues = getDefaultsObjeto({ dadosStepper, dados, imoveisList });
   const methods = useForm({ defaultValues });
   const { control, handleSubmit } = methods;
   const values = useWatch({ control });
@@ -333,94 +269,13 @@ function Objeto({ dados, dispatch, dadosStepper }) {
 function Entidade({ dados, ids, onClose, dispatch, dadosStepper }) {
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
-  const defaultValues = useMemo(
-    () => ({
-      nome_empresa_fornecedora: dadosStepper?.nome_empresa_fornecedora || dados?.nome_empresa_fornecedora || '',
-      nib_vendedor_ou_fornecedor: dadosStepper?.nib_vendedor_ou_fornecedor || dados?.nib_vendedor_ou_fornecedor || '',
-      instituicao_credito_conta_vendedor_ou_fornecedor:
-        dadosStepper?.instituicao_credito_conta_vendedor_ou_fornecedor ||
-        dados?.instituicao_credito_conta_vendedor_ou_fornecedor ||
-        '',
-      valor_transferir_conta_vendedor_ou_fornecedor:
-        dadosStepper?.valor_transferir_conta_vendedor_ou_fornecedor ||
-        dados?.valor_transferir_conta_vendedor_ou_fornecedor ||
-        '',
-    }),
-    [dadosStepper, dados]
-  );
-
+  const defaultValues = getDefaultsEntidade({ dadosStepper, dados });
   const methods = useForm({ defaultValues });
   const { handleSubmit } = methods;
 
   const onSubmit = async (values) => {
     try {
-      const rawData = { ...dadosStepper, ...values };
-
-      const dataFormatted = {
-        taxa_taeg: '0',
-        valor_juro: '0',
-        custo_total: '0',
-        valor_comissao: '0',
-        valor_prestacao: '0',
-        valor_imposto_selo: '0',
-        valor_prestacao_sem_desconto: '0',
-
-        numero_prestacao: Number(rawData.numero_prestacao || 0),
-        conta_do_renda: rawData.conta_do_renda ? Number(rawData.conta_do_renda) : undefined,
-        meses_vencimento: rawData.meses_vencimento ? Number(rawData.meses_vencimento) : undefined,
-        periodo_carencia: rawData.periodo_carencia ? Number(rawData.periodo_carencia) : undefined,
-        prazo_utilizacao: rawData.prazo_utilizacao ? Number(rawData.prazo_utilizacao) : undefined,
-        tipo_imovel_id: rawData.tipo_imovel_id?.id ? Number(rawData.tipo_imovel_id?.id) : undefined,
-
-        taxa_mora: String(rawData.taxa_mora || '0'),
-        taxa_imposto_selo: String(rawData.taxa_imposto_selo || '0'),
-        taxa_juro_precario: String(rawData.taxa_juro_precario || '0'),
-        taxa_juro_desconto: String(rawData.taxa_juro_desconto || '0'),
-        modo_taxa_equivalente: Boolean(rawData.modo_taxa_equivalente),
-        taxa_comissao_abertura: String(rawData.taxa_comissao_abertura || '0'),
-        taxa_imposto_selo_utilizacao: String(rawData.taxa_imposto_selo_utilizacao || '0'),
-        taxa_comissao_imobilizacao: rawData.taxa_comissao_imobilizacao
-          ? String(rawData.taxa_comissao_imobilizacao)
-          : undefined,
-
-        capital_max_isento_imposto_selo: rawData.capital_max_isento_imposto_selo
-          ? String(rawData.capital_max_isento_imposto_selo)
-          : undefined,
-        valor_transferir_conta_vendedor_ou_fornecedor: rawData.valor_transferir_conta_vendedor_ou_fornecedor
-          ? String(rawData.valor_transferir_conta_vendedor_ou_fornecedor)
-          : undefined,
-
-        revolving: Boolean(rawData.revolving),
-        bonificado: Boolean(rawData.bonificado),
-        isento_comissao: Boolean(rawData.isento_comissao),
-        jovem_bonificado: Boolean(rawData.jovem_bonificado),
-        tem_isencao_imposto_selo: Boolean(rawData.tem_isencao_imposto_selo),
-        colaborador_empresa_parceira: Boolean(rawData.colaborador_empresa_parceira),
-
-        data_vencimento_prestacao1: rawData.data_vencimento_prestacao1
-          ? formatDate(rawData.data_vencimento_prestacao1, 'yyyy-MM-dd')
-          : '',
-        data_utilizacao: rawData.data_utilizacao ? formatDate(rawData.data_utilizacao, 'yyyy-MM-dd') : '',
-
-        bem_servico_financiado: String(rawData.bem_servico_financiado || ''),
-        nome_empresa_fornecedora: String(rawData.nome_empresa_fornecedora || ''),
-        nib_vendedor_ou_fornecedor: String(rawData.nib_vendedor_ou_fornecedor || ''),
-        finalidade_credito_habitacao: String(rawData.finalidade_credito_habitacao || ''),
-        instituicao_credito_conta_vendedor_ou_fornecedor: String(
-          rawData.instituicao_credito_conta_vendedor_ou_fornecedor || ''
-        ),
-
-        nivel_formacao: rawData?.credibolsa ? String(rawData.nivel_formacao) : '',
-        designacao_curso: rawData?.credibolsa ? String(rawData.designacao_curso) : '',
-        estabelecimento_ensino: rawData?.credibolsa ? String(rawData.estabelecimento_ensino) : '',
-        localizacao_estabelecimento_ensino: rawData?.credibolsa ? rawData.localizacao_estabelecimento_ensino : '',
-        montante_tranches_credibolsa: rawData?.credibolsa ? String(rawData.montante_tranches_credibolsa) : undefined,
-      };
-
-      const payload = Object.fromEntries(
-        Object.entries(dataFormatted).filter(([, value]) => value !== undefined && value !== '')
-      );
-
+      const payload = buildPayload({ ...dadosStepper, ...values });
       const params = { ...ids, msg: 'Informações atualizadas', fillCredito: true };
       dispatch(updateItem('metadados-credito', JSON.stringify(payload), { ...params, onClose }));
     } catch (error) {

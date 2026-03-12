@@ -12,7 +12,7 @@ import useToggle, { useToggle1 } from '@/hooks/useToggle';
 import { appendAnexos } from '../../../form/anexos/utils-anexos';
 import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 //
-import FichaPdf from './index';
+import FichaPdf from '.';
 import { DefaultAction } from '@/components/Actions';
 import DialogPreviewDoc, { DialogConfirmar } from '@/components/CustomDialog';
 

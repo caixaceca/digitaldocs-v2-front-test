@@ -16,7 +16,7 @@ import { DialogTitleAlt } from '@/components/CustomDialog';
 import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
 import SegurosEntidades from './seguros-entidades';
-import { TableRowItem, LabelSN, Resgisto } from '../../parametrizacao/Detalhes';
+import { TableRowItem, LabelSN, Resgisto } from '../../parametrizacao/details';
 import MetadadosGarantia from '@/sections/processo/info-credito/metadados/garantia';
 
 // ---------------------------------------------------------------------------------------------------------------------

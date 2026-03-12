@@ -38,19 +38,19 @@ export default function FormDepositante({ dados }) {
 
   const formSchema = Yup.object().shape({
     nif: shapeNumber('NIF', false, '', 'is_cliente'),
-    morada: shapeText('Morada', false, '', 'is_cliente'),
-    mae: shapeText('Nome da Mãe', false, '', 'is_cliente'),
-    pai: shapeText('Nome do Pai', false, '', 'is_cliente'),
-    profissao: shapeText('Profissão', false, '', 'is_cliente'),
-    telemovel: shapeText('Nº de telemóvel', false, '', 'is_cliente'),
+    morada: shapeText('is_cliente', [false], 'Morada'),
+    mae: shapeText('is_cliente', [false], 'Nome da Mãe'),
+    pai: shapeText('is_cliente', [false], 'Nome do Pai'),
+    profissao: shapeText('is_cliente', [false], 'Profissão'),
+    telemovel: shapeText('is_cliente', [false], 'Nº de telemóvel'),
+    docid: shapeText('is_cliente', [false], 'Doc. de identificação'),
+    nacionalidade: shapeText('is_cliente', [false], 'Nacionalidade'),
+    ordenador: shapeText('is_cliente', [false], 'Nome do ordenador'),
     estado_civil: shapeMixed('Estado civil', false, '', 'is_cliente'),
-    docid: shapeText('Doc. de identificação', false, '', 'is_cliente'),
-    nacionalidade: shapeText('Nacionalidade', false, '', 'is_cliente'),
-    ordenador: shapeText('Nome do ordenador', false, '', 'is_cliente'),
     entidade_con: shapeNumber('Nº da entidade', true, '', 'is_cliente'),
-    data_nascimento: shapeDate('Data de nascimento', false, '', 'is_cliente'),
+    data_nascimento: shapeDate('is_cliente', [false], 'Data de nascimento'),
     tipo_docid: shapeMixed('Tipo doc. identificação', false, '', 'is_cliente'),
-    local_pais_nascimento: shapeText('Local/País de nascimento', false, '', 'is_cliente'),
+    local_pais_nascimento: shapeText('is_cliente', [false], 'Local/País de nascimento'),
   });
 
   const defaultValues = useMemo(

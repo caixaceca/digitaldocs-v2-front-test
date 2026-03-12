@@ -36,6 +36,7 @@ export default function PageParametrizacao() {
             { value: 'Crédito', component: <TabParametrizacao item="credito" label="Crédito" subTabs /> },
             { value: 'Motivos', component: <TabParametrizacao item="motivos" label="Motivos" subTabs /> },
             { value: 'Documentos', component: <TabParametrizacao item="documentos" label="Documentos" /> },
+            { value: 'Preçarios', component: <TabParametrizacao item="precarios" label="Preçarios" /> },
           ]
         : []),
     ],

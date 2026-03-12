@@ -2,14 +2,14 @@ import { useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 // utils
-import { useTabsSync } from '../../hooks/minimal-hooks/use-tabs-sync';
+import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // Components
-import { AddItem } from '../../components/Actions';
-import { TabsWrapperSimple } from '../../components/TabsWrapper';
-import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
+import { AddItem } from '@/components/Actions';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 //
+import TableParametrizacao from './geral';
 import TableMotivos from './table-motivos';
-import TableParametrizacao from './TableParametrizacao';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

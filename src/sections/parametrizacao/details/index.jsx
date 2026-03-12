@@ -1,6 +1,4 @@
-import { useState } from 'react';
 // @mui
-import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -11,7 +9,6 @@ import ListItem from '@mui/material/ListItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
@@ -19,19 +16,16 @@ import { useSelector } from '@/redux/store';
 import { fPercent } from '@/utils/formatNumber';
 import { nomeacaoBySexo } from '@/utils/formatText';
 import { ptDateTime, ptDate } from '@/utils/formatTime';
-import { getComparator, applySort } from '@/hooks/useTable';
-import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
 import Label from '@/components/Label';
+import { Criado } from '@/components/Panel';
 import Markdown from '@/components/Markdown';
-import { DefaultAction } from '@/components/Actions';
 import { SearchNotFoundSmall } from '@/components/table';
 import { DialogTitleAlt } from '@/components/CustomDialog';
-import { TabsWrapperSimple } from '@/components/TabsWrapper';
-import { Criado, CellChecked, DataLabel } from '@/components/Panel';
 //
-import { DestinatarioForm } from './form-fluxo';
-import DetalhesTransicao from './detalhes-transicao';
+import { Notificacao } from './notificacoes';
+import DetalhesPrecario, { Condicoes } from './precario-detalhes';
+import DetalhesTransicao, { FluxosTransicoes } from './detalhes-transicao';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -67,7 +61,7 @@ const fields = [
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Detalhes({ item, closeModal }) {
+export default function Detalhes({ item, closeModal }) {
   const { colaboradores } = useSelector((state) => state.intranet);
   const { selectedItem } = useSelector((state) => state.parametrizacao);
   const colaborador = selectedItem?.perfil_id
@@ -79,11 +73,12 @@ export function Detalhes({ item, closeModal }) {
       open
       fullWidth
       onClose={closeModal}
-      maxWidth={item === 'Transições' || item === 'Notificações' ? 'md' : 'sm'}
+      maxWidth={item === 'Transições' || item === 'Notificações' || item === 'precarios' ? 'md' : 'sm'}
     >
       <DialogTitleAlt title="Detalhes" onClose={closeModal} />
       <DialogContent>
         {(item === 'Transições' && <DetalhesTransicao dados={selectedItem} />) ||
+          (item === 'precarios' && <DetalhesPrecario dados={selectedItem} />) ||
           (item === 'Notificações' && <Notificacao dados={selectedItem} />) || (
             <DetalhesContent dados={selectedItem} item={item} colaborador={colaborador} />
           )}
@@ -120,42 +115,26 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                   <TableBody>
                     <TableRowItem title="ID:" text={dados?.id} />
                     <TableRowItem title="Código:" text={dados?.codigo} />
-                    <TableRowItem
-                      title="Designação:"
-                      text={dados?.linha || dados?.motivo || dados?.designacao || dados?.descritivo}
-                    />
+                    <TableRowItem title="Designação:" text={dados?.motivo || dados?.designacao || dados?.descritivo} />
+                    <TableRowItem title="Componente:" text={dados?.componente || dados?.componente_id} />
+                    <TableRowItem title="Linha:" text={dados?.linha || dados?.linha_id} />
                     <TableRowItem title="Modo:" text={dados?.modo} />
                     <TableRowItem title="Modelo:" text={dados?.modelo} />
                     <TableRowItem title={item === 'linhas' ? 'Segmento:' : 'Descrição:'} text={dados?.descricao} />
-                    {dados?.assunto && (
-                      <TableRowItem
-                        title="Assunto:"
-                        text={`${dados?.assunto}${dados?.fluxo_id ? ` (ID: ${dados?.fluxo_id})` : ''}`}
-                      />
-                    )}
-                    {dados?.estado && (
-                      <TableRowItem
-                        title={item === 'regrasTransicao' ? 'Origem:' : 'Ambiente:'}
-                        text={`${dados?.estado}${dados?.estado_id ? ` (ID: ${dados?.estado_id})` : ''}`}
-                      />
-                    )}
+                    <TableRowItem title="Assunto:" text={getLabel(dados?.assunto, dados?.fluxo_id)} />
+                    <TableRowItem
+                      text={getLabel(dados?.estado, dados?.estado_id)}
+                      title={item === 'regrasTransicao' ? 'Origem:' : 'Ambiente:'}
+                    />
                     <TableRowItem title="Documento:" text={dados?.tipo_documento} />
-                    {(dados?.estado_inicial || dados?.estado_origem) && (
-                      <TableRowItem
-                        title="Origem:"
-                        text={`${dados?.estado_inicial || dados?.estado_origem}${
-                          dados?.estado_inicial_id ? ` (ID: ${dados?.estado_inicial_id})` : ''
-                        }`}
-                      />
-                    )}
-                    {(dados?.estado_final || dados?.estado_destino) && (
-                      <TableRowItem
-                        title="Destino:"
-                        text={`${dados?.estado_final || dados?.estado_destino}${
-                          dados?.estado_final_id ? ` (ID: ${dados?.estado_final_id})` : ''
-                        }`}
-                      />
-                    )}
+                    <TableRowItem
+                      title="Origem:"
+                      text={getLabel(dados?.estado_inicial || dados?.estado_origem, dados?.estado_inicial_id)}
+                    />
+                    <TableRowItem
+                      title="Destino:"
+                      text={getLabel(dados?.estado_final || dados?.estado_destino, dados?.estado_final_id)}
+                    />
                     <TableRowItem title="Transição ID:" text={dados?.transicao_id} />
                     <TableRowItem title="Segmento:" text={dados?.seguimento} />
                     <TableRowItem title="Tipo:" text={dados?.tipo} />
@@ -177,7 +156,7 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                       <>
                         <TableRowItem
                           title="Colaborador:"
-                          text={`${colaborador?.nome} (ID_Perfil: ${colaborador?.perfil_id})`}
+                          text={`${colaborador?.nome} (Perfil_ID: ${colaborador?.perfil_id})`}
                         />
                         <TableRowItem
                           title="Função:"
@@ -185,9 +164,7 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                         />
                       </>
                     )}
-                    {uoAlt && (
-                      <TableRowItem title="U.O:" text={`${uoAlt?.label}${uoAlt?.id ? ` (ID: ${uoAlt?.id})` : ''}`} />
-                    )}
+                    <TableRowItem title="U.O:" text={getLabel(uoAlt?.label, uoAlt?.id)} />
                     {uoAlt && <TableRowItem title="Balcão:" text={uoAlt?.balcao} />}
                     {dados && 'corpo' in dados && (
                       <TableRowItem title="Corpo:" item={<Markdown children={dados?.corpo} />} />
@@ -205,32 +182,20 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
                     )}
                     <TableRowItem title="Escalão de decisão:" text={dados?.nivel_decisao} />
                     <TableRowItem title="Observação:" text={dados?.obs || dados?.observacao} />
+                    {item === 'precario' && (
+                      <TableRowItem title="Condições especiais:" item={<Condicoes precario={dados?.precario} />} />
+                    )}
                   </TableBody>
                 </Table>
               </List>
-              {item === 'motivosTransicao' && (
-                <List>
-                  <ListItem disableGutters divider sx={{ pb: 0.5 }}>
-                    <Typography variant="subtitle1">Fluxos</Typography>
-                  </ListItem>
-                  <Stack useFlexGap flexWrap="wrap" direction="row" sx={{ py: 1 }} spacing={1}>
-                    {dados?.fluxos?.length > 0 ? (
-                      applySort(dados?.fluxos, getComparator('asc', 'fluxo'))?.map((row) => (
-                        <Label key={row?.id}>{row?.fluxo}</Label>
-                      ))
-                    ) : (
-                      <Label>Todos</Label>
-                    )}
-                  </Stack>
-                </List>
-              )}
+              {item === 'motivosTransicao' && <FluxosTransicoes fluxos={dados?.fluxos || []} />}
               <Stack>
                 <Divider sx={{ my: 1 }} />
                 <Stack useFlexGap flexWrap="wrap" direction="row" spacing={3} justifyContent="center">
                   <Resgisto
                     label="Criado"
-                    por={dados?.criador || dados?.feito_por}
                     em={dados?.criado_em || dados?.ultima_alteracao}
+                    por={dados?.criador || dados?.criado_por || dados?.feito_por}
                   />
                   <Resgisto
                     label="Modificado"
@@ -245,80 +210,6 @@ export function DetalhesContent({ dados = null, item = '', colaborador = null, u
           )}
         </>
       )}
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-function Notificacao({ dados }) {
-  const { destinatarios } = useSelector((state) => state.parametrizacao);
-
-  const tabsList = [
-    { value: 'Info', component: <DetalhesContent dados={dados} /> },
-    { value: 'Destinatários', component: <Notificacoes dados={dados} destinatarios={destinatarios || []} /> },
-  ];
-
-  const [tab, setTab] = useTabsSync(tabsList, 'Info', '');
-
-  return (
-    <>
-      <TabsWrapperSimple tabsList={tabsList} tab={tab} sx={{ mt: 2, mb: 1, boxShadow: 'none' }} setTab={setTab} />
-      <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-function Notificacoes({ dados, destinatarios }) {
-  const { id, ativo } = dados;
-  const [destinatario, setDestinatario] = useState(null);
-  return (
-    <>
-      <Table sx={{ mt: 3 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell size="small">Contacto</TableCell>
-            <TableCell size="small">Data</TableCell>
-            <TableCell size="small" align="center">
-              Ativo
-            </TableCell>
-            <TableCell size="small">Registo</TableCell>
-            {ativo && (
-              <TableCell size="small" width={10}>
-                <DefaultAction small label="ADICIONAR" onClick={() => setDestinatario({ add: true })} />
-              </TableCell>
-            )}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {destinatarios?.map((row) => (
-            <TableRow hover key={`dest_${row?.id}`}>
-              <TableCell>
-                <Typography variant="body2">{row?.email}</Typography>
-                <Typography variant="body2">{row?.telefone}</Typography>
-              </TableCell>
-              <TableCell>
-                <DataLabel data={row?.data_inicio || ''} />
-                <DataLabel data={row?.data_fim || ''} termino />
-              </TableCell>
-              <CellChecked check={row.ativo} />
-              <TableCell>
-                <Criado tipo="user" value={row?.modificador || row?.criador} caption />
-                <Criado tipo="data" value={ptDateTime(row?.modificado_em || row?.criado_em)} caption />
-              </TableCell>
-              {ativo && (
-                <TableCell>
-                  <DefaultAction disabled={!row?.ativo} small label="EDITAR" onClick={() => setDestinatario(row)} />
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {!destinatarios?.length && <SearchNotFoundSmall message="Nenhum destinatário adicionado..." />}
-      {!!destinatario && <DestinatarioForm id={id} selectedItem={destinatario} onClose={() => setDestinatario(null)} />}
     </>
   );
 }
@@ -357,3 +248,10 @@ export function TableRowItem({ title, id = 0, text = '', item = null }) {
 export function LabelSN({ item = false }) {
   return <Label color={item ? 'success' : 'default'}>{item ? 'Sim' : 'Não'}</Label>;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export const getLabel = (label, id) => {
+  if (!label) return '';
+  return `${label}${id ? ` (ID: ${id})` : ''}`;
+};

@@ -10,8 +10,8 @@ export const ambiente =
   (window.location.hostname?.includes('ddocsteste') && 'teste') ||
   'producao';
 
-const redirectUri = import.meta.env.VITE_BASE_URL;
 export const popupRedirectUri = window.location.origin;
+export const redirectUri = import.meta.env.VITE_BASE_URL;
 
 export const msalConfig = {
   auth: {
@@ -20,7 +20,7 @@ export const msalConfig = {
     authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
-  system: { allowRedirectInIframe: false, iframeHashTimeout: 10000, tokenRenewalOffsetSeconds: 300 },
+  system: { allowRedirectInIframe: false, iframeHashTimeout: 10000 },
 };
 
 export const msalInstance = new PublicClientApplication(msalConfig);

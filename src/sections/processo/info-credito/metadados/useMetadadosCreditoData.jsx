@@ -6,7 +6,7 @@ import { ptDate } from '@/utils/formatTime';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
 import Label from '@/components/Label';
-import { LabelSN } from '../../../parametrizacao/Detalhes';
+import { LabelSN } from '../../../parametrizacao/details';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

@@ -19,7 +19,7 @@ import { SearchNotFoundSmall } from '@/components/table';
 import { DialogTitleAlt } from '@/components/CustomDialog';
 import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
-import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/Detalhes';
+import { TableRowItem, LabelSN, Resgisto } from '../parametrizacao/details';
 import { GrupoDetail, BalcoesRepresentante, SubtiposGarantias } from './sub-items';
 import { OpcoesClausula, NumerosClausula, Relacionados } from './clausulas/opcoes-clausulas';
 
