@@ -2,7 +2,6 @@
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
-import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
 // utils
 import { ptDate, getIdade } from '@/utils/formatTime';
@@ -10,6 +9,7 @@ import { fNumber, fCurrency } from '@/utils/formatNumber';
 import { dataNascimento, estadoCivil, docInfo, colorDoc } from './calculos';
 //
 import { noDados } from '@/components/Panel';
+import { Cabecalho, rowInfo, CellValor, EmptyRow } from './fragments';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ export function Clientes({ dados }) {
       <TableBody>{dados?.map((row) => rowInfo(row))}</TableBody>
     </>
   ) : (
-    <NadaConsta />
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }
 
@@ -155,7 +155,7 @@ export function Saldos({ dados, titulos, totalMoedas }) {
       )}
     </>
   ) : (
-    <NadaConsta />
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }
 
@@ -194,7 +194,7 @@ export function Movimentos({ dados, totaisConta }) {
       )}
     </>
   ) : (
-    <NadaConsta />
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }
 
@@ -231,7 +231,7 @@ export function CentralRisco({ cr }) {
       {rowInfo('Saldo centralizado', cr?.saldo_centralizado, cr?.centralizado_em, cr?.centralizado_com_mora, dif)}
     </TableBody>
   ) : (
-    <NadaConsta />
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }
 
@@ -255,7 +255,7 @@ export function Mensagens({ dados }) {
       <TableBody>{dados?.map((row) => rowInfo(row))}</TableBody>
     </>
   ) : (
-    <NadaConsta />
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }
 
@@ -275,96 +275,6 @@ export function Restruturacoes({ dados }) {
       <TableBody>{dados?.map((row) => rowInfo(row))}</TableBody>
     </>
   ) : (
-    <NadaConsta />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function Cabecalho({ item, headLabel }) {
-  return (
-    <TableHead>
-      <TableRow>
-        {headLabel.map((row, index) => (
-          <TableCell align={row?.align || 'left'} key={`${row?.label}_${item}_${index}`} sx={{ color: row?.color }}>
-            {row?.label}
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export const rowInfo = (title, value, total, extra = null) => {
-  const isTitle = value === '*title*';
-  const notSet = value === '(Não definido...)';
-  return value ? (
-    <TableRow hover={!isTitle} sx={{ whiteSpace: 'nowrap' }}>
-      <TableCell
-        colSpan={1}
-        align="right"
-        sx={{ color: (total && 'success.main') || (!isTitle && 'text.secondary'), fontWeight: 'bold' }}
-      >
-        {title}:
-      </TableCell>
-      {!isTitle ? (
-        <TableCell sx={{ width: '100%' }}>
-          <Typography
-            component="span"
-            variant="body2"
-            sx={{
-              fontWeight: total ? 'bold' : 'normal',
-              ...((notSet && { typography: 'caption', fontStyle: 'italic', color: 'text.secondary' }) || {}),
-            }}
-          >
-            {value}
-          </Typography>
-          {extra}
-        </TableCell>
-      ) : (
-        <TableCell sx={{ width: '100%' }}> </TableCell>
-      )}
-    </TableRow>
-  ) : null;
-};
-
-export function CellValor({ valor = 0, moeda = 'CVE', total = false }) {
-  return (
-    <TableCell align="right">
-      <Typography noWrap variant="body2" sx={{ fontWeight: total ? 'bold' : 'normal' }}>{`${fNumber(
-        Math.abs(valor),
-        2
-      )} ${moeda}`}</Typography>
-    </TableCell>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function EmptyRow({ cells = 4, message = ' ', variant = '', empty }) {
-  return (
-    <TableRow>
-      <TableCell
-        colSpan={cells}
-        variant={variant}
-        sx={{
-          border: 'none',
-          color: (message === 'Histórico de incidentes' && 'warning.main') || (variant && 'success.main'),
-          ...(empty && { fontStyle: 'italic', color: 'text.secondary' }),
-        }}
-      >
-        {message}
-      </TableCell>
-    </TableRow>
-  );
-}
-
-export function NadaConsta() {
-  return (
-    <Typography variant="body2" sx={{ p: 1.5, fontStyle: 'italic', color: 'text.secondary' }}>
-      Nada consta
-    </Typography>
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }

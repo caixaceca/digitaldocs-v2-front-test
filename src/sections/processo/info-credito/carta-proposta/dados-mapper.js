@@ -13,14 +13,14 @@ function mapCondicoes(modelo) {
   return {
     taeg: meta?.taxa_taeg || 0,
     taxa_mora: meta?.taxa_mora || '2',
+    data_entrada: modelo?.data_entrada,
     taxa_juro: credito?.taxa_juro || 0,
     agencia: modelo?.uo?.nome || 'Agência',
     nome_proponente: modelo?.titular || '---',
-    data_entrada: modelo?.data_entrada,
-    montante: credito?.montante_aprovado || credito?.montante_solicitado || 0,
-    meses_vencimento: meta?.meses_vencimento || 0,
     valor_prestacao: meta?.valor_prestacao || 0,
+    meses_vencimento: meta?.meses_vencimento || 0,
     prazo_amortizacao: credito?.prazo_amortizacao || '---',
+    montante: credito?.montante_aprovado || credito?.montante_solicitado || 0,
     prazo_entrega_contrato: 15,
     garantias_brutas: credito?.garantias || [],
     fiadores: extrairFiadores(credito?.garantias),
@@ -31,14 +31,13 @@ function mapEncargos(modelo) {
   const meta = modelo?.credito?.gaji9_metadados ?? {};
 
   return {
-    conta_pagamento: modelo?.conta || modelo?.cliente || '---',
     imposto_selo: meta?.taxa_imposto_selo,
     valor_encargos_iniciais: meta?.custo_total,
     valor_imposto_selo: meta?.valor_imposto_selo,
     valor_comissao_abertura: meta?.valor_comissao,
     comissao_abertura: meta?.taxa_comissao_abertura,
     imposto_selo_comissao: meta?.taxa_imposto_selo_utilizacao || '0',
-    valor_imposto_selo_comissao: meta?.valor_imposto_selo_comissao || 0,
+    conta_pagamento: meta?.conta_do_renda || modelo?.conta || modelo?.cliente || '---',
   };
 }
 
@@ -46,12 +45,12 @@ function mapObrigacoes(modelo) {
   const credito = modelo?.credito ?? {};
   const meta = credito?.gaji9_metadados ?? {};
 
-  const temSeguroGeral = credito?.seguros?.length > 0;
-  const temSeguroGarantia = credito?.garantias?.some((g) => g.metadados?.seguros?.length > 0);
+  const temSeguroCredito = credito?.seguros?.length > 0;
+  const temSeguroColateral = credito?.garantias?.some((g) => g.metadados?.bem?.seguros?.length > 0);
 
   return {
     prazo_entrega_contrato: meta?.prazo_utilizacao || 15,
-    tem_seguro: temSeguroGeral || temSeguroGarantia,
+    tem_seguro: Boolean(temSeguroCredito || temSeguroColateral),
     descricao_seguro: credito?.seguros?.[0]?.tipo_seguro || 'Seguro de Vida / Multiriscos',
   };
 }
@@ -59,6 +58,7 @@ function mapObrigacoes(modelo) {
 export function extrairFiadores(garantias) {
   if (!garantias) return [];
   return garantias
-    ?.flatMap((g) => g.metadados?.garantidores || [])
+    .filter((g) => !g.metadados?.numero_livranca)
+    .flatMap((g) => g.metadados?.garantidores || [])
     .map((f) => ({ ...f, nome: f?.nome_entidade || '---' }));
 }

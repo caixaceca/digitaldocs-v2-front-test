@@ -11,7 +11,7 @@ export function situacaoProfissionalRows(dados) {
     item: 'Proponente',
     bruto: dados?.renda_bruto_mensal,
     liquido: dados?.renda_liquido_mensal,
-    tipo: `${dados?.tipo_contrato ?? ''}${dados?.tipo_contrato ? ` (${dados?.local_trabalho})` : ''}`,
+    tipo: `${dados?.situacao_laboral ?? ''}${dados?.local_trabalho ? ` (${dados?.local_trabalho})` : ''}`,
   });
 
   // Cônjuge
@@ -20,7 +20,7 @@ export function situacaoProfissionalRows(dados) {
       item: 'Cônjuge',
       bruto: dados?.renda_bruto_mensal_conjuge,
       liquido: dados?.renda_liquido_mensal_conjuge,
-      tipo: `${dados?.tipo_contrato_conjuge ?? ''} (${dados?.local_trabalho_conjuge ?? ''})`,
+      tipo: `${dados?.situacao_laboral_conjuge ?? ''} (${dados?.local_trabalho_conjuge ?? ''})`,
     });
 
     // Totais
@@ -35,3 +35,16 @@ export function situacaoProfissionalRows(dados) {
 
   return rows;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export const situacoesLaboral = [
+  'Quadro efetivo',
+  'Contratado',
+  'Trabalhador por conta própria',
+  'Reformado/Aposentado',
+  'Desempregado',
+  'Estagiário',
+  'Prorrogado',
+  'Suspenso',
+];

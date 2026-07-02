@@ -98,10 +98,12 @@ export function FormLoading({ rows = 0 }) {
 
 export function SkeletonEntidade() {
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} sx={{ pt: 2 }}>
       <GridItem children={<Skeleton variant="text" height={140} sx={{ transform: 'none' }} />} />
       <GridItem children={<Skeleton variant="text" height={45} sx={{ transform: 'none' }} />} />
-      <GridItem children={<Skeleton variant="text" height={500} sx={{ transform: 'none' }} />} />
+      <GridItem children={<Skeleton variant="text" height={45} sx={{ transform: 'none' }} />} />
+      <GridItem children={<Skeleton variant="text" height={45} sx={{ transform: 'none' }} />} />
+      <GridItem children={<Skeleton variant="text" height={250} sx={{ transform: 'none' }} />} />
     </Grid>
   );
 }

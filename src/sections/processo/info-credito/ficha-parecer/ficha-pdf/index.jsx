@@ -4,7 +4,7 @@ import { Document, Page, View, Text } from '@react-pdf/renderer';
 // utils
 import { ptDate } from '@/utils/formatTime';
 import { extractClientes } from '../calculos';
-import { situacaoProfissionalRows } from '../utils';
+import { situacaoProfissionalRows } from '../utilss';
 import { pdfInfo, labelMeses } from '@/utils/formatText';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
@@ -32,7 +32,7 @@ export default function FichaPdf({ dados }) {
     garantiasPrestadas,
     garantiasRecebidas,
   } = useMemo(() => extractClientes(dados?.clientes || []), [dados?.clientes]);
-  const { fiadores = [], movimentos = [] } = dados || {};
+  const { fiadores = [], liquidacoes = [], movimentos = [] } = dados || {};
   const { dividas_externas: dividasExternas = [], avales_externas: avalesExternos = [] } = dados || {};
   const { numero, analista, uo, fiancas, entidade, mensagens, central_risco: cr, montante } = dados || {};
   const { rendimento = null, parecer = '', credito = null, proposta = null, valorPrestacao = 0 } = dados || {};
@@ -119,6 +119,7 @@ export default function FichaPdf({ dados }) {
           <Responsabilidades
             dividas={dividas}
             fiancas={fiancas}
+            liquidacoes={liquidacoes}
             renderSection={renderSection}
             avalesExternos={avalesExternos}
             dividasExternas={dividasExternas}
@@ -244,7 +245,7 @@ export default function FichaPdf({ dados }) {
             {proposta ? (
               <>
                 <RowFicha small title="Tipo de crédito" value={credito?.componente} />
-                <RowFicha small title="Finalidade" value={credito?.finalidade} />
+                <RowFicha small title="Finalidade" value={proposta?.finalidade} />
                 <RowFicha small title="Montante" value={fCurrency(proposta?.montante)} />
                 <RowFicha small title="Taxa de juro" value={fPercent(proposta?.taxa_juro)} />
                 <RowFicha small title="Prazo de amortização" value={labelMeses(proposta?.prazo_amortizacao)} />

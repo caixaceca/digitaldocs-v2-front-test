@@ -1,4 +1,7 @@
 // @mui
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
@@ -20,8 +23,8 @@ import {
   dstiAposContratacao,
   dividasConsolidadas,
 } from './calculos';
-import { situacaoProfissionalRows } from './utils';
-import { Cabecalho, rowInfo, EmptyRow } from './dados-ficha';
+import { situacaoProfissionalRows } from './utilss';
+import { Cabecalho, rowInfo, EmptyRow, Field, AlertaInfo } from './fragments';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -59,33 +62,52 @@ export function SituacaoProfissional({ dados }) {
 
 export function NovoFinanciamento({ dados }) {
   const { valorPrestacao = 0, credito = null, proposta = null } = dados || {};
-  const consolidadas = dividasConsolidadas(dados, proposta?.montante || credito?.montante_solicitado, valorPrestacao);
+  const { taxa_juro = 0, taxa_precario = 0 } = proposta || {};
+
+  const montante = proposta?.montante || credito?.montante_solicitado;
+  const consolidadas = dividasConsolidadas(dados, montante, valorPrestacao);
   const prestacaoM40 =
     credito?.componente?.includes('Habitação') && valorPrestacao > calcRendimento(dados?.rendimento, true) * 0.4;
 
   return (
-    <TableBody>
-      {rowInfo('Capital pretendido', fCurrency(proposta?.montante || credito?.montante_solicitado), false)}
-      {rowInfo('Tipo de crédito', credito?.componente, false)}
-      {rowInfo('Taxa do preçário', proposta?.taxa_precario || '', false)}
-      {rowInfo(
-        'Taxa de juros',
-        `${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${
-          proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''
-        }`
-      )}
-      {rowInfo('Prazo de amortização', labelMeses(proposta?.prazo_amortizacao), false)}
-      {rowInfo(
-        'Prestação mensal',
-        fCurrency(valorPrestacao),
-        false,
-        prestacaoM40 ? <Alerta alerta="A prestação excede 40% do rendimento bruto mensal do agregado" /> : null
-      )}
-      {rowInfo('Dívidas consolidadas após o fincanciamento', '*title*', false)}
-      {rowInfo('Capital inicial', fCurrency(consolidadas?.valor), true)}
-      {rowInfo('Saldo em dívida', fCurrency(consolidadas?.saldo_divida), true)}
-      {rowInfo('Serviço mensal', fCurrency(consolidadas?.valor_prestacao), true)}
-    </TableBody>
+    <Stack spacing={2} sx={{ p: 1 }}>
+      <Stack useFlexGap flexWrap="wrap" direction="row" spacing={5}>
+        <Stack direction="row" spacing={5}>
+          <Field destaque label="Capital pretendido" value={fCurrency(montante)} />
+          <Field
+            destaque
+            label="Prestação mensal"
+            value={fCurrency(valorPrestacao)}
+            alertLabel={prestacaoM40 ? <AlertaInfo alerta="Excede 40% do rendimento bruto" /> : null}
+          />
+        </Stack>
+        <Stack direction="row" spacing={5}>
+          <Field
+            label="Taxa do preçário"
+            value={taxa_precario && taxa_precario !== taxa_juro ? fPercent(taxa_precario) : null}
+          />
+          <Field
+            label="Taxa de juro"
+            value={`${fPercent(taxa_juro || credito?.taxa_juro)}${proposta?.origem_taxa ? ` · ${proposta.origem_taxa}` : ''}`}
+          />
+          <Field label="Prazo de amortização" value={labelMeses(proposta?.prazo_amortizacao)} />
+          <Field label="Tipo de crédito" value={credito?.componente} />
+        </Stack>
+      </Stack>
+
+      <Divider />
+
+      <Box>
+        <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1.25 }}>
+          Dívidas consolidadas após o financiamento
+        </Typography>
+        <Stack direction="row" spacing={5}>
+          <Field label="Capital inicial" value={fCurrency(consolidadas?.valor)} />
+          <Field label="Saldo em dívida" value={fCurrency(consolidadas?.saldo_divida)} />
+          <Field destaque label="Serviço mensal" value={fCurrency(consolidadas?.valor_prestacao)} />
+        </Stack>
+      </Box>
+    </Stack>
   );
 }
 
@@ -93,18 +115,39 @@ export function NovoFinanciamento({ dados }) {
 
 export function Dsti({ dados }) {
   const dsti = percentagemDsti(dados);
+  const limite = limiteDsti(dados?.rendimento);
+  const disponivel = dstiDisponivel(dados);
+  const aposContratacao = dstiAposContratacao(dados);
+
   return (
-    <TableBody>
-      {rowInfo('Limite do DSTI', fCurrency(limiteDsti(dados?.rendimento)))}
-      {rowInfo('DSTI disponível', fCurrency(dstiDisponivel(dados)))}
-      {rowInfo(
-        'DSTI',
-        fPercent(dsti),
-        false,
-        dsti > 50 ? <Alerta alerta="DSTI ultrapassa o limite recomendável" /> : null
-      )}
-      {rowInfo('DSTI após contratação', fCurrency(dstiAposContratacao(dados)))}
-    </TableBody>
+    <Stack direction="row" spacing={5} sx={{ p: 1 }}>
+      <Field
+        destaque
+        label="DSTI"
+        value={fPercent(dsti)}
+        alertLabel={dsti > 50 ? <AlertaInfo alerta="Ultrapassa o limite recomendável" /> : null}
+      />
+      <Field label="Limite do DSTI" value={fCurrency(limite)} />
+      <Field label="DSTI disponível" value={fCurrency(disponivel)} />
+      <Field label="Disponível após contratação" value={fCurrency(aposContratacao)} />
+    </Stack>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function DstiCorrigido({ dados }) {
+  const corrigido = dstiCorrigido(dados);
+  return (
+    <Stack direction="row" spacing={5} sx={{ p: 1 }}>
+      <Field
+        destaque
+        label="DSTI corrigido"
+        value={fPercent(corrigido)}
+        alertLabel={corrigido > 70 ? <AlertaInfo alerta="Ultrapassa o limite recomendável" /> : null}
+      />
+      <Field label="Limite do DSTI corrigido" value={fCurrency(limiteDstiCorrigido(dados))} />
+    </Stack>
   );
 }
 
@@ -116,23 +159,6 @@ export function Despesas({ dados }) {
       {dados?.map(({ despesa, valor }) => rowInfo(despesa, fCurrency(valor), false))}
       {dados?.length > 1 && rowInfo('Total', fCurrency(totalDespesas(dados)), true)}
       {dados?.length === 0 && <EmptyRow cells={2} message="Nenhuma despesa encontrada..." empty />}
-    </TableBody>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function DstiCorrigido({ dados }) {
-  const corrigido = dstiCorrigido(dados);
-  return (
-    <TableBody>
-      {rowInfo('Limite do DSTI corrigido', fCurrency(limiteDstiCorrigido(dados)), false)}
-      {rowInfo(
-        'DSTI corrigido',
-        fPercent(corrigido),
-        false,
-        corrigido > 70 ? <Alerta alerta="DSTI Corrigido ultrapassa o limite recomendável" /> : null
-      )}
     </TableBody>
   );
 }
@@ -156,18 +182,12 @@ export function LimiteAval({ rendimento }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function Parecer({ parecer }) {
-  return (
-    <TableBody>
-      {parecer ? (
-        <TableRow>
-          <TableCell>
-            <Markdown>{normalizeQuillLists(parecer)}</Markdown>
-          </TableCell>
-        </TableRow>
-      ) : (
-        <EmptyRow cells={2} message="Ainda não foi adicionado o parecer..." empty />
-      )}
-    </TableBody>
+  return parecer ? (
+    <Box sx={{ p: 1.5 }}>
+      <Markdown>{normalizeQuillLists(parecer)}</Markdown>
+    </Box>
+  ) : (
+    <EmptyRow cells={2} message="Ainda não foi adicionado o parecer..." empty />
   );
 }
 
@@ -180,7 +200,7 @@ export function Proposta({ dados }) {
       {proposta ? (
         <>
           {rowInfo('Tipo de crédito', credito?.componente)}
-          {rowInfo('Finalidade', credito?.finalidade)}
+          {rowInfo('Finalidade', proposta?.finalidade)}
           {rowInfo('Montante', fCurrency(proposta?.montante))}
           {rowInfo('Taxa de juro', fPercent(proposta?.taxa_juro) || '')}
           {rowInfo('Prazo de amortização', labelMeses(proposta?.prazo_amortizacao))}
@@ -194,15 +214,5 @@ export function Proposta({ dados }) {
         <EmptyRow cells={2} message="Os dados da proposta ainda não foram preenchidas..." empty />
       )}
     </TableBody>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function Alerta({ alerta }) {
-  return (
-    <Typography component="span" variant="subtitle2" sx={{ color: 'error.main' }}>
-      {` *${alerta}`}
-    </Typography>
   );
 }

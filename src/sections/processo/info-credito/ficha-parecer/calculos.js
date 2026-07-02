@@ -3,6 +3,8 @@ import { add } from 'date-fns';
 import { ptDate, getIdade } from '@/utils/formatTime';
 import { getComparator, applySort } from '@/hooks/useTable';
 
+export const AVAL_MULTIPLICADOR = 2;
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function calcRendimento(dados, bruto) {
@@ -20,7 +22,7 @@ export function totalDespesas(dados) {
   return dados?.reduce((total, item) => total + Number(item?.valor), 0);
 }
 
-// --------- DSTI ------------------------------------------------------------------------------------------------------
+// --------- PRESTAÇÃO -------------------------------------------------------------------------------------------------
 
 export function calcValorPrestacao(dados) {
   if (!dados?.montante || !dados?.taxa || !dados?.prazo) return 0;
@@ -41,6 +43,20 @@ export function totalPrestacao(dados) {
   const prestacaoExterna = prestacaoDividas(dados?.dividasExternas);
 
   return Number(dados?.valorPrestacao) + Number(prestacaoCaixa) + Number(prestacaoExterna);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export const RISK = {
+  excede_limite: { label: 'Excede limite aval/fiança', color: 'error' },
+  rendimento_insuficiente: { label: 'Rendimento < 75% do proponente', color: 'warning' },
+};
+
+export function getRiskLevel({ totalPres, limite, liquido, rend }) {
+  const violacoes = [];
+  if (limite != null && totalPres > limite) violacoes.push('excede_limite');
+  if (rend != null && liquido < rend * 0.75) violacoes.push('rendimento_insuficiente');
+  return violacoes;
 }
 
 // --------- RESPONSABILIDADES -----------------------------------------------------------------------------------------
@@ -103,6 +119,10 @@ export function limiteDstiCorrigido(dados) {
   if (!dados) return '';
   const rendimento = calcRendimento(dados?.rendimento);
   return (rendimento > 0 && limiteDsti(dados?.rendimento) + rendimento * 0.2) || 0;
+}
+
+export function limiteAvalFianca(rendimento) {
+  return rendimento ? limiteDsti(rendimento) * AVAL_MULTIPLICADOR : 0;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

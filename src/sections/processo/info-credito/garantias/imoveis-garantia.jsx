@@ -15,6 +15,8 @@ import GridItem from '@/components/GridItem';
 import { noDados } from '@/components/Panel';
 import { TipoSeguro } from './table-seguros';
 import { DefaultAction } from '@/components/Actions';
+//
+import Entidades from './entidades';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -215,7 +217,7 @@ function GarantiaLayout({ children, donos, donosTitle, multi, openForm, id }) {
     >
       <Stack spacing={3}>
         {children}
-        {donos?.length > 0 && <Donos dados={donos} title={donosTitle} />}
+        {donos?.length > 0 && <Entidades dados={donos} title={donosTitle} />}
 
         {openForm && (
           <Stack direction="column" alignItems="center">
@@ -262,41 +264,13 @@ function Balcao({ balcao }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Donos({ title, dados = [] }) {
-  return (
-    <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 1 }}>
-      <Stack spacing={1}>
-        {title && (
-          <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-            {title}
-          </Typography>
-        )}
-        {dados.map((row, index) => (
-          <Stack key={row?.numero || row?.numero_entidade || index} direction="row" spacing={1} alignItems="center">
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main' }} />
-            <Typography variant="body2">
-              <Box component="span" sx={{ fontWeight: 'bold' }}>
-                {row?.numero || row?.numero_entidade || '—'}
-              </Box>
-              {' - '}
-              {row?.nome || row?.nome_entidade || '—'}
-            </Typography>
-          </Stack>
-        ))}
-      </Stack>
-    </Box>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function Livranca({ livranca, donos }) {
   return (
     <Stack spacing={2}>
       <Paper variant="outlined" sx={{ p: 1, color: 'primary.main', typography: 'subtitle1', textAlign: 'center' }}>
         {livranca}
       </Paper>
-      {donos?.length > 0 && <Donos dados={donos} title="Avalista(s)" />}
+      {donos?.length > 0 && <Entidades dados={donos} title="Avalista(s)" />}
     </Stack>
   );
 }

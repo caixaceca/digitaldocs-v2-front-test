@@ -63,56 +63,6 @@ export function Asuntos({ dados, total }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Desempenho({ dados }) {
-  return (
-    <TableDashboard
-      title="Desempenho por colaborador  (Top 5)"
-      headLabel={[
-        { id: 'employee', label: 'Colaborador' },
-        { id: 'closed', label: 'Fechados', align: 'center' },
-        { id: 'resolved', label: 'Resolvidos', align: 'center' },
-        { id: 'rating', label: 'Média avaliação', align: 'center' },
-      ]}
-      body={dados.map((row) => (
-        <TableRow key={`employee_${row.employee}`} hover>
-          <TableCell>{row.employee}</TableCell>
-          <TableCell align="center">{row.closed}</TableCell>
-          <TableCell align="center">{row.resolved}</TableCell>
-          <Avaliacao rating={row.rating} />
-        </TableRow>
-      ))}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function Departamentos({ dados }) {
-  return (
-    <TableDashboard
-      title="Desempenho por departamento (Top 5)"
-      headLabel={[
-        { id: 'department_name', label: 'Departamento' },
-        { id: 'check_in_count', label: 'Entradas', align: 'right' },
-        { id: 'check_out_count', label: 'Saídas', align: 'right' },
-        { id: 'check_out_rate', label: 'Taxa de Saída', align: 'right' },
-        { id: 'sla_compliance_rate', label: 'Conformidade SLA', align: 'right' },
-      ]}
-      body={dados.map((row) => (
-        <TableRow key={row.id} hover>
-          <TableCell>{row.department_name}</TableCell>
-          <TableCell align="right">{fNumber(row.check_in_count)}</TableCell>
-          <TableCell align="right">{fNumber(row.check_out_count)}</TableCell>
-          <TableCell align="right">{fPercent(row?.check_out_rate * 100)}</TableCell>
-          <TableCell align="right">{fPercent(row?.sla_compliance_rate * 100)}</TableCell>
-        </TableRow>
-      ))}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 function TableDashboard({ title, headLabel, body }) {
   return (
     <Card sx={{ height: 1 }}>

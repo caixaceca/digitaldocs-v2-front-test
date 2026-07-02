@@ -1,12 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 // @mui
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Table from '@mui/material/Table';
-import Accordion from '@mui/material/Accordion';
-import TableContainer from '@mui/material/TableContainer';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
 // utils
 import { extractClientes, movimentosConta } from './calculos';
 //
@@ -20,7 +14,9 @@ import {
   NovoFinanciamento,
   SituacaoProfissional,
 } from './info-solvabilidade';
+import ResumoFicha from './resumo-ficha';
 import { FormParecer } from './form-ficha';
+import { AccordionItem } from './fragments';
 import AnaliseFiadores from './analise-fiadores';
 import AnexarFicha from './ficha-pdf/anexar-ficha';
 import { AddItem, DefaultAction } from '@/components/Actions';
@@ -55,8 +51,23 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
 
   return (
     <Stack spacing={2}>
+      <ResumoFicha
+        dados={{
+          cr,
+          numero,
+          fiancas,
+          dividas,
+          proposta,
+          entidade,
+          clientes,
+          mensagens,
+          rendimento,
+          restruturacoes,
+          irregularidades,
+          movimentosCredito,
+        }}
+      />
       <AccordionItem
-        open
         title="1. Identificação"
         children={<Identificcao entidade={{ numero, ...entidade, ...rendimento }} />}
       />
@@ -85,6 +96,7 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
         }
       >
         <Responsabilidades
+          liquidacoes={liquidacoes}
           responsabilidades={{ dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas }}
         />
       </AccordionItem>
@@ -99,15 +111,17 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
         children={<SituacaoProfissional dados={rendimento} />}
         title="11. Situação profissional e Rendimento do agregado familiar (mensal)"
       />
-      <AccordionItem title="12. Novo financiamento">
+      <AccordionItem normal title="12. Novo financiamento">
         <NovoFinanciamento dados={{ valorPrestacao, proposta, credito, rendimento, dividas: divEf, dividasExternas }} />
       </AccordionItem>
       <AccordionItem
+        normal
         title="13. DSTI - Debt Service To Income (<=50%)"
         children={<Dsti dados={{ valorPrestacao, dividas: divEf, dividasExternas, rendimento, credito }} />}
       />
       <AccordionItem title="14. Outras despesas regulares (média mensal)" children={<Despesas dados={despesas} />} />
       <AccordionItem
+        normal
         title="15. DSTI corrigido (<=70%)"
         children={
           <DstiCorrigido dados={{ valorPrestacao, dividas: divEf, dividasExternas, rendimento, credito, despesas }} />
@@ -127,6 +141,7 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
         />
       )}
       <AccordionItem
+        normal
         title={`${temFiadores ? '18' : '17'}. Parecer`}
         children={<Parecer parecer={ficha?.parecer || ''} />}
         action={
@@ -161,41 +176,5 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
         <Liquidacoes dividas={dividas} liquidacoes={liquidacoes} onClose={() => actionModal({})} />
       )}
     </Stack>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-function AccordionItem({ open = false, title, action = null, children }) {
-  const [expanded, setExpanded] = useState(open);
-
-  return (
-    <Accordion expanded={expanded} onChange={(event, isExpanded) => setExpanded(isExpanded)}>
-      <AccordionSummary sx={{ typography: 'subtitle1', py: title === '17. Parecer' ? 0 : 0.25 }}>
-        <Stack
-          useFlexGap
-          spacing={2}
-          flexWrap="wrap"
-          direction="row"
-          alignItems="center"
-          sx={{ flexGrow: 1 }}
-          justifyContent="space-between"
-        >
-          {title}
-          {action && (
-            <Box component="div" sx={{ pr: 1 }} onClick={(e) => e.stopPropagation()}>
-              {action}
-            </Box>
-          )}
-        </Stack>
-      </AccordionSummary>
-      <AccordionDetails sx={{ p: 1 }}>
-        <TableContainer>
-          <Table size="small" sx={{ tableLayout: 'auto', width: '100%' }}>
-            {children}
-          </Table>
-        </TableContainer>
-      </AccordionDetails>
-    </Accordion>
   );
 }

@@ -10,8 +10,9 @@ import GridItem from '@/components/GridItem';
 import { DashboardTicketSkeleton } from '@/components/skeleton';
 //
 import KPI from './kpi';
+import KPIEstados from './estados-kpi';
+import { Asuntos } from './table-dashboard';
 import { Evolucao, PorDepartamento } from './chart-dasboard';
-import { Asuntos, Departamentos, Desempenho } from './table-dashboard';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +35,7 @@ export default function ResumoDashboard({ data, periodo, department, departament
       ) : (
         <Stack spacing={3}>
           <KPI dados={indicadores?.kpis ?? null} />
+          <KPIEstados dados={indicadores?.indicators_by_status ?? null} />
 
           <Grid container spacing={3}>
             <GridItem md={7}>
@@ -55,18 +57,6 @@ export default function ResumoDashboard({ data, periodo, department, departament
             </GridItem>
             <GridItem>
               <Asuntos dados={indicadores?.indicators_by_subject?.filter(({ count }) => count) ?? []} />
-            </GridItem>
-            <GridItem xl={6}>
-              <Departamentos
-                dados={
-                  indicadores?.indicators_by_department?.filter(
-                    ({ check_in_count, check_out_count }) => check_in_count || check_out_count
-                  ) ?? []
-                }
-              />
-            </GridItem>
-            <GridItem xl={6}>
-              <Desempenho dados={indicadores?.indicators_by_employee?.filter(({ closed }) => closed) ?? []} />
             </GridItem>
           </Grid>
         </Stack>

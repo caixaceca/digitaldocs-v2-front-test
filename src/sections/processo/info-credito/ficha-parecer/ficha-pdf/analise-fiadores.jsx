@@ -16,7 +16,7 @@ export default function AnaliseFiadoresPdf({ fiadores, financiamento, rendimento
       {fiadores?.map((row, index) => {
         const bruto = row?.renda_bruto_mensal;
         const liquido = row?.renda_liquido_mensal;
-        const dadosResponsabilidades = [{ ...financiamento, situacao: 'Normal' }, ...(row.fiancas || [])];
+        const dadosResponsabilidades = [{ label: 'Crédito em análise', ...financiamento }, ...(row.fiancas || [])];
         const totalPres = dadosResponsabilidades.reduce((acc, item) => acc + Number(item.valor_prestacao || 0), 0);
 
         const alertaLimite = totalPres > liquido;
@@ -56,16 +56,16 @@ export default function AnaliseFiadoresPdf({ fiadores, financiamento, rendimento
                 { label: 'TOTAL', ...responsabilidadesInfo(dadosResponsabilidades), totais: true },
               ],
               [
-                { title: 'Aval/Fiança', options: [styles.tCell_20, styles.bgCinza] },
-                { title: 'Capital Inicial', align: 'right', options: [styles.tCell_25, styles.bgCinza] },
+                { title: 'Aval/Fiança', options: [styles.tCell_25, styles.bgCinza] },
+                { title: 'Capital Inicial', align: 'right', options: [styles.tCell_20, styles.bgCinza] },
                 { title: 'Saldo', align: 'right', options: [styles.tCell_20, styles.bgCinza] },
                 { title: 'Prestação', align: 'right', options: [styles.tCell_20, styles.bgCinza] },
                 { title: 'Situação', align: 'center', options: [styles.tCell_15, styles.bgCinza] },
               ],
               (item, index) => (
                 <>
-                  <ItemValue value={item.label || index + 1} options={[styles.tCell_20]} />
-                  <ItemValue value={fCurrency(item?.valor)} options={[styles.tCell_25, styles.alignRight]} />
+                  <ItemValue value={item?.tipo_credito || item.label || index + 1} options={[styles.tCell_25]} />
+                  <ItemValue value={fCurrency(item?.valor)} options={[styles.tCell_20, styles.alignRight]} />
                   <ItemValue value={fCurrency(item?.saldo_divida)} options={[styles.tCell_20, styles.alignRight]} />
                   <ItemValue value={fCurrency(item?.valor_prestacao)} options={[styles.tCell_20, styles.alignRight]} />
                   <ItemValue value={item?.situacao} options={[styles.tCell_15, styles.alignCenter]} />

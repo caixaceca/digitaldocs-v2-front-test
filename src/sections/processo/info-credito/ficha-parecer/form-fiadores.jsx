@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { situacoesLaboral } from './utilss';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getFromIntranet, updateFicha } from '@/redux/slices/intranet';
 // components
@@ -15,13 +16,13 @@ import { Dividas } from './form-ficha';
 import GridItem from '@/components/GridItem';
 import { DialogButons } from '@/components/Actions';
 import { DialogTitleAlt } from '@/components/CustomDialog';
-import { FormProvider, RHFNumberField } from '@/components/hook-form';
+import { FormProvider, RHFNumberField, RHFAutocompleteSmp } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormFiadores({ onClose, dados, fiadores }) {
   const dispatch = useDispatch();
-  const { fichaFiador } = useSelector((state) => state.intranet);
+  const fichaFiador = useSelector((state) => state.intranet.fichaFiador);
 
   useEffect(() => {
     const entidade = dados.numero_entidade;
@@ -29,6 +30,7 @@ export default function FormFiadores({ onClose, dados, fiadores }) {
   }, [dispatch, dados?.numero_entidade]);
 
   const formSchema = Yup.object().shape({
+    situacao_laboral: Yup.mixed().required().label('Situação laboral'),
     renda_bruto_mensal: Yup.number().positive().label('Rendimento bruto'),
     renda_liquido_mensal: Yup.number().positive().label('Rendimento liquido'),
     fiancas: Yup.array(
@@ -51,6 +53,7 @@ export default function FormFiadores({ onClose, dados, fiadores }) {
     }));
 
     return {
+      situacao_laboral: dados?.situacao_laboral || null,
       renda_bruto_mensal: dados?.renda_bruto_mensal || '',
       renda_liquido_mensal: dados?.renda_liquido_mensal || '',
       fiancas: fiancasFormatadas,
@@ -81,10 +84,13 @@ export default function FormFiadores({ onClose, dados, fiadores }) {
       <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} justifyContent="center" sx={{ pt: 1 }}>
-            <GridItem sm={6}>
+            <GridItem md={4}>
+              <RHFAutocompleteSmp name="situacao_laboral" label="Situação laboral" options={situacoesLaboral} />
+            </GridItem>
+            <GridItem xs={6} md={4}>
               <RHFNumberField tipo="CVE" name="renda_bruto_mensal" label="Rendimento bruto" />
             </GridItem>
-            <GridItem sm={6}>
+            <GridItem xs={6} md={4}>
               <RHFNumberField tipo="CVE" name="renda_liquido_mensal" label="Rendimento liquido" />
             </GridItem>
             <GridItem children={<Dividas name="fiancas" />} />

@@ -16,11 +16,13 @@ export function normalizeText(text) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function entidadesParse(entidades) {
-  let entidadesList = '';
-  entidades?.split(';')?.forEach((row, index) => {
-    entidadesList += entidades?.split(';')?.length - 1 === index ? row : `${row} / `;
-  });
-  return entidadesList;
+  if (!entidades) return '';
+
+  return entidades
+    .split(';')
+    .map((entidade) => entidade.trim())
+    .filter(Boolean)
+    .join(' / ');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -18,7 +18,6 @@ import { condicoesGerais, encargos, obrigacoes } from './sections';
 
 export default function ModeloCartaProposta() {
   const { enqueueSnackbar } = useSnackbar();
-
   const processo = useSelector((state) => state.digitaldocs.processo);
 
   const exportToWord = async (setLoading) => {

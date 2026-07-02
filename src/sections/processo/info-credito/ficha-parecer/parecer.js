@@ -4,6 +4,15 @@ import { calcRendimento, percentagemDsti, dstiCorrigido, idadeCliente, idadeRefo
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+const REGRAS_SOLVABILIDADE = {
+  AVAL_MULTIPLICADOR: 2,
+  AJUSTE_REFORMA_PCT: 20,
+  DSTI: { limite: 50, label: 'DSTI <= 50%' },
+  DSTI_CORRIGIDO: { limite: 70, label: 'DSTI Corrigido <= 70%' },
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export function textParecer(ficha) {
   const {
     dividas = [],
@@ -11,6 +20,7 @@ export function textParecer(ficha) {
     credito = {},
     proposta = {},
     rendimento = {},
+    liquidacoes = [],
     avales_externas: avalesExterna = [],
     dividas_externas: dividasExterna = [],
     clientes = [],
@@ -29,27 +39,27 @@ export function textParecer(ficha) {
   const { resumoResponsa, detalheResponsa } = gerarResponsabilidades({
     dividas,
     fiancas,
+    liquidacoes,
     dividasExterna,
     avalesExterna,
   });
 
-  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
-  const reforma = idadeReforma(ficha?.entidade?.sexo);
+  const rendimentoLiq = calcRendimento(rendimento);
+  const rendimentoBruto = calcRendimento(rendimento, true);
+  const impactoReforma = calcularImpactoReforma(ficha, proposta);
 
-  const idadeFimCredito = idadeTitular + Number(proposta?.prazo_amortizacao || 0) / 12;
   let ajusteRendimentoTexto = '';
-  if (idadeFimCredito >= reforma) {
-    const anosNaReforma = idadeFimCredito - reforma;
-    const proporcao = Math.min(anosNaReforma / (Number(proposta?.prazo_amortizacao || 0) / 12), 1);
-    const ajuste = 20 * proporcao;
-    ajusteRendimentoTexto = `O crédito ultrapassa a idade de reforma (${reforma} anos). Considera-se prudente um ajuste no rendimento líquido em cerca de ${fPercent(
-      ajuste / 100
+  if (impactoReforma.ultrapassaReforma) {
+    ajusteRendimentoTexto = `O crédito ultrapassa a idade de reforma (${impactoReforma.reforma} anos). Considera-se prudente um ajuste no rendimento líquido em cerca de ${fPercent(
+      impactoReforma.ajustePct / 100
     )}, refletindo a expectativa de redução após a aposentadoria.`;
   }
 
-  const regras = avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, proposta, ficha });
+  const regras = avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimentoLiq, impactoReforma });
   const riscoProspectivo = gerarRiscoProspectivo(regras);
   const conclusao = gerarConclusao(regras);
+
+  const multiploSalario = rendimentoBruto > 0 ? fShortenNumber(proposta?.montante / rendimentoBruto) : 'N/D';
 
   return `
     <p><strong>${ficha?.credito?.titular ?? 'NOME DO CLIENTE'}</strong>${
@@ -60,17 +70,13 @@ export function textParecer(ficha) {
       ficha?.entidade?.sexo === 'Masculino' ? 'o' : 'a'
     } do(a) <strong>${
       rendimento?.local_trabalho ?? 'EMPRESA/INSTITUIÇÃO'
-    }</strong>, auferindo um vencimento mensal bruto de <strong>${fCurrency(
-      calcRendimento(rendimento, true)
-    )}</strong>.</p>
+    }</strong>, auferindo um vencimento mensal bruto de <strong>${fCurrency(rendimentoBruto)}</strong>.</p>
 
     <br/>
-    <p>O cliente, com <strong>${idadeTitular} anos</strong>, solicita um crédito <strong>${
+    <p>O cliente, com <strong>${impactoReforma.idadeTitular} anos</strong>, solicita um crédito <strong>${
       credito?.componente
-    }</strong> no valor de <strong>${fCurrency(proposta?.montante)}</strong>, correspondente a <strong>${fShortenNumber(
-      proposta?.montante / calcRendimento(rendimento, true)
-    )}</strong> vezes o seu salário, destinado a <strong>${
-      credito?.finalidade ?? 'FINALIDADE'
+    }</strong> no valor de <strong>${fCurrency(proposta?.montante)}</strong>, correspondente a <strong>${multiploSalario}</strong> vezes o seu salário, destinado a <strong>${
+      proposta?.finalidade ?? 'FINALIDADE'
     }</strong>. O crédito proposto apresenta as seguintes condições:</p>
     <ul>
       <li>Prazo de amortização: <strong>${proposta?.prazo_amortizacao} meses</strong></li>
@@ -103,19 +109,40 @@ export function textParecer(ficha) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function gerarResponsabilidades({ dividas, fiancas, dividasExterna, avalesExterna }) {
+function calcularImpactoReforma(ficha, proposta) {
+  const reforma = idadeReforma(ficha?.entidade?.sexo);
+  const prazoAnos = Number(proposta?.prazo_amortizacao || 0) / 12;
+  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
+  const idadeFimCredito = idadeTitular + prazoAnos;
+  const ultrapassaReforma = idadeFimCredito >= reforma;
+
+  let ajustePct = 0;
+  if (ultrapassaReforma && prazoAnos > 0) {
+    const anosNaReforma = idadeFimCredito - reforma;
+    const proporcao = Math.min(anosNaReforma / prazoAnos, 1);
+    ajustePct = REGRAS_SOLVABILIDADE.AJUSTE_REFORMA_PCT * proporcao;
+  }
+
+  return { idadeTitular, reforma, idadeFimCredito, ultrapassaReforma, ajustePct };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function gerarResponsabilidades({ dividas, liquidacoes, fiancas, dividasExterna, avalesExterna }) {
   const blocos = [];
 
   const criarListaInterna = (itens, formatItem) => `<ul>${itens.map(formatItem).join('')}</ul>`;
+
+  const contasParaLiquidar = new Set(liquidacoes ?? []);
 
   if (dividas?.length > 0) {
     blocos.push(
       `<li>Possui ${dividas.length} crédito${dividas.length > 1 ? 's' : ''} ativo na Caixa:${criarListaInterna(
         dividas,
-        (d) =>
-          `<li class="ql-indent-1">${d.tipo}, saldo ${fNumber(Math.abs(d.saldo_divida))} ${d.moeda}, situação ${
-            d.situacao
-          };</li>`
+        (d) => {
+          const notaLiquidacao = contasParaLiquidar.has(d.conta) ? ' <strong>(liquidação anticipada)</strong>' : '';
+          return `<li class="ql-indent-1">${d.tipo}, saldo ${fNumber(Math.abs(d.saldo_divida))} ${d.moeda}, situação ${d.situacao}${notaLiquidacao};</li>`;
+        }
       )}</li>`
     );
   }
@@ -173,30 +200,34 @@ function gerarResponsabilidades({ dividas, fiancas, dividasExterna, avalesExtern
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, proposta, ficha }) {
+function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimentoLiq, impactoReforma }) {
   const resultados = [];
 
   resultados.push({
-    cumpre: dsti <= 50,
-    regra: 'DSTI <= 50%',
+    id: 'DSTI',
+    cumpre: dsti <= REGRAS_SOLVABILIDADE.DSTI.limite,
+    regra: REGRAS_SOLVABILIDADE.DSTI.label,
     status:
-      dsti <= 50
+      dsti <= REGRAS_SOLVABILIDADE.DSTI.limite
         ? `O rácio de esforço do cliente é de <b>${fPercent(dsti)}</b>, encontrando-se <b>dentro do limite definido</b>, evidenciando capacidade adequada para assumir a prestação proposta;`
         : `O rácio de esforço do cliente é de <b>${fPercent(dsti)}</b>, encontrando-se <b>fora do limite definido</b>, indicando pressão excessiva sobre o rendimento disponível;`,
   });
 
   resultados.push({
-    cumpre: dstiCor <= 70,
-    regra: 'DSTI Corrigido <= 70%',
+    id: 'DSTI_CORRIGIDO',
+    cumpre: dstiCor <= REGRAS_SOLVABILIDADE.DSTI_CORRIGIDO.limite,
+    regra: REGRAS_SOLVABILIDADE.DSTI_CORRIGIDO.label,
     status:
-      dstiCor <= 70
+      dstiCor <= REGRAS_SOLVABILIDADE.DSTI_CORRIGIDO.limite
         ? `Após ajustamentos prudenciais, o DSTI situa-se em <b>${fPercent(dstiCor)}</b>, permanecendo <b>dentro do limite definido</b>;`
         : `Após ajustamentos prudenciais, o DSTI situa-se em <b>${fPercent(dstiCor)}</b>, encontrando-se <b>fora do limite definido</b>, agravando o risco de sobre-endividamento`,
   });
 
   const somaAval = [...fiancas, ...avalesExterna].reduce((acc, a) => acc + Math.abs(a.valor_prestacao || 0), 0);
-  const limiteAval = calcRendimento(rendimento, true) * 0.5 * 2;
+  const limiteAval = rendimentoLiq > 0 ? rendimentoLiq * 0.5 * REGRAS_SOLVABILIDADE.AVAL_MULTIPLICADOR : 0;
+
   resultados.push({
+    id: 'AVAL',
     cumpre: somaAval <= limiteAval,
     regra: 'Prestações avalizadas/afiançadas <= 2x limite DSTI',
     status:
@@ -205,17 +236,13 @@ function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, prop
         : `A exposição por avales/fianças totaliza <b>${fCurrency(somaAval)}</b>, encontrando-se <b>fora do limite definido</b>, representando risco contingente adicional associado a eventual incumprimento de terceiros;`,
   });
 
-  const reforma = idadeReforma(ficha?.entidade?.sexo);
-  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
-  const idadeFimCredito = idadeTitular + Number(proposta?.prazo_amortizacao || 0) / 12;
-
   resultados.push({
-    cumpre: idadeFimCredito <= reforma,
+    id: 'REFORMA',
+    cumpre: !impactoReforma.ultrapassaReforma,
     regra: 'Ajuste rendimento por idade de reforma',
-    status:
-      idadeFimCredito <= reforma
-        ? `O prazo do crédito termina <b>antes</b> da idade legal de reforma do proponente, ${idadeFimCredito.toFixed(0)} anos no final do crédito.`
-        : `O prazo do crédito <b>ultrapassa</b> a idade legal de reforma do proponente, ${idadeFimCredito.toFixed(0)} anos, sendo aplicado <b>ajustamento prudencial de 20% ao rendimento</b>, visando reforçar a prudência na avaliação da capacidade futura de pagamento`,
+    status: !impactoReforma.ultrapassaReforma
+      ? `O prazo do crédito termina <b>antes</b> da idade legal de reforma do proponente, ${impactoReforma.idadeFimCredito.toFixed(0)} anos no final do crédito.`
+      : `O prazo do crédito <b>ultrapassa</b> a idade legal de reforma do proponente, ${impactoReforma.idadeFimCredito.toFixed(0)} anos, sendo aplicado <b>ajustamento prudencial de ${REGRAS_SOLVABILIDADE.AJUSTE_REFORMA_PCT}% ao rendimento</b>, visando reforçar a prudência na avaliação da capacidade futura de pagamento`,
   });
 
   return resultados;
@@ -226,29 +253,29 @@ function avaliarRegras({ dsti, dstiCor, fiancas, avalesExterna, rendimento, prop
 function gerarRiscoProspectivo(regras) {
   const riscos = [];
 
-  regras.forEach(({ cumpre, regra }) => {
+  regras.forEach(({ cumpre, id }) => {
     if (cumpre) return;
 
-    switch (regra) {
-      case 'DSTI <= 50%':
+    switch (id) {
+      case 'DSTI':
         riscos.push(
           'O nível de esforço financeiro atual poderá limitar a capacidade do cliente de acomodar aumentos futuros de despesas ou responsabilidades.'
         );
         break;
 
-      case 'DSTI Corrigido <= 70%':
+      case 'DSTI_CORRIGIDO':
         riscos.push(
           'Após ajustamentos prudenciais, o rácio de esforço mantém-se elevado, aumentando o risco de sobre-endividamento em cenários adversos.'
         );
         break;
 
-      case 'Prestações avalizadas/afiançadas <= 2x limite DSTI':
+      case 'AVAL':
         riscos.push(
           'A exposição associada a avales e fianças representa risco contingente relevante, dependente de eventual incumprimento de terceiros.'
         );
         break;
 
-      case 'Ajuste rendimento por idade de reforma':
+      case 'REFORMA':
         riscos.push(
           'A extensão do prazo do crédito para além da idade de reforma poderá impactar negativamente a capacidade futura de pagamento.'
         );

@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { textParecer } from './parecer';
+import { situacoesLaboral } from './utilss';
 import { fillData } from '@/utils/formatTime';
 import { updateFicha } from '@/redux/slices/intranet';
 import { useSelector, useDispatch } from '@/redux/store';
@@ -35,16 +36,6 @@ import { AddItem, DefaultAction, ButtonsStepper, DialogButons } from '@/componen
 import { shapeText, shapeNumberZero, shapeDate, shapeMixed } from '@/components/hook-form/yup-shape';
 
 const divida = { valor: '', valor_prestacao: '', saldo_divida: '' };
-const situacoesLaboral = [
-  'Quadro efetivo',
-  'Contratado',
-  'Trabalhador por conta própria',
-  'Reformado/Aposentado',
-  'Desempregado',
-  'Estagiário',
-  'Prorrogado',
-  'Suspenso',
-];
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -92,13 +83,13 @@ function Rendimento({ dados, onClose }) {
 
   const formSchema = Yup.object().shape({
     nome_conjuge: shapeText('conjuge', [true], 'Nome'),
-    tipo_contrato: Yup.mixed().required().label('Situação laboral'),
     local_trabalho: Yup.string().required().label('Local de trabalho'),
+    situacao_laboral: Yup.mixed().required().label('Situação laboral'),
     renda_bruto_mensal: Yup.number().positive().label('Rendimento bruto'),
-    tipo_contrato_conjuge: shapeMixed('conjuge', [true], 'Situação laboral'),
     local_trabalho_conjuge: shapeText('conjuge', [true], 'Local de trabalho'),
     renda_liquido_mensal: Yup.number().positive().label('Rendimento liquido'),
     data_nascimento_conjuge: shapeDate('conjuge', [true], 'Data de nascimento'),
+    situacao_laboral_conjuge: shapeMixed('conjuge', [true], 'Situação laboral'),
     renda_bruto_mensal_conjuge: shapeNumberZero('Rendimento bruto', [true], 'conjuge'),
     renda_liquido_mensal_conjuge: shapeNumberZero('Rendimento liquido', [true], 'conjuge'),
   });
@@ -108,11 +99,11 @@ function Rendimento({ dados, onClose }) {
       conjuge: !!dados?.conjuge,
       nome_conjuge: dados?.nome_conjuge || '',
       local_trabalho: dados?.local_trabalho || '',
-      tipo_contrato: dados?.tipo_contrato || null,
+      situacao_laboral: dados?.situacao_laboral || null,
       renda_bruto_mensal: dados?.renda_bruto_mensal || '',
       renda_liquido_mensal: dados?.renda_liquido_mensal || '',
-      tipo_contrato_conjuge: dados?.tipo_contrato_conjuge || null,
       local_trabalho_conjuge: dados?.local_trabalho_conjuge || '',
+      situacao_laboral_conjuge: dados?.situacao_laboral_conjuge || null,
       renda_bruto_mensal_conjuge: dados?.renda_bruto_mensal_conjuge || '',
       renda_liquido_mensal_conjuge: dados?.renda_liquido_mensal_conjuge || '',
       data_nascimento_conjuge: fillData(dados?.data_nascimento_conjuge, null),
@@ -137,7 +128,7 @@ function Rendimento({ dados, onClose }) {
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3} justifyContent="center" sx={{ pt: 3 }}>
         <GridItem sm={6} md={3}>
-          <RHFAutocompleteSmp name="tipo_contrato" label="Situação laboral" options={situacoesLaboral} />
+          <RHFAutocompleteSmp name="situacao_laboral" label="Situação laboral" options={situacoesLaboral} />
         </GridItem>
         <GridItem sm={6} md={3} children={<RHFTextField name="local_trabalho" label="Local de trabalho" />} />
         <GridItem sm={6} md={3}>
@@ -154,7 +145,7 @@ function Rendimento({ dados, onClose }) {
               <RHFDatePicker name="data_nascimento_conjuge" label="Data de nascimento" disableFuture />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFAutocompleteSmp label="Situação laboral" name="tipo_contrato_conjuge" options={situacoesLaboral} />
+              <RHFAutocompleteSmp label="Situação laboral" name="situacao_laboral_conjuge" options={situacoesLaboral} />
             </GridItem>
             <GridItem sm={6} md={3}>
               <RHFTextField name="local_trabalho_conjuge" label="Local de trabalho" />
@@ -305,6 +296,7 @@ function Proposta({ dados, credito, onClose }) {
   const formSchema = Yup.object().shape({
     montante: Yup.number().positive().label('Montante'),
     comissoes: Yup.string().required().label('Comissões'),
+    finalidade: Yup.string().required().label('Finalidade'),
     taxa_juro: Yup.number().positive().label('Taxa de juro'),
     origem_taxa: Yup.mixed().required().label('Origem da taxa'),
     taxa_precario: Yup.number().positive().label('Taxa do preçário'),
@@ -314,6 +306,7 @@ function Proposta({ dados, credito, onClose }) {
   const defaultValues = useMemo(
     () => ({
       taxa_juro: dados?.taxa_juro || credito?.taxa_juro,
+      finalidade: dados?.finalidade || credito?.finalidade || '',
       modo_taxa_equivalente: dados?.modo_taxa_equivalente || false,
       comissoes: dados?.comissoes || credito?.comissoes || 'Em vigor',
       montante: dados?.montante || credito?.montante_solicitado || '',
@@ -357,6 +350,7 @@ function Proposta({ dados, credito, onClose }) {
             options={['Negociada', 'Condições Especiais de Negociação', 'Preçário']}
           />
         </GridItem>
+        <GridItem children={<RHFTextField name="finalidade" label="Finalidade" />} />
         <GridItem children={<RHFTextField name="comissoes" label="Comissões" />} />
       </Grid>
       <ButtonsStepper onClose={() => dispatch(backStep())} label="Guardar" />

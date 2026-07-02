@@ -15,7 +15,7 @@ import { CheckIcon, TicketIcon, TimeIcon, SatisfyIcon, ArrowIcon } from './icons
 
 export default function KPI({ dados }) {
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={2}>
       <KpiItem
         color="primary.dark"
         icon={<TicketIcon />}

@@ -27,7 +27,7 @@ export function SearchEntidade({ entidades, actionModal, credito }) {
         label="Ficha da entidade"
         onClick={() => actionModal({ modal: 'search-ficha' })}
       />
-      {fichaInformativa && (
+      {fichaInformativa?.entidade && (
         <DefaultAction
           button
           icon="adicionar"
@@ -45,6 +45,8 @@ export function SearchEntidade({ entidades, actionModal, credito }) {
     </Stack>
   );
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function SearchFicha({ entidades = [], loading, onClose }) {
   const dispatch = useDispatch();

@@ -67,7 +67,7 @@ const createCell = ({ size, shading, children, level = 1, columnSpan, bold = fal
   });
 };
 
-const createRow = (cells) => new TableRow({ children: cells });
+const createRow = (cells) => new TableRow({ children: cells, cantSplit: true });
 
 // ---------------------------------------------------------------------------------------------------------------------
 

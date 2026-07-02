@@ -85,7 +85,7 @@ export default function AnexarFicha({ dados }) {
   );
 
   return (
-    <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
+    <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" sx={{ mb: 1 }}>
       <DefaultAction button icon="pdf" onClick={() => onPreview()} label="Pré-visualizar" />
       <DefaultAction button icon="pdf" onClick={onOpen} variant="contained" label="ANEXAR AO PROCESSO" />
       {open1 && (

@@ -6,6 +6,7 @@ import Checkbox from '@mui/material/Checkbox';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
+import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
@@ -19,11 +20,11 @@ import { updateFicha } from '@/redux/slices/intranet';
 //
 import Label from '@/components/Label';
 import { TableHeadCustom } from '@/components/table';
-import { Cabecalho, CellValor, EmptyRow, NadaConsta } from './dados-ficha';
+import { Cabecalho, CellValor, EmptyRow } from './fragments';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Responsabilidades({ responsabilidades }) {
+export default function Responsabilidades({ liquidacoes, responsabilidades }) {
   const { dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas } = responsabilidades;
 
   const rowInfo = (row, incidente) => (
@@ -69,6 +70,19 @@ export default function Responsabilidades({ responsabilidades }) {
         {dividas?.length > 1 && rowInfo(responsabilidadesInfo(dividas))}
         {dividas?.length === 0 && <EmptyRow empty cells={7} message="Nenhum registo encontrado..." />}
 
+        {liquidacoes?.length > 0 && (
+          <TableRow>
+            <TableCell colSpan={8}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <Typography variant="subtitle2" component="span" sx={{ fontWeight: 'bold', color: 'text.warning' }}>
+                  *Liquidação anticipada:{' '}
+                </Typography>
+                {liquidacoes.join(', ')}
+              </Typography>
+            </TableCell>
+          </TableRow>
+        )}
+
         {/* Dívidas externas  */}
         {dividasExternas?.length > 0 && (
           <>
@@ -106,7 +120,7 @@ export default function Responsabilidades({ responsabilidades }) {
       </TableBody>
     </>
   ) : (
-    <NadaConsta />
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }
 
@@ -165,7 +179,7 @@ export function AvalesFiancas({ dados }) {
       </TableBody>
     </>
   ) : (
-    <NadaConsta />
+    <EmptyRow body empty cells={1} message="Nada consta..." />
   );
 }
 
@@ -178,7 +192,7 @@ export function Liquidacoes({ dividas = [], liquidacoes = [], onClose }) {
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle sx={{ mb: 3 }}>Marcar crédito(s) para liquidação</DialogTitle>
+      <DialogTitle sx={{ mb: 3 }}>Marcar crédito(s) para liquidação anticipada</DialogTitle>
       <DialogContent>
         <Table size="small">
           <TableHeadCustom

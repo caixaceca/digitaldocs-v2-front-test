@@ -65,6 +65,12 @@ export const condicoesGerais = (dados) =>
           fCurrency(dados?.valor_prestacao) || 'XX CVE'
         } cada, acrescido de imposto de selo sobre os juros.`,
       },
+      {
+        cells: 2,
+        label: 'Antecipação do rembolso',
+        value:
+          'A antecipação da amortização do crédito dependerá da anuência da Caixa, que estabelecerá as respectivas condições e cobrará a comissão de anticipação fixada no preçário, à data da amortização.',
+      },
     ],
   });
 
@@ -85,21 +91,21 @@ export const encargos = (dados) =>
       },
       {
         cells: 2,
-        label: 'Imposto de selo sobre crédito',
+        label: 'Imposto de selo a incidir sobre o montante da Comisão de Abertura',
         value: `À taxa de ${fPercent(dados?.imposto_selo) || 'X%'}. No montante de ${
           fCurrency(dados?.valor_imposto_selo) || 'XX CVE'
         }.`,
       },
+      // {
+      //   cells: 2,
+      //   label: 'Imposto de selo a incidir sobre o montante do Crédito Utilizado ',
+      //   value: `À taxa de ${fPercent(dados?.imposto_selo) || 'X%'}. No montante de ${
+      //     fCurrency(dados?.valor_imposto_selo) || 'XX CVE'
+      //   }.`,
+      // },
       {
         cells: 2,
-        label: 'Imposto de selo sobre comissão',
-        value: `À taxa de ${fPercent(dados?.imposto_selo_comissao) || 'X%'}. No montante de ${
-          fCurrency(dados?.valor_imposto_selo_comissao) || 'XX CVE'
-        }.`,
-      },
-      {
-        cells: 2,
-        label: 'Total de encargos iniciais',
+        label: 'Total de encargos',
         value: `${
           fCurrency(dados?.valor_encargos_iniciais) || 'XX CVE'
         }. Todos os pagamentos serão efetuados por débito na conta nº ${dados?.conta_pagamento ?? 'XXXXXXXXXX'} do proponente.`,

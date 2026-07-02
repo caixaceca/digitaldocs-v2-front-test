@@ -10,6 +10,7 @@ import { EmptyRow, RowDivida, RowFianca } from './pdf-fragments';
 export default function Responsabilidades({
   fiancas,
   dividas,
+  liquidacoes,
   renderSection,
   avalesExternos,
   dividasExternas,
@@ -39,13 +40,22 @@ export default function Responsabilidades({
         )
       )}
 
+      {liquidacoes?.length > 0 && (
+        <View style={[styles.tCell_100]}>
+          <Text style={[styles.textCellFicha, { fontSize: 8 }]}>
+            <Text style={{ color: '#ff9800' }}>*Liquidação anticipada: </Text>
+            {liquidacoes.join(', ')}
+          </Text>
+        </View>
+      )}
+
       {dividasExternas?.length > 0 && (
         <>
           <Cabecalho title="Dívidas externas" />
           {renderTableSection({
             rows: dividasExternas,
-            rowRenderer: (row) => <RowDivida row={row} />,
             keyPrefix: 'dividas_externas',
+            rowRenderer: (row) => <RowDivida row={row} />,
           })}
         </>
       )}
@@ -61,22 +71,22 @@ export default function Responsabilidades({
 
       {renderTableSection({
         rows: garantiasPrestadas,
-        rowRenderer: (row) => <RowDivida row={row} />,
         keyPrefix: 'garantias_prestadas',
+        rowRenderer: (row) => <RowDivida row={row} />,
       })}
 
       {renderTableSection({
         rows: garantiasRecebidas,
-        rowRenderer: (row) => <RowDivida row={row} />,
         keyPrefix: 'garantias_recebidas',
+        rowRenderer: (row) => <RowDivida row={row} />,
       })}
 
       {renderTableSection({
         rows: irregularidades,
+        keyPrefix: 'irregularidades',
         title: 'HISTÓRICO DE INCIDENTES',
         titleStyle: { color: '#ff9800', fontSize: 7 },
         rowRenderer: (row) => <RowDivida row={row} incidentes />,
-        keyPrefix: 'irregularidades',
       })}
 
       {renderSection(
@@ -103,8 +113,8 @@ export default function Responsabilidades({
           <Cabecalho title="Avales/Fianças externas" />
           {renderTableSection({
             rows: avalesExternos,
-            rowRenderer: (row) => <RowDivida row={row} />,
             keyPrefix: 'avales_externas',
+            rowRenderer: (row) => <RowDivida row={row} />,
           })}
         </>
       )}
@@ -155,12 +165,12 @@ function Consolidada({ row }) {
   );
 }
 
-function Cabecalho({ title }) {
+function Cabecalho({ title, color = '#444' }) {
   return (
     <View wrap={false}>
       <EmptyRow />
       <View wrap={false} style={[styles.tCell_100, styles.px0]}>
-        <Text style={[styles.textCellFicha, styles.textBold, { color: '#444', fontSize: 7 }]}>{title}</Text>
+        <Text style={[styles.textCellFicha, styles.textBold, { color, fontSize: 7 }]}>{title}</Text>
       </View>
     </View>
   );

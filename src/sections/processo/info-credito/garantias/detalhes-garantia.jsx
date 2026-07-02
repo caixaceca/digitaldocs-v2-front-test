@@ -17,9 +17,10 @@ import { SearchNotFoundSmall } from '@/components/table';
 import { DialogTitleAlt } from '@/components/CustomDialog';
 import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
+import Entidades from './entidades';
 import TableSeguros from './table-seguros';
+import { Livranca } from './imoveis-garantia';
 import ImoveisGarantia from './imoveis-garantia';
-import { Livranca, Donos } from './imoveis-garantia';
 import { Resgisto, TableRowItem } from '../../../parametrizacao/details';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -32,7 +33,7 @@ export default function DetalhesGarantia({ dados, onClose, openForm = null }) {
     { value: 'Garantia', component: <InfoGarantia dados={dados} info /> },
     ...(livranca ? [{ value: 'Livrança', component: <Livranca livranca={livranca} donos={garantidores} /> }] : []),
     ...(garantidores?.length > 0 && !livranca
-      ? [{ value: 'Fiador(es)', component: <Donos dados={garantidores} /> }]
+      ? [{ value: 'Fiador(es)', component: <Entidades showDetails dados={garantidores} /> }]
       : []),
     ...(bem?.tipo
       ? [
