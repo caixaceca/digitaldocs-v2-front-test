@@ -378,9 +378,10 @@ export default function DownloadModeloDoc({ modelo = 'Modelo.docx', tipo = '', o
       variant="soft"
       color="inherit"
       loading={loading}
+      loadingIndicator="Carregando ficheiro..."
       onClick={() => onClick(setLoading, tipo)}
-      startIcon={getFileThumb(false, null, 'file.docx')}
       sx={{ justifyContent: 'left', textAlign: 'left', boxShadow: 'none' }}
+      startIcon={loading ? <CircularProgress size={18} color="inherit" /> : getFileThumb(false, null, 'file.docx')}
     >
       {modelo}
     </Button>

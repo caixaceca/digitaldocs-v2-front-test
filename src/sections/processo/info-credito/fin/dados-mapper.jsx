@@ -1,13 +1,29 @@
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 
+// ---------------------------------------------------------------------------------------------------------------------
+
+function descreverBemFinanciado(bem) {
+  if (!bem) return null;
+  if (bem.descritivo) return bem.descritivo;
+  if (bem.marca || bem.modelo) return `${bem.marca || ''} ${bem.modelo || ''}`.trim() || null;
+  if (bem.numero_matriz || bem.numero_descricao_predial) return `Imóvel (matriz nº ${bem.numero_matriz || '---'})`;
+  return bem.tipo || null;
+}
+
 export const mapearPayloadParaFINCC = (payload) => {
   if (!payload) return {};
 
   const credito = payload.credito || {};
   const meta = credito.gaji9_metadados || {};
 
-  const primeiroSeguro = credito.seguros?.[0] || {};
+  const seguroBem = credito.garantias?.map((g) => g.metadados?.bem?.seguros?.[0]).find(Boolean);
+  const primeiroSeguro = credito.seguros?.[0] || seguroBem || {};
+  const temSeguroExigido = Boolean(credito.seguros?.length > 0 || seguroBem);
+
   const listaGarantias = credito.garantias?.map((g) => g.tipo_garantia).join(', ') || '--';
+
+  const primeiroBemFinanciado = meta.bens_financiados?.[0];
+  const descricaoBemFinanciado = descreverBemFinanciado(primeiroBemFinanciado);
 
   return {
     // --- SEÇÃO A: IDENTIFICAÇÃO ---
@@ -33,10 +49,22 @@ export const mapearPayloadParaFINCC = (payload) => {
     prazo_amortizacao: `${credito.prazo_amortizacao || '--'} meses`,
     garantias_desc: listaGarantias,
 
-    // Seguros (Seção 9.1)
+    // Contrato coligado (7.1/7.2)
+    bem_servico: descricaoBemFinanciado || '--',
+    preco: primeiroBemFinanciado?.valor ? fCurrency(primeiroBemFinanciado.valor) : '--',
+
+    // Seguros exigidos (Secção 9.1)
     segurador: primeiroSeguro?.seguradora || '--',
-    produto_seguro: primeiroSeguro?.tipo_seguro || '--',
-    descricao_seguro: `Apólice: ${primeiroSeguro?.apolice || '--'}`,
+    seguro: primeiroSeguro?.tipo_seguro || '--',
+    descricao: `Apólice: ${primeiroSeguro?.apolice || '--'}`,
+    coberturas_minimas: primeiroSeguro?.percentagem_cobertura
+      ? `${fPercent(primeiroSeguro.percentagem_cobertura)} do capital em dívida`
+      : '--',
+    periodicidade_seguro: primeiroSeguro?.periodicidade || '--',
+    periodicidade_deguro: primeiroSeguro?.periodicidade || '--',
+
+    // Seguros exigidos
+    seguros: temSeguroExigido ? primeiroSeguro?.tipo_seguro || 'Seguro exigido' : 'Não aplicável',
 
     // --- SEÇÃO C: CUSTOS ---
     regime_taxa_juro: 'Fixa',
@@ -46,6 +74,8 @@ export const mapearPayloadParaFINCC = (payload) => {
     taxa_base: fPercent(meta?.taxa_juro_precario || 0, 3),
     spread_inicial: fPercent(meta?.taxa_juro_desconto) || '',
     taxa_juro_nominal_fixa: fPercent(meta?.taxa_juro_precario || 0),
+    taxa_juro_fixa_contratada: fPercent(credito?.taxa_juro || 0, 3),
+    alteracao_taxa: 'Não aplicável (taxa fixa)',
     comissoes_iniciais: fCurrency(meta?.valor_comissao || 0),
     valor_total_encargos_iniciais: fCurrency(meta?.custo_total || 0),
     comissoes_processamento: '--',

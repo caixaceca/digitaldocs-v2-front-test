@@ -64,7 +64,8 @@ export function colorLabel(value, padrao = 'primary') {
       value === 'Pendentes' ||
       value === 'Administrador' ||
       value === 'Favorável parcial' ||
-      value === 'Alteração do estado' ||
+      value === 'Mudança de estado' ||
+      value === 'Mudança de assunto' ||
       value?.includes('UPDATE')) &&
       'warning') ||
     ((value === 'Afeto' ||

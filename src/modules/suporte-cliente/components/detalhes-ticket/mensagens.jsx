@@ -17,7 +17,6 @@ import { getFileThumb } from '@/utils/formatFile';
 import { API_SUPORTE_CLIENTE_URL } from '@/utils/apisUrl';
 // components
 import { SemRegisto } from './historico';
-import { newLineText } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +59,7 @@ function TimelineMessageItem({ message, isLast, total }) {
             </Typography>
           </Stack>
           <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-line' }}>
-            {newLineText(content)}
+            {content}
           </Typography>
 
           {attachments?.length > 0 && (

@@ -14,47 +14,41 @@ import { CheckIcon, TicketIcon, TimeIcon, SatisfyIcon, ArrowIcon } from './icons
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function KPI({ dados }) {
+  const { tickets_opened = 0, tickets_opened_prev = 0, tickets_resolved = 0, tickets_resolved_prev = 0 } = dados || {};
+  const { avg_response = 0, avg_response_prev = 0, avg_satisfaction = 0, avg_satisfaction_prev = 0 } = dados || {};
+
   return (
     <Grid container spacing={2}>
       <KpiItem
         color="primary.dark"
         icon={<TicketIcon />}
         title="Tickets Abertos"
-        value={fNumber(dados?.tickets_opened)}
-        melhorou={dados?.tickets_opened > dados?.tickets_opened_prev}
-        sub={fNumber(dados?.tickets_opened - dados?.tickets_opened_prev)}
+        value={fNumber(tickets_opened)}
+        melhorou={tickets_opened > tickets_opened_prev}
+        sub={tickets_opened_prev > 0 ? fNumber(tickets_opened - tickets_opened_prev) : null}
       />
       <KpiItem
         icon={<CheckIcon />}
         title="Tickets Resolvidos"
-        value={fNumber(dados?.tickets_resolved)}
-        melhorou={dados?.tickets_resolved > dados?.tickets_resolved_prev}
-        sub={fNumber(dados?.tickets_resolved - dados?.tickets_resolved_prev)}
-        percentagem={fPercent(calcPercentagem(dados?.tickets_resolved, dados?.tickets_opened))}
+        value={fNumber(tickets_resolved)}
+        melhorou={tickets_resolved > tickets_resolved_prev}
+        percentagem={fPercent(calcPercentagem(tickets_resolved, tickets_opened))}
+        sub={tickets_resolved_prev > 0 ? fNumber(tickets_resolved - tickets_resolved_prev) : null}
       />
-      {/* <KpiItem
-        color="info.main"
-        icon={<FirstIcon />}
-        title="Resolução 1º Contacto"
-        value={fNumber(dados?.first_contact_resolution)}
-        melhorou={dados?.first_contact_resolution > dados?.first_contact_resolution_prev}
-        sub={fNumber(dados?.first_contact_resolution - dados?.first_contact_resolution_prev)}
-        percentagem={fPercent(calcPercentagem(dados?.first_contact_resolution, dados?.tickets_resolved))}
-      /> */}
       <KpiItem
         inverso
         icon={<TimeIcon />}
         title="Tempo Médio Resposta"
-        value={toHourLabel(dados?.avg_response)}
-        melhorou={dados?.avg_response < dados?.avg_response_prev}
-        sub={toHourLabel(dados?.avg_response - dados?.avg_response_prev)}
+        value={toHourLabel(avg_response)}
+        melhorou={avg_response < avg_response_prev}
+        sub={avg_response_prev > 0 ? toHourLabel(avg_response - avg_response_prev) : null}
       />
       <KpiItem
         icon={<SatisfyIcon />}
         title="Satisfação Média"
-        value={`${dados?.avg_satisfaction?.toFixed(1)} / 5`}
-        melhorou={dados?.avg_satisfaction > dados?.avg_satisfaction_prev}
-        sub={(dados?.avg_satisfaction - dados?.avg_satisfaction_prev).toFixed(1)}
+        value={`${avg_satisfaction?.toFixed(1)} / 5`}
+        melhorou={avg_satisfaction > avg_satisfaction_prev}
+        sub={avg_satisfaction_prev > 0 ? (avg_satisfaction - avg_satisfaction_prev).toFixed(1) : null}
       />
     </Grid>
   );
@@ -87,17 +81,25 @@ function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 6, melh
             </Typography>
           </Box>
         </Stack>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, color: 'text.disabled' }}>
-          <Box sx={{ ...((!inverso && melhorou) || (inverso && !melhorou) ? null : { transform: 'rotate(180deg)' }) }}>
-            <Icon sx={{ width: 20, height: 20, color: melhorou ? 'success.main' : 'error.main' }}>
-              <ArrowIcon />
-            </Icon>
+        {sub ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, color: 'text.disabled' }}>
+            <Box
+              sx={{ ...((!inverso && melhorou) || (inverso && !melhorou) ? null : { transform: 'rotate(180deg)' }) }}
+            >
+              <Icon sx={{ width: 20, height: 20, color: melhorou ? 'success.main' : 'error.main' }}>
+                <ArrowIcon />
+              </Icon>
+            </Box>
+            <Typography variant="caption" sx={{ color: melhorou ? 'success.main' : 'error.main' }}>
+              {signedSub}{' '}
+            </Typography>
+            <Typography variant="caption">&nbsp;do que o período anterior</Typography>
           </Box>
-          <Typography variant="caption" sx={{ color: melhorou ? 'success.main' : 'error.main' }}>
-            {signedSub}{' '}
+        ) : (
+          <Typography variant="caption" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
+            Sem dados no período anterior
           </Typography>
-          <Typography variant="caption">&nbsp;do que o período anterior</Typography>
-        </Box>
+        )}
       </Card>
     </GridItem>
   );

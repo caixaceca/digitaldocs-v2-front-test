@@ -16,6 +16,7 @@ import { DialogTitleAlt } from '@/components/CustomDialog';
 //
 import ResumoFiador from './resumo-fiador';
 import { SkeletonEntidade } from '@/components/skeleton';
+import { SearchNotFoundSmall } from '@/components/table';
 import { AccordionItem } from '../ficha-parecer/fragments';
 import Responsabilidades, { AvalesFiancas } from '../ficha-parecer/responsabilidades';
 import { Saldos, Clientes, Mensagens, Identificcao, CentralRisco, Restruturacoes } from '../ficha-parecer/dados-ficha';
@@ -85,6 +86,8 @@ export function InfoEntidade({ entidadeSel, onClose }) {
       <DialogContent>
         {isLoading ? (
           <SkeletonEntidade />
+        ) : !fichaFiador ? (
+          <SearchNotFoundSmall message="Não foi possível carregar os dados da entidade..." />
         ) : (
           <Stack spacing={2} sx={{ pt: 2 }}>
             <ResumoFiador dados={{ clientes, entidade, fiancas, dividas, cr, irregularidades, mensagens }} />

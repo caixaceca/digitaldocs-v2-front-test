@@ -5,9 +5,10 @@ import { Packer, Document, Paragraph } from 'docx';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
+import { ptDate } from '@/utils/formatTime';
 import { useSelector } from '@/redux/store';
 import { mapearPayloadParaFINCC } from './dados-mapper';
-import { CabecalhoWord, RodapeWord, createStyles } from '@/components/exportar-dados/word';
+import { CabecalhoWordAlt, RodapeWordAlt, createStyles, PAGE_FORMULARIO } from '@/components/exportar-dados/word';
 // components
 import { custos } from './custos';
 import { assinaturas } from './assinaturas';
@@ -15,6 +16,8 @@ import { identificacao } from './identificacao';
 import DownloadModeloDoc from '@/components/Actions';
 import { principaisCaracteristicas } from './caracteristicas';
 import { planoFinanceiro, informacaoGeral } from './informacao-geral';
+
+const codificacao = import.meta.env?.VITE_CODIFICACAO_FINCC || ptDate(new Date());
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -28,11 +31,7 @@ export default function Fincc() {
     try {
       setLoading(true);
 
-      const [logo, iso27001, iso9001] = await Promise.all([
-        fetch('/assets/caixa_logo_carta.png').then((r) => r.arrayBuffer()),
-        fetch('/assets/iso27001.png').then((r) => r.arrayBuffer()),
-        fetch('/assets/iso9001.png').then((r) => r.arrayBuffer()),
-      ]);
+      const logo = await fetch('/assets/logo_sem_fundo.png').then((r) => r.arrayBuffer());
 
       const { mutuario, agencia, fiadores, gerente_nome: nomeGerente } = dadosMapeados;
 
@@ -42,14 +41,14 @@ export default function Fincc() {
         styles: createStyles('10pt'),
         sections: [
           {
-            properties: { page: { margin: { top: '58mm', right: '18mm', left: '18mm' } } },
-            headers: CabecalhoWord({
+            properties: PAGE_FORMULARIO,
+            headers: CabecalhoWordAlt({
               logo,
+              codificacao,
               enabled: true,
-              codificacao: 'JRDC.FM.C.023.00',
               titulo: 'Ficha de Informação Normalizada de Crédito Consumo - Simulação',
             }),
-            footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
+            footers: RodapeWordAlt({ enabled: true }),
             children: [
               identificacao(dadosMapeados),
               principaisCaracteristicas(dadosMapeados),

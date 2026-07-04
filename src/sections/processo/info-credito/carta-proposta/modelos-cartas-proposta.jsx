@@ -14,6 +14,8 @@ import { mapDadosPoposta } from './dados-mapper';
 import DownloadModeloDoc from '@/components/Actions';
 import { condicoesGerais, encargos, obrigacoes } from './sections';
 
+const codificacao = import.meta.env?.VITE_CODIFICACAO_CARTA_PROPOSTA || 'JRDC.FM.C.023.00';
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function ModeloCartaProposta() {
@@ -40,7 +42,7 @@ export default function ModeloCartaProposta() {
         sections: [
           {
             properties: { page: { margin: { top: '58mm', right: '18mm', left: '18mm', bottom: '20mm' } } },
-            headers: CabecalhoWord({ enabled: true, logo, codificacao: 'JRDC.FM.C.023.00', titulo: '' }),
+            headers: CabecalhoWord({ enabled: true, logo, codificacao, titulo: '' }),
             footers: RodapeWord({ enabled: true, certificacoes: [iso27001, iso9001] }),
             children: [
               new Paragraph({

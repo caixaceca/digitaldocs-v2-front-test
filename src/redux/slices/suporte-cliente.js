@@ -31,7 +31,7 @@ const initialState = {
   pesquisa: {},
   avaliacoes: {},
   dashutilizadores: {},
-  dashdepartamentos: {},
+  dashdepartamentos: [],
   faq: [],
   slas: [],
   slasUo: [],
@@ -149,7 +149,7 @@ export function createInSuporte(item, body, params) {
 
     try {
       const accessToken = await getAccessToken();
-      const options = headerOptions({ accessToken, mail: '', ct: true, mfd: item === 'add-message' });
+      const options = headerOptions({ accessToken, mail: '', ct: true, mfd: false });
       if (item === 'add-message') delete options.headers['content-type'];
 
       const apiUrl =
@@ -197,6 +197,7 @@ export function updateInSuporte(item, body, params) {
     try {
       const accessToken = await getAccessToken();
       const options = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: false });
+      if (params?.mfd) delete options.headers['content-type'];
 
       if (item === 'core-validation') {
         // const response = await axios.patch(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);

@@ -1,3 +1,5 @@
 export * from './rodape-word';
+export * from './word-styles';
 export * from './cabecalho-word';
-export { createStyles } from './word-styles';
+export * from './rodape-word-alt';
+export * from './cabecalho-word-alt';

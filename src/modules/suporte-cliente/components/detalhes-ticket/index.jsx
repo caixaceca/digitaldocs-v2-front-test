@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 // @mui
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
@@ -25,8 +26,10 @@ import { Detalhes } from './detalhes';
 
 export default function DetalhesTicket({ onClose, refetch }) {
   const { isLoading, selectedItem, utilizador } = useSelector((state) => state.suporte);
-  const atribuidoA = useColaborador({ userId: selectedItem?.current_user_id, nome: true });
+
   const { status = '' } = selectedItem || {};
+  const totalHistory = useMemo(() => buildTicketHistory(selectedItem), [selectedItem]);
+  const atribuidoA = useColaborador({ userId: selectedItem?.current_user_id, nome: true });
 
   // useEffect(() => {
   //   if (
@@ -44,32 +47,7 @@ export default function DetalhesTicket({ onClose, refetch }) {
 
   const tabsList = [
     { value: 'Detalhes', component: <Detalhes ticket={selectedItem} /> },
-    {
-      value: 'Histórico',
-      component: (
-        <Historico
-          historico={[
-            { action: 'Abertura', created_at: selectedItem?.created_at, by_email: selectedItem?.created_by_email },
-            ...(getStatusLabel(status) === 'Fechado' && selectedItem?.closed_at
-              ? [
-                  {
-                    action: 'Enceramento',
-                    resolved: selectedItem?.resolved,
-                    created_at: new Date(new Date(selectedItem?.closed_at).getTime() + 5000).toISOString(),
-                  },
-                ]
-              : []),
-            ...(selectedItem?.ticket_histories ?? []),
-            ...(selectedItem?.messages?.map((message) => ({
-              action: 'Mensagem',
-              msg: message?.content,
-              created_at: message?.sent_at,
-              performed_by_user_id: message?.user_id,
-            })) ?? []),
-          ]}
-        />
-      ),
-    },
+    { value: 'Histórico', component: <Historico historico={totalHistory} /> },
     ...(selectedItem?.sla_report
       ? [
           {
@@ -158,4 +136,47 @@ export default function DetalhesTicket({ onClose, refetch }) {
       )}
     </Dialog>
   );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function buildTicketHistory(selectedItem) {
+  if (!selectedItem) return [];
+
+  const { resolved, created_at, messages = [], created_by_email, ticket_histories = [] } = selectedItem;
+
+  const aloneMessages = [];
+  const messagesByHistoryId = new Map();
+
+  messages.forEach((message) => {
+    if (message?.history_id) messagesByHistoryId.set(message.history_id, message);
+    else aloneMessages.push(message);
+  });
+
+  const aberturaEvent = { action: 'Abertura', created_at, by_email: created_by_email };
+
+  const processedHistories = ticket_histories.map((history) => {
+    const linkedMessage = messagesByHistoryId.get(history?.id);
+    const isClosureStatus = history?.action === 'STATUS_CHANGE' && history?.new_status === 'CLOSED';
+
+    let historyItem = { ...history };
+
+    if (isClosureStatus) {
+      historyItem.action = 'Encerramento';
+      historyItem.resolved = history?.resolved ?? resolved;
+    }
+
+    if (linkedMessage && linkedMessage.content) historyItem.linkedMessage = linkedMessage.content;
+
+    return historyItem;
+  });
+
+  const processedAloneMessages = aloneMessages.map((message) => ({
+    action: 'Mensagem',
+    msg: message?.content,
+    created_at: message?.sent_at,
+    performed_by_user_id: message?.user_id,
+  }));
+
+  return [aberturaEvent, ...processedHistories, ...processedAloneMessages];
 }

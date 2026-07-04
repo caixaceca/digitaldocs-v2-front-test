@@ -45,7 +45,7 @@ export default function PageGestaoSuporteCliente() {
         ? [
             {
               value: 'Dashboard',
-              component: <Dashboard params={{ department: selectedDepartment, setDepartment, departamentos }} />,
+              component: <Dashboard params={{ selectedDepartment, setDepartment, departmentList, isAdmin }} />,
             },
           ]
         : []),
@@ -58,7 +58,7 @@ export default function PageGestaoSuporteCliente() {
         : []),
       { value: 'Procurar', icon: <SearchIcon sx={{ width: 20, height: 20 }} />, component: <ProcurarPedidos /> },
     ],
-    [utilizador, selectedDepartment, setDepartment, departmentList, isAdmin, departamentos]
+    [utilizador, selectedDepartment, setDepartment, departmentList, isAdmin]
   );
 
   const [tab, setTab] = useTabsSync(tabsList, 'Tickets', 'tab-suporte-cliente');

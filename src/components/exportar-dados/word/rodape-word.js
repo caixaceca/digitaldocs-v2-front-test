@@ -37,9 +37,7 @@ function criarParagrafoImagem(imageData, index) {
 // -------------------------------------------------------------------------------------------------
 
 export function RodapeWord({ enabled = true, certificacoes = [] }) {
-  if (!enabled) {
-    return { default: new Footer({ children: [] }) };
-  }
+  if (!enabled) return { default: new Footer({ children: [] }) };
   const imagensCertificacao = certificacoes.map(criarParagrafoImagem).filter(Boolean);
 
   return { default: new Footer({ children: [criarParagrafoInstitucional(), ...imagensCertificacao] }) };

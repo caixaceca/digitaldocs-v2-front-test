@@ -12,14 +12,15 @@ import { TabsWrapperSimple } from '@/components/TabsWrapper';
 import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 //
 import ResumoDashboard from './resumo';
-import DepartamentosColaboradores from './departamentos-colaboradores';
+import DashColaboradores from './colaboradores';
+import DashDepartamentos from './departamentos';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function AdminDashboardMetrics({ params }) {
+export default function Dashboard({ params }) {
   const [data, setData] = useState(new Date());
   const [periodo, setPeriodo] = useState('Mensal');
-  const { departamentos = [], department, setDepartment } = params;
+  const { departmentList: departamentos = [], selectedDepartment: department, setDepartment, isAdmin } = params;
 
   const tabsList = useMemo(
     () => [
@@ -31,13 +32,11 @@ export default function AdminDashboardMetrics({ params }) {
       },
       {
         value: 'Departamentos',
-        component: <DepartamentosColaboradores department={department?.id} data={data} periodo={periodo} />,
+        component: <DashDepartamentos department={department?.id} data={data} periodo={periodo} />,
       },
       {
         value: 'Colaboradores',
-        component: (
-          <DepartamentosColaboradores department={department?.id} data={data} periodo={periodo} item="utilizadores" />
-        ),
+        component: <DashColaboradores department={department?.id} data={data} periodo={periodo} />,
       },
     ],
     [data, departamentos, department, periodo]
@@ -79,6 +78,7 @@ export default function AdminDashboardMetrics({ params }) {
               sx={{ minWidth: 200 }}
               options={departamentos}
               value={department || null}
+              disableClearable={!isAdmin}
               getOptionLabel={(option) => option?.abreviation || option?.name}
               isOptionEqualToValue={(option, value) => option?.id === value?.id}
               renderInput={(params) => <TextField {...params} label="Departamento" />}

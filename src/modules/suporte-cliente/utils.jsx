@@ -95,12 +95,16 @@ export const departsTypeList = [
 export const actionsList = [
   { id: 'ASSIGNMENT', label: 'Atribuição' },
   { id: 'FORWARDING', label: 'Encaminhamento' },
-  { id: 'STATUS_CHANGE', label: 'Alteração do estado' },
+  { id: 'STATUS_CHANGE', label: 'Mudança de estado' },
+  { id: 'SUBJECT_CHANGE', label: 'Mudança de assunto' },
+  { id: 'CLOSURE', label: 'Encerramento' },
+  { id: 'MESSAGE', label: 'Mensagem' },
+  { id: 'OPENING', label: 'Abertura' },
 ];
 
 export const ratingList = [
   { id: 'VERY_DISSATISFIED', rating: 1, label: 'Muito insatisfeito' },
-  { id: 'UNSATISFIED', rating: 2, label: 'Insatisfeito' },
+  { id: 'DISSATISFIED', rating: 2, label: 'Insatisfeito' },
   { id: 'NEUTRAL', rating: 3, label: 'Neutro' },
   { id: 'SATISFIED', rating: 4, label: 'Satisfeito' },
   { id: 'VERY_SATISFIED', rating: 5, label: 'Muito satisfeito' },
