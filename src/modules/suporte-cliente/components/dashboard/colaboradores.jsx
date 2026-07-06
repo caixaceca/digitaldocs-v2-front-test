@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -32,7 +32,8 @@ export default function DashColaboradores({ department, data, periodo }) {
     onChangeRowsPerPage,
   } = useTable({ defaultRowsPerPage: 10, defaultOrderBy: 'rating' });
 
-  const { dashutilizadores, isLoading } = useSelector((state) => state.suporte);
+  const colaboradores = useSelector((state) => state.intranet.colaboradores);
+  const { dashutilizadores, utilizadores, isLoading } = useSelector((state) => state.suporte);
 
   const fetchTickets = useCallback(() => {
     const year = data.getFullYear();
@@ -59,7 +60,18 @@ export default function DashColaboradores({ department, data, periodo }) {
     fetchTickets();
   }, [fetchTickets]);
 
-  const isNotFound = !dashutilizadores?.indicators_by_employee?.length;
+  const dadosComNome = useMemo(() => {
+    if (!dashutilizadores?.indicators_by_employee || !colaboradores || !utilizadores) return [];
+    const colaboradorPorEmail = new Map(colaboradores.map((c) => [c.email?.toLowerCase(), c.nome]));
+    const utilizadorPorId = new Map(utilizadores.map((u) => [u.employee_id, u.username?.toLowerCase()]));
+    return dashutilizadores?.indicators_by_employee.map((item) => {
+      const email = item.employee?.toLowerCase() || utilizadorPorId.get(item.employee_id);
+      const nomeColaborador = email ? colaboradorPorEmail.get(email) : null;
+      return { ...item, nome_colaborador: nomeColaborador || '' };
+    });
+  }, [dashutilizadores?.indicators_by_employee, utilizadores, colaboradores]);
+
+  const isNotFound = !dadosComNome?.length;
 
   return (
     <Card sx={{ p: 1 }}>
@@ -71,9 +83,9 @@ export default function DashColaboradores({ department, data, periodo }) {
               {isLoading && isNotFound ? (
                 <SkeletonTable row={10} column={5} />
               ) : (
-                dashutilizadores?.indicators_by_employee?.map((row, index) => (
+                dadosComNome?.map((row, index) => (
                   <TableRow hover key={`colaborador_${index}`}>
-                    <TableCell>{row.employee}</TableCell>
+                    <TableCell>{row?.nome_colaborador || row.employee}</TableCell>
                     <TableCell align="center">{row.totalActions}</TableCell>
                     <TableCell align="center">{row.closed}</TableCell>
                     <TableCell align="center">{row.resolved}</TableCell>
@@ -110,7 +122,7 @@ export default function DashColaboradores({ department, data, periodo }) {
 const headLabel = [
   { id: '', label: 'Colaborador' },
   { id: '', label: 'Trabalhados', align: 'center' },
-  { id: '', label: 'Fechados', align: 'center' },
+  { id: '', label: 'Encerrados', align: 'center' },
   { id: '', label: 'Resolvidos', align: 'center' },
   { id: '', label: 'Média avaliação', align: 'center' },
 ];

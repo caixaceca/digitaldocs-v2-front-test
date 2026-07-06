@@ -64,7 +64,7 @@ export function ActionForm({ dados, item = '', onClose, closeTicket, refetch }) 
   const onSubmit = async (values) => {
     const formData = new FormData();
     const resolved = values?.item?.id === 'RESOLVED';
-    const value = resolved ? { id: 'CLOSED', label: 'Fechado' } : values?.item;
+    const value = resolved ? { id: 'CLOSED', label: 'Encerrado' } : values?.item;
 
     if (hasMsg) {
       const messagePayload = { content: values.message, visibility: values?.to_client ? 'BOTH' : 'INTERNAL' };
@@ -184,7 +184,7 @@ function buildItemList({ item, colaboradores, utilizadores, departamentos, assun
             { id: 'CLOSED', label: 'Encerrado (Não Resolvido)' },
           ]
         : [
-            { id: 'IN_PROGRESS', label: 'Em análise' },
+            { id: 'IN_PROGRESS', label: 'Em tratamento' },
             { id: 'RESOLVED', label: 'Resolvido' },
             { id: 'CLOSED', label: 'Encerrado (Não Resolvido)' },
           ];

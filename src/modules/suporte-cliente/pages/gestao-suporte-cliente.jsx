@@ -18,6 +18,7 @@ import Tickets from '../components/lista-pedidos';
 import FilaEspera from '../components/fila-espera';
 import Configuracoes from '../components/configuracoes';
 import Avaliacoes from '../components/lista-pedidos/avaliacoes';
+import Trabalhados from '../components/lista-pedidos/trabalhados';
 import ProcurarPedidos from '../components/lista-pedidos/procurar-pedidos';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -50,6 +51,12 @@ export default function PageGestaoSuporteCliente() {
           ]
         : []),
       { value: 'Avaliações', component: <Avaliacoes /> },
+      {
+        value: 'Trabalhados',
+        component: (
+          <Trabalhados setDepartment={setDepartment} departmentList={departmentList} department={selectedDepartment} />
+        ),
+      },
       ...(isAdmin
         ? [
             { value: 'Configurações', component: <Configuracoes /> },

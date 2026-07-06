@@ -30,6 +30,7 @@ const initialState = {
   tickets: {},
   pesquisa: {},
   avaliacoes: {},
+  trabalhados: {},
   dashutilizadores: {},
   dashdepartamentos: [],
   faq: [],
@@ -68,6 +69,12 @@ const slice = createSlice({
 
     changeCustomer(state, action) {
       if (state.selectedItem) state.selectedItem.customer = action.payload;
+    },
+
+    lembreteSuccess(state, action) {
+      state.selectedItem.reminder_email_count += 1;
+      const index = state.tickets.tickets.findIndex(({ id }) => id === action.payload);
+      if (index !== -1) state.tickets.tickets[index].reminder_email_count += 1;
     },
 
     toogleItem(state, action) {
@@ -121,6 +128,7 @@ export function getInSuporte(item, params) {
         (item === 'tickets' && `/api/v1/tickets/all${queryString(params)}`) ||
         (item === 'pesquisa' && `/api/v1/tickets/search${queryString(params)}`) ||
         (item === 'indicadores' && `/api/v1/indicators/all${queryString(params)}`) ||
+        (item === 'trabalhados' && `/api/v1/support/operations${queryString(params)}`) ||
         (item === 'avaliacoes' && `/api/v1/indicators/evaluations${queryString(params)}`) ||
         (item === 'dashutilizadores' && `/api/v1/indicators/employees${queryString(params)}`) ||
         (item === 'dashdepartamentos' && `/api/v1/indicators/departments${queryString(params)}`) ||
@@ -165,7 +173,7 @@ export function createInSuporte(item, body, params) {
         (item === 'prompts' && `/api/v1/mail-scan-presets/create`) ||
         (item === 'conteudos' && `/api/v1/page-information/create`) ||
         (item === 'respostas' && `/api/v1/standardized-response/create`) ||
-        (item === 'add-message' && `/api/v1/ticket-messages/create/${params?.id}`) ||
+        (item === 'add-message' && `/api/v1/tickets/messages/create/${params?.id}`) ||
         (item === 'lembrete' && `/api/v1/tickets/send-draft-reminder/${params?.id}`) ||
         (item === 'departamento-ut' && `/api/v1/users/${params?.userId}/department/${params?.id}`) ||
         '';
@@ -173,6 +181,8 @@ export function createInSuporte(item, body, params) {
       if (apiUrl) {
         const response = await axios.post(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
         const dados = response.data?.payload || response.data;
+
+        if (item === 'lembrete') dispatch(slice.actions.lembreteSuccess(params?.id));
         if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados }));
         if (item === 'departamento-ut') dispatch(slice.actions.updateSuccess({ item: 'utilizadores', dados }));
         else if (item !== 'lembrete')
@@ -204,11 +214,6 @@ export function updateInSuporte(item, body, params) {
         // body = JSON.stringify({ coreBankingAccountValidation: false, coreBankingEmailValidation: false, ...body });
       }
       const patchProp = item === 'assign' || item === 'change-status' || item === 'change-subject';
-
-      if (params?.message && (patchProp || item === 'change-department')) {
-        const opt = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
-        await axios.post(`${API_SUPORTE_CLIENTE_URL}/api/v1/ticket-messages/create/${params?.id}`, params.message, opt);
-      }
 
       const apiUrl =
         (item === 'faq' && `/api/v1/faqs/update/${params?.id}`) ||

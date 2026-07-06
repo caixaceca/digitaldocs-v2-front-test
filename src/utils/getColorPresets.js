@@ -72,11 +72,11 @@ export function colorLabel(value, padrao = 'primary') {
       value === 'Ambos' ||
       value === 'Chefia' ||
       value === 'Análise' ||
-      value === 'Em análise' ||
-      value === 'em análise' ||
       value === 'Atribuídos' ||
       value === 'Atribuição' ||
-      value?.includes('READ')) &&
+      value?.includes('READ') ||
+      value === 'Em tratamento' ||
+      value?.toLowerCase() === 'em análise') &&
       'info') ||
     ((value === 'Entrada' || value === 'Sem parecer' || value === 'Fecho') && 'default') ||
     ((value === 'Retidos' ||

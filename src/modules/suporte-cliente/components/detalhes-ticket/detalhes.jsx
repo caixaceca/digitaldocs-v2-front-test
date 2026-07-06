@@ -16,6 +16,7 @@ import Label, { LabelSN } from '@/components/Label';
 
 export const Detalhes = React.memo(({ ticket }) => {
   const { status = '', messages = [], description, attachments = [], customer = {}, ...res } = ticket || {};
+  const lembretes = res?.reminder_email_count || 0;
 
   const allMessages = useMemo(() => {
     const rootMessage = { content: description ?? '', sent_at: res?.created_at, from: 'Cliente', attachments };
@@ -42,25 +43,31 @@ export const Detalhes = React.memo(({ ticket }) => {
             <ItemDesc label="Número de conta" value={customer?.account_number} />
           </Stack>
         )}
-        {res?.created_by_email || (status !== 'DRAFT' && customer?.is_cliente && customer?.account_number) ? (
-          <Stack spacing={1}>
-            {res?.created_by_email && (
-              <Label color="info" startIcon={<InfoOutlineIcon />} children="Criado a partir do email" />
-            )}
-            {status !== 'DRAFT' && customer?.is_cliente && customer?.account_number && (
-              <CoreValidation
-                email={customer?.core_banking_email_valition}
-                account={customer?.core_banking_account_validation}
-              />
-            )}
-          </Stack>
-        ) : null}
+        <Stack spacing={1}>
+          {res?.created_by_email && (
+            <Label color="info" startIcon={<InfoOutlineIcon />} children="Criado a partir do email" />
+          )}
+          {customer?.is_cliente && customer?.account_number && (
+            <CoreValidation
+              email={customer?.core_banking_email_valition}
+              account={customer?.core_banking_account_validation}
+            />
+          )}
+          {status === 'DRAFT' && (
+            <Label
+              color="info"
+              children={
+                lembretes === 0
+                  ? 'Nenhum lembrete enviado'
+                  : `${lembretes} lembrete${lembretes > 1 ? 's' : ''} enviado${lembretes > 1 ? 's' : ''}`
+              }
+            />
+          )}
+        </Stack>
       </Stack>
 
       <Divider sx={{ my: 3 }} />
-
-      <Typography variant="subtitle1">Histórico de mensagens</Typography>
-
+      <Typography variant="subtitle1">Mensagens</Typography>
       <Mensagens messages={allMessages} />
 
       {ticket?.customer_satisfaction && <Avaliacao avaliacao={ticket?.customer_satisfaction} />}

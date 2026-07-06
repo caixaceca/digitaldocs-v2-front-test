@@ -62,26 +62,30 @@ function TimelineMessageItem({ message, isLast, total }) {
             {content}
           </Typography>
 
-          {attachments?.length > 0 && (
-            <Stack spacing={0.5} sx={{ mt: 1 }}>
-              {attachments.map((anexo) => (
-                <Button
-                  size="small"
-                  component="a"
-                  target="_blank"
-                  key={anexo?.identifier}
-                  rel="noopener noreferrer"
-                  sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
-                  startIcon={getFileThumb(false, { width: 20, height: 20 }, anexo?.filename)}
-                  href={`${API_SUPORTE_CLIENTE_URL}/api/v1/ticket-attachments/download/${anexo?.identifier}`}
-                >
-                  {anexo?.filename}
-                </Button>
-              ))}
-            </Stack>
-          )}
+          {attachments?.length > 0 && <Anexos attachments={attachments} />}
         </Paper>
       </TimelineContent>
     </TimelineItem>
+  );
+}
+
+export function Anexos({ attachments = [] }) {
+  return (
+    <Stack spacing={0.5} sx={{ mt: 1 }}>
+      {attachments.map((anexo) => (
+        <Button
+          size="small"
+          component="a"
+          target="_blank"
+          key={anexo?.identifier}
+          rel="noopener noreferrer"
+          sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
+          startIcon={getFileThumb(false, { width: 20, height: 20 }, anexo?.filename)}
+          href={`${API_SUPORTE_CLIENTE_URL}/api/v1/tickets/attachments/download/${anexo?.identifier}`}
+        >
+          {anexo?.filename}
+        </Button>
+      ))}
+    </Stack>
   );
 }

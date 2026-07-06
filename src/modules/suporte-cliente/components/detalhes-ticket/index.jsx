@@ -166,7 +166,7 @@ function buildTicketHistory(selectedItem) {
       historyItem.resolved = history?.resolved ?? resolved;
     }
 
-    if (linkedMessage && linkedMessage.content) historyItem.linkedMessage = linkedMessage.content;
+    if (linkedMessage && linkedMessage.content) historyItem.linkedMessage = linkedMessage;
 
     return historyItem;
   });
@@ -175,6 +175,7 @@ function buildTicketHistory(selectedItem) {
     action: 'Mensagem',
     msg: message?.content,
     created_at: message?.sent_at,
+    attachments: message?.attachments,
     performed_by_user_id: message?.user_id,
   }));
 

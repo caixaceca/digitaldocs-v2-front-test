@@ -136,7 +136,7 @@ export function DefaultAction({
         <Contrato />
       </Icon>
     )) ||
-    ((label === 'Lembrete' || label === 'Contas' || label === 'Nº PROCESSOS') && (
+    ((label === 'Enviar lembrete' || label === 'Contas' || label === 'Nº PROCESSOS') && (
       <InfoOutlinedIcon sx={{ width: 20 }} />
     )) ||
     ((icon === 'Procurar' || label === 'Procurar' || label === 'PROCURAR') && (

@@ -29,7 +29,7 @@ export const DAYS_OF_WEEK = [
 ];
 
 export const EXCEPTION_TYPES = [
-  { id: 'CLOSED', label: 'Fechado' },
+  { id: 'CLOSED', label: 'Encerrado' },
   // { id: 'OPEN', label: 'Aberto' },
   { id: 'PARTIAL', label: 'Aberto parcial' },
 ];

@@ -16,8 +16,8 @@ export default function KPIEstados({ dados }) {
     <Grid container spacing={2}>
       <EstadoItem title="Rascunhos" value={fNumber(dados?.draft)} total={total} />
       <EstadoItem color="warning.main" title="Pendentes" value={fNumber(dados?.open)} total={total} />
-      <EstadoItem color="info.main" title="Em análise" value={fNumber(dados?.inProgress)} total={total} />
-      <EstadoItem title="Fechados" value={fNumber(dados?.closed)} total={total} />
+      <EstadoItem color="info.main" title="Em tratamento" value={fNumber(dados?.inProgress)} total={total} />
+      <EstadoItem title="Encerrados" value={fNumber(dados?.closed)} total={total} />
     </Grid>
   );
 }

@@ -85,6 +85,7 @@ export default function Tickets({ setDepartment, departmentList, department }) {
         <TablePedidos
           dados={dados}
           refetch={() => fetchTickets()}
+          draft={status?.id === 'DRAFT'}
           useTable={{ total, page, order, rowsPerPage, ...rest }}
         />
       </Card>

@@ -87,7 +87,7 @@ export default function Actions({ dados, onClose, utilizador, refetch }) {
             ))}
 
           {canSendLembrete && (
-            <DefaultAction small button label="Lembrete" color="inherit" onClick={() => openModal('lembrete')} />
+            <DefaultAction small button label="Enviar lembrete" color="inherit" onClick={() => openModal('lembrete')} />
           )}
         </Stack>
 
@@ -98,9 +98,9 @@ export default function Actions({ dados, onClose, utilizador, refetch }) {
         {modal === 'lembrete' && (
           <DialogConfirmar
             color="success"
-            title="Lembrete"
             onClose={closeModal}
-            desc="enviar um lembrete de validação do email para registo do ticket"
+            title="Enviar lembrete"
+            desc="enviar um lembrete de validação do email para o registo do pedido"
             handleOk={() => {
               const params = { msg: 'Lembrete enviado', onClose: () => closeModal() };
               dispatch(createInSuporte('lembrete', null, { id: dados?.id, ...params }));

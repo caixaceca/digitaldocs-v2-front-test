@@ -19,6 +19,7 @@ import { colorLabel } from '@/utils/getColorPresets';
 import { applySort, getComparator } from '@/hooks/useTable';
 import { getActionLabel, getStatusLabel } from '../../utils';
 // components
+import { Anexos } from './mensagens';
 import Label from '@/components/Label';
 import { Criado } from '@/components/Panel';
 
@@ -81,6 +82,7 @@ export default function Historico({ historico }) {
 
 function TimelineRowItem({ row, isLast, colaboradoresMap }) {
   const { created_at: at, action, linkedMessage } = row;
+  const attachments = linkedMessage?.attachments || row?.attachments || [];
 
   const atribuidoA = colaboradoresMap.get(row?.to_user_id) || row?.to_user_username;
   const criadoPor = colaboradoresMap.get(row?.performed_by_user_id) || row?.performed_by_user_username;
@@ -142,11 +144,12 @@ function TimelineRowItem({ row, isLast, colaboradoresMap }) {
 
           {action === 'Mensagem' && <Typography variant="body2">{row?.msg}</Typography>}
 
-          {linkedMessage && (
+          {linkedMessage?.content && (
             <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-line', pt: 1, color: 'text.secondary' }}>
-              {linkedMessage}
+              {linkedMessage.content}
             </Typography>
           )}
+          {attachments?.length > 0 && <Anexos attachments={attachments} />}
         </Paper>
       </TimelineContent>
     </TimelineItem>

@@ -111,7 +111,7 @@ export function RHFDataEntrada({ name, label = '', ...other }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function RHFDateIF({ options }) {
-  const { datai, dataf, setDatai, setDataf, labeli = '', labelf = '', clearable = false } = options;
+  const { datai, dataf, setDatai, setDataf, labeli = '', labelf = '', clearable = false, small = true } = options;
 
   return (
     <Stack direction="row" spacing={1}>
@@ -119,7 +119,7 @@ export function RHFDateIF({ options }) {
         value={datai}
         label="Data inicial"
         maxDate={new Date()}
-        slotProps={{ ...datePickerConf(clearable) }}
+        slotProps={{ ...datePickerConf(clearable, small) }}
         onChange={(newValue) => setDataUtil(newValue, setDatai, labeli, setDataf, labelf, dataf)}
       />
       <DatePicker
@@ -128,7 +128,7 @@ export function RHFDateIF({ options }) {
         disabled={!datai}
         label="Data final"
         maxDate={new Date()}
-        slotProps={{ ...datePickerConf(clearable) }}
+        slotProps={{ ...datePickerConf(clearable, small) }}
         onChange={(newValue) => setDataUtil(newValue, setDataf, labelf, '', '', '')}
       />
     </Stack>
@@ -137,11 +137,11 @@ export function RHFDateIF({ options }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const datePickerConf = (clearable) => ({
+const datePickerConf = (clearable, small) => ({
   field: { clearable },
   textField: {
-    size: 'small',
     fullWidth: true,
+    size: small ? 'small' : 'meddium',
     sx: {
       width: clearable ? 170 : 150,
       '&.MuiTextField-root .MuiIconButton-root': { padding: 0.5 },

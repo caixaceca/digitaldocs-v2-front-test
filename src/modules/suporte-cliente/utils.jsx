@@ -29,6 +29,14 @@ export function LabelStatus({ label }) {
   );
 }
 
+export function LabelAction({ label }) {
+  return (
+    <Label color={colorLabel(getActionLabel(label), 'default')} variant="ghost">
+      {getActionLabel(label)}
+    </Label>
+  );
+}
+
 export function LabelApply({ label }) {
   return (
     <Label color={colorLabel(getApllyLabel(label), 'default')} variant="ghost">
@@ -58,8 +66,8 @@ export function LabelRole({ label }) {
 export const statusList = [
   { id: 'DRAFT', label: 'Rascunho' },
   { id: 'OPEN', label: 'Pendente' },
-  { id: 'IN_PROGRESS', label: 'Em análise' },
-  { id: 'CLOSED', label: 'Fechado' },
+  { id: 'IN_PROGRESS', label: 'Em tratamento' },
+  { id: 'CLOSED', label: 'Encerrado' },
 ];
 
 export const phasesList = [
@@ -103,11 +111,11 @@ export const actionsList = [
 ];
 
 export const ratingList = [
-  { id: 'VERY_DISSATISFIED', rating: 1, label: 'Muito insatisfeito' },
-  { id: 'DISSATISFIED', rating: 2, label: 'Insatisfeito' },
-  { id: 'NEUTRAL', rating: 3, label: 'Neutro' },
-  { id: 'SATISFIED', rating: 4, label: 'Satisfeito' },
-  { id: 'VERY_SATISFIED', rating: 5, label: 'Muito satisfeito' },
+  { id: 'VERY_DISSATISFIED', rating: 1, label: 'Muito mau' },
+  { id: 'DISSATISFIED', rating: 2, label: 'Mau' },
+  { id: 'NEUTRAL', rating: 3, label: 'Razoável' },
+  { id: 'SATISFIED', rating: 4, label: 'Bom' },
+  { id: 'VERY_SATISFIED', rating: 5, label: 'Excelente' },
 ];
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -139,9 +147,9 @@ export function injectCollaboratorName(data, users, colaboradores) {
   const colaboradoresById = new Map(colaboradores.map((c) => [c.id, c]));
 
   return data.map((item) => {
-    if (!item.current_user_id) return { ...item, colaborador: null };
+    if (!item.current_user_id && !item.employee_id) return { ...item, colaborador: null };
 
-    const user = usersById.get(item.current_user_id);
+    const user = usersById.get(item.current_user_id || item?.employee_id);
     if (!user) return { ...item, colaborador: null };
 
     const colaborador = colaboradoresById.get(user.employee_id);

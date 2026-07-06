@@ -6,6 +6,7 @@ import Autocomplete from '@mui/material//Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // utils
 import { setItemValue } from '@/utils/formatObject';
+import { storageGet, storageSet } from '../../utils';
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
 import { TabsWrapperSimple } from '@/components/TabsWrapper';
@@ -18,8 +19,8 @@ import DashDepartamentos from './departamentos';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function Dashboard({ params }) {
-  const [data, setData] = useState(new Date());
-  const [periodo, setPeriodo] = useState('Mensal');
+  const [periodo, setPeriodo] = useState(storageGet('periodTicket', 'Mensal'));
+  const [data, setData] = useState(new Date(storageGet('dataPeriodTicket', new Date())));
   const { departmentList: departamentos = [], selectedDepartment: department, setDepartment, isAdmin } = params;
 
   const tabsList = useMemo(
@@ -59,14 +60,20 @@ export default function Dashboard({ params }) {
                 disableClearable
                 sx={{ maxWidth: 120 }}
                 options={['Mensal', 'Anual']}
-                onChange={(event, newValue) => setPeriodo(newValue)}
+                onChange={(event, newValue) => {
+                  setPeriodo(newValue);
+                  storageSet('periodTicket', newValue);
+                }}
                 renderInput={(params) => <TextField {...params} fullWidth label="Período" />}
               />
               <DatePicker
                 value={data}
                 maxDate={new Date()}
                 minDate={new Date('2020-01-01')}
-                onChange={(newValue) => setData(newValue)}
+                onChange={(newValue) => {
+                  setData(newValue);
+                  storageSet('dataPeriodTicket', newValue);
+                }}
                 label={periodo === 'Mensal' ? 'Mês' : 'Data'}
                 views={periodo === 'Mensal' ? ['month', 'year'] : ['year']}
                 slotProps={{ textField: { size: 'small', sx: { maxWidth: periodo === 'Mensal' ? 200 : 150 } } }}
