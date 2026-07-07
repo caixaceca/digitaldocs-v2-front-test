@@ -82,7 +82,7 @@ export default function TableFilaEspera({ item }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={(item === 'horario' && 4) || 7} />
+                  <SkeletonTable row={10} column={(item === 'horario' && 5) || 7} />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
