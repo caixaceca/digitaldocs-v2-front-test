@@ -53,7 +53,10 @@ export default function ModeloCartaProposta() {
               }),
 
               new Paragraph({ spacing: { after: 150 }, text: `Exmo(a). Sr(a). ${nomeProponente.toUpperCase()}` }),
-
+              new Paragraph({
+                spacing: { after: 150 },
+                text: `${processo?.uo?.concelho ?? '--'}, ${ptDate(new Date())}`,
+              }),
               new Paragraph({
                 spacing: { after: 300 },
                 text: `Comunicamos que o crédito solicitado em ${ptDate(dados.condicoes?.data_entrada) || 'DD/MM/YYYY'} foi aprovado nas seguintes condições:`,
@@ -66,7 +69,7 @@ export default function ModeloCartaProposta() {
               new Paragraph({ spacing: { before: 200 } }),
 
               obrigacoes(dados.obrigacoes),
-              new Paragraph({ spacing: { before: 400 } }),
+              new Paragraph({ spacing: { before: 200 } }),
 
               ...assinaturas(dados.condicoes?.agencia, 'A Gerência', nomeProponente, dados.condicoes?.fiadores),
             ],

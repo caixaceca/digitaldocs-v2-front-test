@@ -11,19 +11,22 @@ function mapCondicoes(modelo) {
   const meta = credito?.gaji9_metadados ?? {};
 
   return {
-    taeg: meta?.taxa_taeg || 0,
-    taxa_mora: meta?.taxa_mora || '2',
     data_entrada: modelo?.data_entrada,
-    taxa_juro: credito?.taxa_juro || 0,
     agencia: modelo?.uo?.nome || 'Agência',
     nome_proponente: modelo?.titular || '---',
+    garantias_brutas: credito?.garantias || [],
+    taxa_imposto_selo: meta?.taxa_imposto_selo,
+    fiadores: extrairFiadores(credito?.garantias),
+    taxa_comissao_abertura: meta?.taxa_comissao_abertura,
+    taxa_imposto_selo_utilizacao: meta?.taxa_imposto_selo_utilizacao,
+    prazo_entrega_contrato: 15,
+    taeg: meta?.taxa_taeg || 0,
+    taxa_mora: meta?.taxa_mora || '2',
+    taxa_juro: credito?.taxa_juro || 0,
     valor_prestacao: meta?.valor_prestacao || 0,
     meses_vencimento: meta?.meses_vencimento || 0,
     prazo_amortizacao: credito?.prazo_amortizacao || '---',
     montante: credito?.montante_aprovado || credito?.montante_solicitado || 0,
-    prazo_entrega_contrato: 15,
-    garantias_brutas: credito?.garantias || [],
-    fiadores: extrairFiadores(credito?.garantias),
   };
 }
 
@@ -31,12 +34,10 @@ function mapEncargos(modelo) {
   const meta = modelo?.credito?.gaji9_metadados ?? {};
 
   return {
-    imposto_selo: meta?.taxa_imposto_selo,
-    valor_encargos_iniciais: meta?.custo_total,
+    valor_juro: meta?.valor_juro,
+    custo_total: meta?.custo_total,
+    valor_comissao: meta?.valor_comissao,
     valor_imposto_selo: meta?.valor_imposto_selo,
-    valor_comissao_abertura: meta?.valor_comissao,
-    comissao_abertura: meta?.taxa_comissao_abertura,
-    imposto_selo_comissao: meta?.taxa_imposto_selo_utilizacao || '0',
     conta_pagamento: meta?.conta_do_renda || modelo?.conta || modelo?.cliente || '---',
   };
 }

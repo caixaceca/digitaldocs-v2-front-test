@@ -25,7 +25,7 @@ export function TitleFicha({ sub = false, title = '', declaracao = '', options =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RowFicha({ title = '', value = '', options = null, valueAlt = null, small = false }) {
+export function RowFicha({ title = '', value = '', options = null, valueAlt = null }) {
   return value ? (
     <View
       wrap={false}
@@ -36,10 +36,20 @@ export function RowFicha({ title = '', value = '', options = null, valueAlt = nu
           style={[
             styles.viewSubFicha,
             options?.success ? styles.bgSuccess : styles?.bgCinza,
-            small || options?.ficha ? styles.tCell_25 : styles.tCell_35,
+            options?.ficha ? styles.tCell_25 : styles.tCell_35,
           ]}
         >
-          <Text style={[styles.subFicha, styles.uppercase, styles.textBold, styles.px0]}>{title}</Text>
+          <Text
+            style={[
+              styles.subFicha,
+              styles.uppercase,
+              styles.textBold,
+              styles.px0,
+              options?.small ? [{ fontSize: 8 }] : [],
+            ]}
+          >
+            {title}
+          </Text>
         </View>
       )}
       <View
@@ -47,7 +57,8 @@ export function RowFicha({ title = '', value = '', options = null, valueAlt = nu
           styles.px0,
           styles.alignLeft,
           styles.verticalCenter,
-          (!title && styles.tCell_100) || ((small || options?.ficha) && styles.tCell_75) || styles.tCell_65,
+          (!title && styles.tCell_100) || (options?.ficha && styles.tCell_75) || styles.tCell_65,
+          options?.small ? [{ fontSize: 8 }] : [],
         ]}
       >
         <Text style={[styles.textCellFicha, { color: '#444' }]}>

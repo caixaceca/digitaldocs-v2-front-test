@@ -11,7 +11,7 @@ export function situacaoProfissionalRows(dados) {
     item: 'Proponente',
     bruto: dados?.renda_bruto_mensal,
     liquido: dados?.renda_liquido_mensal,
-    tipo: `${dados?.situacao_laboral ?? ''}${dados?.local_trabalho ? ` (${dados?.local_trabalho})` : ''}`,
+    tipo: `${dados?.situacao_laboral ?? ''}${dados?.entidade_patronal ? ` (${dados?.entidade_patronal})` : ''}`,
   });
 
   // Cônjuge
@@ -20,7 +20,7 @@ export function situacaoProfissionalRows(dados) {
       item: 'Cônjuge',
       bruto: dados?.renda_bruto_mensal_conjuge,
       liquido: dados?.renda_liquido_mensal_conjuge,
-      tipo: `${dados?.situacao_laboral_conjuge ?? ''} (${dados?.local_trabalho_conjuge ?? ''})`,
+      tipo: `${dados?.situacao_laboral_conjuge ?? ''} (${dados?.entidade_patronal_conjuge ?? ''})`,
     });
 
     // Totais

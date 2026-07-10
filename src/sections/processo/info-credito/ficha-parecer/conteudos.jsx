@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 // utils
-import { extractClientes, movimentosConta } from './calculos';
 //
 import {
   Dsti,
@@ -14,11 +13,17 @@ import {
   NovoFinanciamento,
   SituacaoProfissional,
 } from './info-solvabilidade';
+import { dispatch } from '@/redux/store';
+import { updateFicha } from '@/redux/slices/intranet';
+import { extractClientes, movimentosConta } from './calculos';
+import { extrairFiadores } from '../carta-proposta/dados-mapper';
+import { useEnriquecerEntidades } from './fiadores/useEnriquecerEntidades';
+//
 import ResumoFicha from './resumo-ficha';
-import { FormParecer } from './form-ficha';
 import { AccordionItem } from './fragments';
-import AnaliseFiadores from './analise-fiadores';
+import { FormParecer } from './form/form-ficha';
 import AnexarFicha from './ficha-pdf/anexar-ficha';
+import AnaliseFiadores from './fiadores/analise-fiadores';
 import { AddItem, DefaultAction } from '@/components/Actions';
 import Responsabilidades, { AvalesFiancas, Liquidacoes } from './responsabilidades';
 import { Saldos, Clientes, Mensagens, Movimentos, Identificcao, CentralRisco, Restruturacoes } from './dados-ficha';
@@ -26,6 +31,13 @@ import { Saldos, Clientes, Mensagens, Movimentos, Identificcao, CentralRisco, Re
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function Ficha({ credito, montante, ficha, valorPrestacao, cliente, modalIntranet, actionModal }) {
+  const fiadores1 = useMemo(() => extrairFiadores(credito?.garantias), [credito?.garantias]);
+  const { enriquecidos, loading } = useEnriquecerEntidades(!ficha?.fiadores ? fiadores1 : null);
+
+  useEffect(() => {
+    if (enriquecidos) dispatch(updateFicha({ fiadores: enriquecidos }));
+  }, [enriquecidos]);
+
   const {
     saldos,
     titulos,
@@ -42,12 +54,12 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
   const { rendimento = null, despesas = [], liquidacoes = [], fiadores = [], parecer = '' } = ficha || {};
   const { numero, fiancas, entidade, mensagens, central_risco: cr, movimentos = [], proposta = null } = ficha || {};
 
-  const divEf = useMemo(() => dividas?.filter((r) => !liquidacoes?.includes(r?.conta)), [dividas, liquidacoes]);
   const { movimentosDebito, movimentosCredito, totaisDebConta, totaisCredConta } = useMemo(
     () => movimentosConta(movimentos),
     [movimentos]
   );
   const temFiadores = fiadores?.length > 0;
+  const divEf = useMemo(() => dividas?.filter((r) => !liquidacoes?.includes(r?.conta)), [dividas, liquidacoes]);
 
   return (
     <Stack spacing={2}>
@@ -112,7 +124,7 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
         title="11. Situação profissional e Rendimento do agregado familiar (mensal)"
       />
       <AccordionItem normal title="12. Novo financiamento">
-        <NovoFinanciamento dados={{ valorPrestacao, proposta, credito, rendimento, dividas: divEf, dividasExternas }} />
+        <NovoFinanciamento dados={{ valorPrestacao, credito, rendimento, dividas: divEf, dividasExternas }} />
       </AccordionItem>
       <AccordionItem
         normal
@@ -133,6 +145,7 @@ export default function Ficha({ credito, montante, ficha, valorPrestacao, client
           title="17. Análise dos fiadores"
           children={
             <AnaliseFiadores
+              loading={loading}
               fiadores={fiadores}
               rendimento={rendimento}
               financiamento={{ valor: montante, saldo_divida: montante, valor_prestacao: valorPrestacao }}

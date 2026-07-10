@@ -24,25 +24,31 @@ import { Cabecalho, CellValor, EmptyRow } from './fragments';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Responsabilidades({ liquidacoes, responsabilidades }) {
+export default function Responsabilidades({ liquidacoes, responsabilidades, fiador = false }) {
   const { dividas, garantiasPrestadas, garantiasRecebidas, irregularidades, dividasExternas } = responsabilidades;
 
   const rowInfo = (row, incidente) => (
     <TableRow hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
       <TableCell>{row?.totais || row?.tipo || row?.classe || ' '}</TableCell>
-      <TableCell align="center">{row?.conta || ' '}</TableCell>
+      {!fiador && <TableCell align="center">{row?.conta || ' '}</TableCell>}
       <CellValor valor={row?.valor} moeda={row?.moeda} total={row?.totais} />
       <CellValor valor={row?.saldo_divida} moeda={row?.moeda} total={row?.totais} />
       <CellValor valor={row?.valor_prestacao} moeda={row?.moeda} total={row?.totais} />
-      <TableCell align="right">{row?.taxa_juros ? fPercent(row?.taxa_juros, 2) : ' '}</TableCell>
-      <TableCell align="center">
-        {row?.data_abertura_credito === row?.data_vencimento || !row?.data_vencimento
-          ? ptDate(row?.data_abertura_credito)
-          : `${ptDate(row?.data_abertura_credito)} - ${ptDate(row?.data_vencimento)}`}
-      </TableCell>
+      {fiador ? null : (
+        <>
+          <TableCell align="right">{row?.taxa_juros ? fPercent(row?.taxa_juros, 2) : ' '}</TableCell>
+          <TableCell align="center">
+            {row?.data_abertura_credito === row?.data_vencimento || !row?.data_vencimento
+              ? ptDate(row?.data_abertura_credito)
+              : `${ptDate(row?.data_abertura_credito)} - ${ptDate(row?.data_vencimento)}`}
+          </TableCell>
+        </>
+      )}
       <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
         {row?.situacao && (
-          <Label color={(incidente && 'warning') || (row?.situacao === 'Normal' && 'success') || 'error'}>
+          <Label
+            color={(incidente && 'warning') || (row?.situacao?.toLowerCase() === 'normal' && 'success') || 'error'}
+          >
             {(incidente && row?.maior_irregularidade) || row?.situacao || ' '}
           </Label>
         )}
@@ -56,12 +62,16 @@ export default function Responsabilidades({ liquidacoes, responsabilidades }) {
         item="responsabilidades"
         headLabel={[
           { label: 'Dívidas na caixa', color: 'success.main' },
-          { label: 'Conta', align: 'center' },
+          ...(fiador ? [] : [{ label: 'Conta', align: 'center' }]),
           { label: 'Capital inicial', align: 'right' },
           { label: 'Saldo em dívida', align: 'right' },
           { label: 'Prestação', align: 'right' },
-          { label: 'Taxa', align: 'right' },
-          { label: 'Data', align: 'center' },
+          ...(fiador
+            ? []
+            : [
+                { label: 'Taxa', align: 'right' },
+                { label: 'Data', align: 'center' },
+              ]),
           { label: 'Situação', align: 'center' },
         ]}
       />
@@ -126,19 +136,25 @@ export default function Responsabilidades({ liquidacoes, responsabilidades }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function AvalesFiancas({ dados }) {
+export function AvalesFiancas({ dados, fiador = false }) {
   const { fiancas, avalesExternos } = dados;
 
   const rowInfo = (row) => (
     <TableRow hover sx={{ '& > *': { fontWeight: row?.totais ? 'bold' : 'normal' } }}>
       <TableCell>{(row?.totais && 'Total') || row?.tipo_credito || ' '}</TableCell>
-      <TableCell align="center">{row?.cliente || ' '}</TableCell>
-      <TableCell align="center">{row?.tipo_interveniente}</TableCell>
+      {fiador ? null : (
+        <>
+          <TableCell align="center">{row?.cliente || ' '}</TableCell>
+          <TableCell align="center">{row?.tipo_interveniente}</TableCell>
+        </>
+      )}
       <CellValor valor={row?.valor} moeda={row?.moeda} total={row?.totais} />
       <CellValor valor={row?.saldo_divida} moeda={row?.moeda} total={row?.totais} />
       <CellValor valor={row?.valor_prestacao} moeda={row?.moeda} total={row?.totais} />
       <TableCell align="center">
-        {row?.situacao && <Label color={(row?.situacao === 'Normal' && 'success') || 'error'}>{row?.situacao}</Label>}
+        {row?.situacao && (
+          <Label color={(row?.situacao?.toLowerCase() === 'normal' && 'success') || 'error'}>{row?.situacao}</Label>
+        )}
       </TableCell>
     </TableRow>
   );
@@ -149,8 +165,12 @@ export function AvalesFiancas({ dados }) {
         item="avales-fiancas"
         headLabel={[
           { label: 'Avales/Fianças na caixa', color: 'success.main' },
-          { label: 'Nº cliente', align: 'center' },
-          { label: 'Resp.', align: 'center' },
+          ...(fiador
+            ? []
+            : [
+                { label: 'Nº cliente', align: 'center' },
+                { label: 'Resp.', align: 'center' },
+              ]),
           { label: 'Capital inicial', align: 'right' },
           { label: 'Saldo em dívida', align: 'right' },
           { label: 'Prestação', align: 'right' },

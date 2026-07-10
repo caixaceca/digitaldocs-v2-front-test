@@ -25,38 +25,35 @@ export default function Financiamento({ dados }) {
   const dsti = percentagemDsti(dados);
   const corrigido = dstiCorrigido(dados);
   const total = totalDespesas(dados?.despesas);
-  const { valorPrestacao = 0, credito = null, proposta = null, rendimento = null, despesas = [] } = dados || {};
+  const { valorPrestacao = 0, credito = null, rendimento = null, despesas = [] } = dados || {};
 
-  const consolidadas = dividasConsolidadas(dados, proposta?.montante || credito?.montante_solicitado, valorPrestacao);
+  const consolidadas = dividasConsolidadas(dados, credito?.montante_solicitado, valorPrestacao);
   const prestacaoM40 =
-    credito?.componente?.includes('Habitação') && valorPrestacao > calcRendimento(rendimento, true) * 0.4;
+    credito?.componente?.includes('Habitação') && valorPrestacao > calcRendimento(rendimento, false) * 0.4;
 
   return (
     <>
       <View style={{ marginTop: '4mm' }} wrap={false}>
         <TitleFicha title="12. Novo financiamneto" />
         <RowFicha
-          small
+          options={{ ficha: true }}
           title="Capital pretendido"
-          value={fCurrency(proposta?.montante || credito?.montante_solicitado)}
+          value={fCurrency(credito?.montante_solicitado)}
         />
-        <RowFicha small title="Tipo de crédito" value={credito?.componente} />
-        {proposta && <RowFicha small title="Taxa do preçário" value={fPercent(proposta?.taxa_precario)} />}
-        {proposta && (
-          <RowFicha
-            small
-            title="Taxa de juros"
-            value={`${fPercent(proposta?.taxa_juro || credito?.taxa_juro)}${
-              proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''
-            }`}
-          />
-        )}
-        <RowFicha small title="Prazo de amortização" value={labelMeses(proposta?.prazo_amortizacao)} />
+        <RowFicha options={{ ficha: true }} title="Tipo de crédito" value={credito?.componente} />
+        <RowFicha options={{ ficha: true }} title="Taxa de juros" value={fPercent(credito?.taxa_juro)} />
         <RowFicha
-          small
+          options={{ ficha: true }}
+          title="Prazo de amortização"
+          value={labelMeses(credito?.prazo_amortizacao)}
+        />
+        <RowFicha
           title="Prestação mensal"
+          options={{ ficha: true }}
           value={fCurrency(valorPrestacao)}
-          valueAlt={prestacaoM40 && <Alerta alerta={'A prestação excede 40% do rendimento bruto mensal do agregado'} />}
+          valueAlt={
+            prestacaoM40 && <Alerta alerta={'A prestação excede 40% do rendimento líquido mensal do agregado'} />
+          }
         />
         <View wrap={false} style={[styles.borderCinza, styles.tableRowFicha]}>
           <View style={[styles.viewSubFicha, styles.tCell_100, styles?.bgCinza]}>
@@ -65,12 +62,11 @@ export default function Financiamento({ dados }) {
             </Text>
           </View>
         </View>
-        <RowFicha small title="Capital inicial" value={fCurrency(consolidadas?.valor)} />
-        <RowFicha small title="Saldo em dívida" value={fCurrency(consolidadas?.saldo_divida)} />
+        <RowFicha options={{ ficha: true }} title="Capital inicial" value={fCurrency(consolidadas?.valor)} />
+        <RowFicha options={{ ficha: true }} title="Saldo em dívida" value={fCurrency(consolidadas?.saldo_divida)} />
         <RowFicha
-          small
-          options={{ final: true }}
           title="Serviço mensal"
+          options={{ final: true, ficha: true }}
           value={fCurrency(consolidadas?.valor_prestacao)}
         />
       </View>
@@ -96,15 +92,14 @@ export default function Financiamento({ dados }) {
         <TitleFicha title="14. Despesas" />
         {despesas?.map(({ despesa, valor }) => (
           <RowFicha
-            small
             key={despesa}
             title={despesa}
             value={fCurrency(valor)}
-            options={{ final: despesas?.length === 1 }}
+            options={{ final: despesas?.length === 1, ficha: true }}
           />
         ))}
         {despesas?.length > 1 && (
-          <RowFicha small title="TOTAL" value={fCurrency(total)} options={{ final: true, bold: true }} />
+          <RowFicha title="TOTAL" value={fCurrency(total)} options={{ final: true, bold: true, ficha: true }} />
         )}
         {despesas?.length === 0 && <NadaConsta />}
       </View>

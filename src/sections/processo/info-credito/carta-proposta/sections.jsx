@@ -43,7 +43,7 @@ export const condicoesGerais = (dados) =>
           }),
           new TextRun({
             text: 'Os juros serão contados sobre o capital utilizado e efetivamente em dívida e serão incluídos nas prestações de reembolso.',
-            break: 2,
+            break: 1,
           }),
         ],
       },
@@ -51,6 +51,13 @@ export const condicoesGerais = (dados) =>
         cells: 2,
         label: `TAEG`,
         value: `${fPercent(dados?.taeg, 3) || 'X%'} conforme cálculo efetuado nos termos legais.`,
+      },
+      { cells: 2, label: 'Taxa de comissão de abertura', value: fPercent(dados?.taxa_comissao_abertura) || 'XX%' },
+      { cells: 2, label: 'Taxa de imposto de selo', value: fPercent(dados?.taxa_imposto_selo) || 'XX%' },
+      {
+        cells: 2,
+        label: 'Taxa de imposto selo utilização',
+        value: fPercent(dados?.taxa_imposto_selo_utilizacao) || 'XX%',
       },
       {
         cells: 2,
@@ -82,33 +89,19 @@ export const encargos = (dados) =>
     columnsWidth: [35, 65],
     title: 'ENCARGOS INICIAIS',
     rows: [
-      {
-        cells: 2,
-        label: 'Comissão de abertura',
-        value: `À taxa de ${fPercent(dados?.comissao_abertura) || 'X%'}. No montante de ${
-          fCurrency(dados?.valor_comissao_abertura) || 'XX CVE'
-        }.`,
-      },
-      {
-        cells: 2,
-        label: 'Imposto de selo a incidir sobre o montante da Comisão de Abertura',
-        value: `À taxa de ${fPercent(dados?.imposto_selo) || 'X%'}. No montante de ${
-          fCurrency(dados?.valor_imposto_selo) || 'XX CVE'
-        }.`,
-      },
-      // {
-      //   cells: 2,
-      //   label: 'Imposto de selo a incidir sobre o montante do Crédito Utilizado ',
-      //   value: `À taxa de ${fPercent(dados?.imposto_selo) || 'X%'}. No montante de ${
-      //     fCurrency(dados?.valor_imposto_selo) || 'XX CVE'
-      //   }.`,
-      // },
+      { cells: 2, label: 'Juros', value: fCurrency(dados?.valor_juro) || 'XX CVE' },
+      { cells: 2, label: 'Comissões', value: fCurrency(dados?.valor_comissao) || 'XX CVE' },
+      { cells: 2, label: 'Imposto de selo', value: fCurrency(dados?.valor_imposto_selo) || 'XX CVE' },
       {
         cells: 2,
         label: 'Total de encargos',
-        value: `${
-          fCurrency(dados?.valor_encargos_iniciais) || 'XX CVE'
-        }. Todos os pagamentos serão efetuados por débito na conta nº ${dados?.conta_pagamento ?? 'XXXXXXXXXX'} do proponente.`,
+        value: [
+          new TextRun({ text: fCurrency(dados?.custo_total) || 'XX CVE' }),
+          new TextRun({
+            text: `Todos os pagamentos serão efetuados por débito na conta nº ${dados?.conta_pagamento ?? 'XXXXXXXXXX'} do proponente.`,
+            break: 1,
+          }),
+        ],
       },
     ],
   });

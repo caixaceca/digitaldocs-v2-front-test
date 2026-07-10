@@ -24,3 +24,8 @@ yarn-debug.log*
 yarn-error.log*
 
 .eslintcache
+
+# Deploy scripts — local-only (não versionar no repositório)
+/deploy.sh
+/Makefile
+/.rsync-filter

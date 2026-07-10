@@ -48,7 +48,7 @@ function Parametros() {
   return (
     <Stack spacing={3}>
       {paramsAtivos.length > 0 ? (
-        <Grid container spacing={3} sx={{ pt: 2 }}>
+        <Grid container spacing={2} sx={{ pt: 2 }}>
           {paramsAtivos.map((p) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={p.id}>
               <ParamCard label={p.label} tipo={p.tipo} data={precario[p.id]} />

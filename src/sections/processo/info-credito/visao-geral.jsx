@@ -139,7 +139,7 @@ export default function VisaoGeral({ dados, modificar = false }) {
                 </Stack>
               )}
               {situacao === 'em análise' && <Fincc />}
-              {situacao === 'aprovado' && <ModeloCartaProposta />}
+              {situacao !== 'aprovado' && <ModeloCartaProposta />}
             </SectionCard>
           </GridItem>
 

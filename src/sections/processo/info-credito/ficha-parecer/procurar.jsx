@@ -10,7 +10,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { useSelector, useDispatch } from '@/redux/store';
 import { getFromIntranet } from '@/redux/slices/intranet';
 // components
-import FormFicha from './form-ficha';
+import FormFicha from './form/form-ficha';
 import { DefaultAction } from '@/components/Actions';
 import { DialogActionsBasic } from '@/components/CustomDialog';
 
@@ -52,7 +52,7 @@ export function SearchFicha({ entidades = [], loading, onClose }) {
   const dispatch = useDispatch();
   const [entidade, setEntidade] = useState(entidades?.length === 1 ? entidades[0] : null);
 
-  const onSearch = () => dispatch(getFromIntranet('fichaInformativa', { entidade, onClose }));
+  const onSearch = () => dispatch(getFromIntranet('fichaInformativa', { entidade, reset: { dados: null }, onClose }));
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">

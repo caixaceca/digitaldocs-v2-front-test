@@ -1,0 +1,5 @@
+# Scripts de deploy DEVEM permanecer com LF (rodam em bash/Make no servidor remoto)
+*.sh        text eol=lf
+deploy.sh   text eol=lf
+Makefile    text eol=lf
+.rsync-filter text eol=lf

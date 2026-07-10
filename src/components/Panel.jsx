@@ -260,11 +260,11 @@ export function newLineText(text = '') {
   return text.split('\n').map((str, index) => <p key={index}>{str.trim() === '' ? '\u00A0' : str}</p>);
 }
 
-export function TextItem({ variant = 'body2', title = '', text = '', label = null }) {
+export function TextItem({ variant = 'body2', title = '', text = '', label = null, small = false }) {
   return text || label ? (
     <Typography variant={variant}>
       {title && (
-        <Typography component="span" sx={{ color: 'text.secondary' }}>
+        <Typography component="span" variant={small ? 'body2' : 'body1'} sx={{ color: 'text.secondary' }}>
           {title}:{' '}
         </Typography>
       )}

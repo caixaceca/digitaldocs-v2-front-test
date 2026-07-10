@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
   tCell_10: { width: '10%', paddingRight: 5, paddingLeft: 5 },
   tCell_12: { width: '12%', paddingRight: 5, paddingLeft: 5 },
   tCell_13: { width: '13%', paddingRight: 5, paddingLeft: 5 },
+  tCell_14: { width: '14%', paddingRight: 5, paddingLeft: 5 },
   tCell_15: { width: '15%', paddingRight: 5, paddingLeft: 5 },
   tCell_18: { width: '18%', paddingRight: 5, paddingLeft: 5 },
   tCell_20: { width: '20%', paddingRight: 5, paddingLeft: 5 },

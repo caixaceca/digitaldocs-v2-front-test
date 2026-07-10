@@ -76,6 +76,7 @@ export const phasesList = [
   { id: 'ANALYSIS', label: 'Análise' },
   { id: 'CLOSING', label: 'Fecho' },
   { id: 'REMINDER', label: 'Lembrete' },
+  { id: 'NEW_MSG_REMINDER', label: 'Mensagem' },
 ];
 
 export const applyList = [

@@ -55,7 +55,7 @@ export default function InfoCon({ dados }) {
           <TextItem title="Local/País de nascimento:" text={dados?.local_pais_nascimento} />
           <TextItem title="Morada:" text={dados?.morada} />
           <TextItem title="Profissão:" text={dados?.profissao} />
-          <TextItem title="Local de trabalho:" text={dados?.local_trabalho} />
+          <TextItem title="Entidade patronal:" text={dados?.local_trabalho} />
           <TextItem title="Telefone:" text={dados?.telefone} />
           <TextItem title="Telemóvel:" text={dados?.telemovel} />
           <TextItem title="Email(s):" text={dados?.emails} />

@@ -18,7 +18,7 @@ export function textParecer(ficha) {
     dividas = [],
     fiancas = [],
     credito = {},
-    proposta = {},
+    entidade = {},
     rendimento = {},
     liquidacoes = [],
     avales_externas: avalesExterna = [],
@@ -44,9 +44,9 @@ export function textParecer(ficha) {
     avalesExterna,
   });
 
-  const rendimentoLiq = calcRendimento(rendimento);
+  const rendimentoLiq = calcRendimento(rendimento, false);
   const rendimentoBruto = calcRendimento(rendimento, true);
-  const impactoReforma = calcularImpactoReforma(ficha, proposta);
+  const impactoReforma = calcularImpactoReforma(entidade, credito);
 
   let ajusteRendimentoTexto = '';
   if (impactoReforma.ultrapassaReforma) {
@@ -59,7 +59,7 @@ export function textParecer(ficha) {
   const riscoProspectivo = gerarRiscoProspectivo(regras);
   const conclusao = gerarConclusao(regras);
 
-  const multiploSalario = rendimentoBruto > 0 ? fShortenNumber(proposta?.montante / rendimentoBruto) : 'N/D';
+  const multiploSalario = rendimentoBruto > 0 ? fShortenNumber(credito?.montante_solicitado / rendimentoBruto) : 'N/D';
 
   return `
     <p><strong>${ficha?.credito?.titular ?? 'NOME DO CLIENTE'}</strong>${
@@ -69,18 +69,18 @@ export function textParecer(ficha) {
     }</strong>, com início de relacionamento com o banco em <strong>${dataAbertura}</strong>, ${historicoReestruturacao}. O cliente possui salário domiciliado na Caixa, é funcionári${
       ficha?.entidade?.sexo === 'Masculino' ? 'o' : 'a'
     } do(a) <strong>${
-      rendimento?.local_trabalho ?? 'EMPRESA/INSTITUIÇÃO'
+      rendimento?.entidade_patronal ?? 'EMPRESA/INSTITUIÇÃO'
     }</strong>, auferindo um vencimento mensal bruto de <strong>${fCurrency(rendimentoBruto)}</strong>.</p>
 
     <br/>
     <p>O cliente, com <strong>${impactoReforma.idadeTitular} anos</strong>, solicita um crédito <strong>${
       credito?.componente
-    }</strong> no valor de <strong>${fCurrency(proposta?.montante)}</strong>, correspondente a <strong>${multiploSalario}</strong> vezes o seu salário, destinado a <strong>${
-      proposta?.finalidade ?? 'FINALIDADE'
+    }</strong> no valor de <strong>${fCurrency(credito?.montante_solicitado)}</strong>, correspondente a <strong>${multiploSalario}</strong> vezes o seu salário, destinado a <strong>${
+      credito?.finalidade ?? 'FINALIDADE'
     }</strong>. O crédito proposto apresenta as seguintes condições:</p>
     <ul>
-      <li>Prazo de amortização: <strong>${proposta?.prazo_amortizacao} meses</strong></li>
-      <li>Taxa de juros: <strong>${fPercent(proposta?.taxa_juro)}</strong></li>
+      <li>Prazo de amortização: <strong>${credito?.prazo_amortizacao} meses</strong></li>
+      <li>Taxa de juros: <strong>${fPercent(credito?.taxa_juro)}</strong></li>
       <li>Prestação mensal: <strong>${fCurrency(ficha?.valorPrestacao)}</strong></li>
     </ul>
 
@@ -109,10 +109,11 @@ export function textParecer(ficha) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function calcularImpactoReforma(ficha, proposta) {
-  const reforma = idadeReforma(ficha?.entidade?.sexo);
-  const prazoAnos = Number(proposta?.prazo_amortizacao || 0) / 12;
-  const idadeTitular = idadeCliente(ficha?.entidade?.data_nascimento);
+function calcularImpactoReforma(entidade, credito) {
+  const reforma = idadeReforma(entidade?.sexo);
+  const idadeTitular = idadeCliente(entidade?.data_nascimento);
+  const prazoAnos = credito?.prazo_amortizacao ? Number(credito?.prazo_amortizacao) / 12 : 0;
+
   const idadeFimCredito = idadeTitular + prazoAnos;
   const ultrapassaReforma = idadeFimCredito >= reforma;
 

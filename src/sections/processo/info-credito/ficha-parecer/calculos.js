@@ -1,7 +1,7 @@
 import { add } from 'date-fns';
 // utils
-import { ptDate, getIdade } from '@/utils/formatTime';
 import { getComparator, applySort } from '@/hooks/useTable';
+import { ptDate, getIdade, fMonthYear } from '@/utils/formatTime';
 
 export const AVAL_MULTIPLICADOR = 2;
 
@@ -52,10 +52,11 @@ export const RISK = {
   rendimento_insuficiente: { label: 'Rendimento < 75% do proponente', color: 'warning' },
 };
 
-export function getRiskLevel({ totalPres, limite, liquido, rend }) {
+export function getRiskLevel({ totalPres, limiteFianca, liquido, rend, dstiPropria }) {
   const violacoes = [];
-  if (limite != null && totalPres > limite) violacoes.push('excede_limite');
+  if (dstiPropria && totalPres && totalPres > dstiPropria) violacoes.push('excede_limite_dsti');
   if (rend != null && liquido < rend * 0.75) violacoes.push('rendimento_insuficiente');
+  if (limiteFianca && totalPres && totalPres > limiteFianca) violacoes.push('excede_limite_fianca');
   return violacoes;
 }
 
@@ -86,13 +87,13 @@ export function dividasConsolidadas(dados, solicitado, prestacao) {
 // --------- DSTI ------------------------------------------------------------------------------------------------------
 
 export function limiteDsti(rendimento) {
-  return rendimento ? calcRendimento(rendimento) * 0.5 : '';
+  return rendimento ? calcRendimento(rendimento, false) * 0.5 : '';
 }
 
 export function percentagemDsti(dados) {
   if (!dados) return '';
-  const rendimento = calcRendimento(dados?.rendimento);
-  return (rendimento > 0 && (totalPrestacao(dados) / rendimento) * 100) || 0;
+  const rendimento = calcRendimento(dados?.rendimento, false);
+  return rendimento > 0 ? (totalPrestacao(dados) / rendimento) * 100 : 0;
 }
 
 export function dstiDisponivel(dados) {
@@ -111,14 +112,14 @@ export function dstiAposContratacao(dados) {
 
 export function dstiCorrigido(dados) {
   if (!dados) return '';
-  const rendimento = calcRendimento(dados?.rendimento);
-  return (rendimento > 0 && ((totalPrestacao(dados) + totalDespesas(dados?.despesas)) / rendimento) * 100) || 0;
+  const rendimento = calcRendimento(dados?.rendimento, false);
+  return rendimento > 0 ? ((totalPrestacao(dados) + totalDespesas(dados?.despesas)) / rendimento) * 100 : 0;
 }
 
 export function limiteDstiCorrigido(dados) {
   if (!dados) return '';
-  const rendimento = calcRendimento(dados?.rendimento);
-  return (rendimento > 0 && limiteDsti(dados?.rendimento) + rendimento * 0.2) || 0;
+  const rendimento = calcRendimento(dados?.rendimento, false);
+  return rendimento > 0 ? limiteDsti(dados?.rendimento) + rendimento * 0.2 : 0;
 }
 
 export function limiteAvalFianca(rendimento) {
@@ -257,4 +258,23 @@ export function dataNascimento(data) {
 
 export function estadoCivil(estado, regime) {
   return estado ? `${estado}${regime ? ` - ${regime}` : ''}` : '';
+}
+
+export function sinalRendimento(movimentosCredito = []) {
+  const ordenado = movimentosCredito.find((m) => m.tipo === 'Pagamento de Ordenado');
+  return ordenado ? Number(ordenado.valor) : null;
+}
+
+export function antiguidadeRelacao(clientes = [], titularCredito) {
+  const titular = clientes.find((c) => c?.titular === titularCredito) || clientes?.[0];
+  return titular?.data_abertura ? fMonthYear(titular.data_abertura) : null;
+}
+
+export function formatContagem(interna, externa) {
+  const total = interna + externa;
+  if (!total) return '';
+  if (interna > 0 && externa > 0) {
+    return `(${total} · ${interna} interna${interna > 1 ? 's' : ''} + ${externa} externa${externa > 1 ? 's' : ''})`;
+  }
+  return `(${total})`;
 }

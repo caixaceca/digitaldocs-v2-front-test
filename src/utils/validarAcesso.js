@@ -195,14 +195,6 @@ export function estadoFixo(assunto) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function emailCheck(mail, check = 'vc.axiac@arove.ordnavi') {
-  if (typeof mail !== 'string') return false;
-  const reversedMail = mail.split('').reverse().join('').toLowerCase();
-  return reversedMail === check.toLowerCase();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 export function noEstado(estado, labels) {
   return !!labels?.find((row) => estado?.includes(row));
 }

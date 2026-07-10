@@ -48,10 +48,10 @@ export default function FichaPdf({ dados }) {
     }
   }, [parecer]);
 
-  const renderSection = (title, wrap, success, items, columns, renderItem) => {
+  const renderSection = (title, wrap, success, items, columns, renderItem, mt = '5mm') => {
     const temRegistos = items && Array.isArray(items) && items?.length > 0;
     return (
-      <View style={{ marginTop: title ? '5mm' : '0mm' }} wrap={wrap}>
+      <View style={{ marginTop: title ? mt : '0mm' }} wrap={wrap}>
         <View wrap={false}>
           {title ? <TitleFicha title={title} options={{ success }} /> : null}
           {temRegistos ? (
@@ -232,7 +232,7 @@ export default function FichaPdf({ dados }) {
           <View style={{ marginTop: '4mm' }}>
             <TitleFicha title={`${temFiadores ? '18' : '17'}. Parecer`} options={{ success: true }} />
             {parecer ? (
-              <View style={[styles.borderCinza, styles.tCell_100, { paddingTop: 5, borderBottom: '1px solid #ddd' }]}>
+              <View style={[styles.borderCinza, styles.tCell_100, { paddingTop: 5, borderBottom: '1px solid #fff' }]}>
                 <Html>{parecerInline}</Html>
               </View>
             ) : (
@@ -244,15 +244,34 @@ export default function FichaPdf({ dados }) {
             <TitleFicha title={`${temFiadores ? '19' : '18'}. Proposta de Financiamento`} />
             {proposta ? (
               <>
-                <RowFicha small title="Tipo de crédito" value={credito?.componente} />
-                <RowFicha small title="Finalidade" value={proposta?.finalidade} />
-                <RowFicha small title="Montante" value={fCurrency(proposta?.montante)} />
-                <RowFicha small title="Taxa de juro" value={fPercent(proposta?.taxa_juro)} />
-                <RowFicha small title="Prazo de amortização" value={labelMeses(proposta?.prazo_amortizacao)} />
-                <RowFicha small title="Prazo de utilização" value={labelMeses(proposta?.prazo_utilizacao)} />
-                <RowFicha small title="Valor da prestação" value={fCurrency(valorPrestacao)} />
-                <RowFicha small title="Comissões" value={proposta?.comissoes} />
-                <RowFicha small title="Garantias" value={credito?.garantia} options={{ final: true }} />
+                <RowFicha options={{ ficha: true }} title="Tipo de crédito" value={credito?.componente} />
+                <RowFicha options={{ ficha: true }} title="Finalidade" value={credito?.finalidade} />
+                <RowFicha options={{ ficha: true }} title="Montante" value={fCurrency(credito?.montante_solicitado)} />
+                <RowFicha
+                  options={{ ficha: true }}
+                  title="Taxa de juro"
+                  value={`${fPercent(credito?.taxa_juro)}${proposta?.origem_taxa ? ` · ${proposta.origem_taxa}` : ''}`}
+                />
+                <RowFicha
+                  options={{ ficha: true }}
+                  title="Prazo de amortização"
+                  value={labelMeses(credito?.prazo_amortizacao)}
+                />
+                <RowFicha
+                  options={{ ficha: true }}
+                  title="Prazo de utilização"
+                  value={labelMeses(credito?.gaji9_metadados?.prazo_utilizacao)}
+                />
+                <RowFicha options={{ ficha: true }} title="Valor da prestação" value={fCurrency(valorPrestacao)} />
+                <RowFicha options={{ ficha: true }} title="Garantias" value={proposta?.nomesGarantias} />
+                <RowFicha
+                  title="Comissões"
+                  value={proposta?.comissoes}
+                  options={{ final: !proposta?.outros, ficha: true }}
+                />
+                {proposta?.outros && (
+                  <RowFicha title="Outros" value={proposta?.outros} options={{ final: true, ficha: true }} />
+                )}
               </>
             ) : (
               <NadaConsta />

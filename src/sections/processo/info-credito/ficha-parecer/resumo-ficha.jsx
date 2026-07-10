@@ -4,25 +4,14 @@ import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
-import { idadeCliente } from './calculos';
-import { fMonthYear } from '@/utils/formatTime';
 import { fCurrency } from '@/utils/formatNumber';
+import { idadeCliente, antiguidadeRelacao, sinalRendimento } from './calculos';
 //
 import { Field } from '../ficha-parecer/fragments';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function sinalRendimento(movimentosCredito = []) {
-  const ordenado = movimentosCredito.find((m) => m.tipo === 'Pagamento de Ordenado');
-  return ordenado ? Number(ordenado.valor) : null;
-}
-
-function antiguidadeRelacao(clientes = [], titularCredito) {
-  const titular = clientes.find((c) => c?.titular === titularCredito) || clientes?.[0];
-  return titular?.data_abertura ? fMonthYear(titular.data_abertura) : null;
-}
-
-export function resumoFicha({
+function resumoFichaDta({
   cr,
   fiancas,
   dividas,
@@ -44,7 +33,6 @@ export function resumoFicha({
     dividaTotal,
     exposicaoFiador,
     semIncumprimento,
-    nif: entidade?.nif,
     estadoCivil: entidade?.estado_civil,
     fiancasCount: (fiancas || []).length,
     dividasCount: (dividas || []).length,
@@ -63,7 +51,7 @@ export function resumoFicha({
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function ResumoFicha({ dados }) {
-  const r = resumoFicha(dados || {});
+  const r = resumoFichaDta(dados || {});
 
   return (
     <Box sx={{ bgcolor: 'background.neutral', borderRadius: 1, p: 2 }}>
@@ -106,7 +94,6 @@ export function Identificacao({ r, proponente = false }) {
   return (
     <Box>
       <Stack direction="row" flexWrap="wrap" gap={3}>
-        <Field label="NIF" value={r.nif} />
         <Field label="Idade" value={r.idade} />
         <Field label="Estado civil" value={r.estadoCivil} />
         {proponente && (

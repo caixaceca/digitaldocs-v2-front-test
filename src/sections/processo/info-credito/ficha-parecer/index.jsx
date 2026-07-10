@@ -1,14 +1,12 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 // utils
-import { calcValorPrestacao } from './calculos';
+import { setModal } from '@/redux/slices/intranet';
 import { useDispatch, useSelector } from '@/redux/store';
-import { setModal, updateFicha } from '@/redux/slices/intranet';
-import { extrairFiadores } from '../carta-proposta/dados-mapper';
 //
 import Ficha from './conteudos';
 import { SearchEntidade } from './procurar';
@@ -18,54 +16,25 @@ import SearchNotFound from '@/components/table/SearchNotFound';
 
 export default function FichaAnalise() {
   const dispatch = useDispatch();
-  const { processo } = useSelector((state) => state.digitaldocs);
+  const processo = useSelector((state) => state.digitaldocs.processo);
   const { fichaInformativa, modalIntranet, isLoading } = useSelector((state) => state.intranet);
 
   const { entidade = '', titular = '', cliente = '', credito = null } = processo || {};
   const entidades = useMemo(() => entidade?.split(';')?.map((row) => row) || [], [entidade]);
-  const valorPrestacao = useMemo(
-    () =>
-      credito?.gaji9_metadados?.valor_prestacao ||
-      calcValorPrestacao({
-        componente: credito?.componente,
-        taxa: fichaInformativa?.proposta?.taxa_juro || credito?.taxa_juro,
-        taxa_equivalente: fichaInformativa?.proposta?.modo_taxa_equivalente,
-        montante: fichaInformativa?.proposta?.montante || credito?.montante_solicitado,
-        prazo: fichaInformativa?.proposta?.prazo_amortizacao || credito?.prazo_amortizacao,
-      }),
-    [credito, fichaInformativa]
-  );
-
-  const fiadores = useMemo(
-    () => fichaInformativa?.fiadores || extrairFiadores(credito?.garantias),
-    [credito?.garantias, fichaInformativa?.fiadores]
-  );
-
-  // credito?.garantias?.flatMap((g) => g.metadados?.garantidores || [])
-
-  useEffect(() => {
-    dispatch(updateFicha({ fiadores }));
-  }, [dispatch, fiadores]);
 
   const actionModal = ({ modal = '' }) => dispatch(setModal({ modal }));
 
   return (
-    <Card sx={{ p: 1 }}>
-      <Stack
-        useFlexGap
-        spacing={1}
-        direction="row"
-        flexWrap="wrap"
-        alignItems="center"
-        sx={{ mb: 2, p: 1 }}
-        justifyContent="space-between"
-      >
+    <Card sx={{ p: 1, pb: 2 }}>
+      <Stack useFlexGap spacing={1} direction="row" flexWrap="wrap" sx={{ mb: 2, p: 1 }} justifyContent="space-between">
         <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
           Ficha de Análise e Parecer
         </Typography>
-        <SearchEntidade entidades={entidades} actionModal={actionModal} credito={credito} />
+        {!!credito?.gaji9_metadados && (
+          <SearchEntidade entidades={entidades} actionModal={actionModal} credito={credito} />
+        )}
       </Stack>
-      {isLoading ? (
+      {isLoading && !fichaInformativa ? (
         <Stack spacing={3}>
           {[...Array(3)].map((z, y) => (
             <Skeleton key={y} variant="text" height={220} sx={{ transform: 'scale(1)' }} />
@@ -73,19 +42,24 @@ export default function FichaAnalise() {
         </Stack>
       ) : (
         <>
-          {fichaInformativa?.entidade ? (
+          {fichaInformativa ? (
             <Ficha
               cliente={cliente}
               ficha={fichaInformativa}
               actionModal={actionModal}
               modalIntranet={modalIntranet}
-              valorPrestacao={valorPrestacao}
               credito={{ titular, ...credito }}
-              estadoId={processo?.estado?.estado_id}
-              montante={fichaInformativa?.proposta?.montante || credito?.montante_solicitado}
+              montante={credito?.montante_solicitado}
+              valorPrestacao={credito?.gaji9_metadados?.valor_prestacao}
             />
           ) : (
-            <SearchNotFound message="Informação da entidade não encontrada..." />
+            <SearchNotFound
+              message={
+                credito?.gaji9_metadados
+                  ? 'Informação da entidade não encontrada...'
+                  : 'Preencha primeiro os dados de Condições Financeiras'
+              }
+            />
           )}
         </>
       )}

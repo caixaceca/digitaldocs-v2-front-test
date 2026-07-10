@@ -91,7 +91,7 @@ export default function ExportarDadosControle({ titulo, dados, tabela }) {
           { header: 'Residente', key: 'residente' },
           { header: 'Morada', key: 'morada' },
           { header: 'Profissão', key: 'profissao' },
-          { header: 'Local trabalho', key: 'local_trabalho' },
+          { header: 'Entidade patronal', key: 'local_trabalho' },
           { header: 'Telefone', key: 'telefone' },
           { header: 'Telemóvel', key: 'telemovel' },
           { header: 'Email', key: 'email' },

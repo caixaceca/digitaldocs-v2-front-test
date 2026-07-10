@@ -61,36 +61,29 @@ export function SituacaoProfissional({ dados }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function NovoFinanciamento({ dados }) {
-  const { valorPrestacao = 0, credito = null, proposta = null } = dados || {};
-  const { taxa_juro = 0, taxa_precario = 0 } = proposta || {};
+  const { valorPrestacao = 0, credito = null } = dados || {};
 
-  const montante = proposta?.montante || credito?.montante_solicitado;
-  const consolidadas = dividasConsolidadas(dados, montante, valorPrestacao);
+  const consolidadas = dividasConsolidadas(dados, credito?.montante_solicitado, valorPrestacao);
   const prestacaoM40 =
-    credito?.componente?.includes('Habitação') && valorPrestacao > calcRendimento(dados?.rendimento, true) * 0.4;
+    credito?.componente?.includes('Habitação') && valorPrestacao > calcRendimento(dados?.rendimento, false) * 0.4;
 
   return (
     <Stack spacing={2} sx={{ p: 1 }}>
       <Stack useFlexGap flexWrap="wrap" direction="row" spacing={5}>
         <Stack direction="row" spacing={5}>
-          <Field destaque label="Capital pretendido" value={fCurrency(montante)} />
+          <Field destaque label="Capital pretendido" value={fCurrency(credito?.montante_solicitado)} />
           <Field
             destaque
             label="Prestação mensal"
             value={fCurrency(valorPrestacao)}
-            alertLabel={prestacaoM40 ? <AlertaInfo alerta="Excede 40% do rendimento bruto" /> : null}
+            alertLabel={
+              prestacaoM40 ? <AlertaInfo alerta="A prestação excede 40% do rend. líquido mensal do agregado." /> : null
+            }
           />
         </Stack>
         <Stack direction="row" spacing={5}>
-          <Field
-            label="Taxa do preçário"
-            value={taxa_precario && taxa_precario !== taxa_juro ? fPercent(taxa_precario) : null}
-          />
-          <Field
-            label="Taxa de juro"
-            value={`${fPercent(taxa_juro || credito?.taxa_juro)}${proposta?.origem_taxa ? ` · ${proposta.origem_taxa}` : ''}`}
-          />
-          <Field label="Prazo de amortização" value={labelMeses(proposta?.prazo_amortizacao)} />
+          <Field label="Taxa de juro" value={fPercent(credito?.taxa_juro)} />
+          <Field label="Prazo de amortização" value={labelMeses(credito?.prazo_amortizacao)} />
           <Field label="Tipo de crédito" value={credito?.componente} />
         </Stack>
       </Stack>
@@ -200,15 +193,19 @@ export function Proposta({ dados }) {
       {proposta ? (
         <>
           {rowInfo('Tipo de crédito', credito?.componente)}
-          {rowInfo('Finalidade', proposta?.finalidade)}
-          {rowInfo('Montante', fCurrency(proposta?.montante))}
-          {rowInfo('Taxa de juro', fPercent(proposta?.taxa_juro) || '')}
-          {rowInfo('Prazo de amortização', labelMeses(proposta?.prazo_amortizacao))}
-          {rowInfo('Prazo de utilização', labelMeses(proposta?.prazo_utilizacao))}
+          {rowInfo('Finalidade', credito?.finalidade)}
+          {rowInfo('Montante', fCurrency(credito?.montante_solicitado))}
+          {rowInfo(
+            'Taxa de juro',
+            `${fPercent(credito?.taxa_juro)}${proposta?.origem_taxa ? ` · ${proposta.origem_taxa}` : ''}`
+          )}
+          {rowInfo('Taxa de juro preçario', fPercent(credito?.gaji9_metadados?.taxa_juro_precario) || '')}
+          {rowInfo('Prazo de amortização', labelMeses(credito?.prazo_amortizacao))}
+          {rowInfo('Prazo de utilização', labelMeses(credito?.gaji9_metadados?.prazo_utilizacao))}
           {rowInfo('Valor da prestação', fCurrency(valorPrestacao))}
+          {rowInfo('Garantia', proposta?.nomesGarantias)}
           {rowInfo('Comissões', proposta?.comissoes)}
-          {rowInfo('Garantia', credito?.garantia)}
-          {rowInfo('Outros', proposta?.observacao)}
+          {rowInfo('Outros', proposta?.outros)}
         </>
       ) : (
         <EmptyRow cells={2} message="Os dados da proposta ainda não foram preenchidas..." empty />

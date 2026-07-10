@@ -3,20 +3,18 @@ import { useMemo, useCallback } from 'react';
 import { useSnackbar } from 'notistack';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useWatch, useFormContext, useFieldArray } from 'react-hook-form';
+import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { textParecer } from './parecer';
-import { situacoesLaboral } from './utilss';
+import { textParecer } from '../parecer';
 import { fillData } from '@/utils/formatTime';
 import { updateFicha } from '@/redux/slices/intranet';
-import { useSelector, useDispatch } from '@/redux/store';
+import { dispatch, useSelector } from '@/redux/store';
 import { resetDados, forwardStep, backStep } from '@/redux/slices/stepper';
 // components
 import {
@@ -35,18 +33,17 @@ import { DialogTitleAlt } from '@/components/CustomDialog';
 import { AddItem, DefaultAction, ButtonsStepper, DialogButons } from '@/components/Actions';
 import { shapeText, shapeNumberZero, shapeDate, shapeMixed } from '@/components/hook-form/yup-shape';
 
-const divida = { valor: '', valor_prestacao: '', saldo_divida: '' };
+import { SituacaoLaboral, Dividas, shapeDivida } from './shared';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormFicha({ onClose, ficha, credito = null }) {
-  const dispatch = useDispatch();
   const { activeStep } = useSelector((state) => state.stepper);
 
   const onClose1 = useCallback(() => {
     onClose();
     dispatch(resetDados());
-  }, [onClose, dispatch]);
+  }, [onClose]);
 
   return (
     <Dialog open fullWidth maxWidth="md">
@@ -54,18 +51,14 @@ export default function FormFicha({ onClose, ficha, credito = null }) {
         onClose={() => onClose1()}
         title="Informação adicional"
         content={
-          <Steps
-            sx={{ mt: 3 }}
-            activeStep={activeStep}
-            steps={['Rendimento', 'Despesas', 'Resp. externa', 'Proposta']}
-          />
+          <Steps sx={{ mt: 3 }} activeStep={activeStep} steps={['Rendimento', 'Despesas', 'Resp. externa', 'Outros']} />
         }
       />
       <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
         {activeStep === 0 && <Rendimento onClose={onClose1} dados={ficha?.rendimento || null} />}
         {activeStep === 1 && <Despesas dados={ficha?.despesas || []} />}
         {activeStep === 2 && (
-          <RespExterna
+          <RespExternaProponente
             dados={{ dividas_externas: ficha?.dividas_externas || [], avales_externas: ficha?.avales_externas || [] }}
           />
         )}
@@ -78,18 +71,17 @@ export default function FormFicha({ onClose, ficha, credito = null }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Rendimento({ dados, onClose }) {
-  const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
 
   const formSchema = Yup.object().shape({
     nome_conjuge: shapeText('conjuge', [true], 'Nome'),
-    local_trabalho: Yup.string().required().label('Local de trabalho'),
     situacao_laboral: Yup.mixed().required().label('Situação laboral'),
+    entidade_patronal: Yup.string().required().label('Local de trabalho'),
     renda_bruto_mensal: Yup.number().positive().label('Rendimento bruto'),
-    local_trabalho_conjuge: shapeText('conjuge', [true], 'Local de trabalho'),
     renda_liquido_mensal: Yup.number().positive().label('Rendimento liquido'),
     data_nascimento_conjuge: shapeDate('conjuge', [true], 'Data de nascimento'),
     situacao_laboral_conjuge: shapeMixed('conjuge', [true], 'Situação laboral'),
+    entidade_patronal_conjuge: shapeText('conjuge', [true], 'Local de trabalho'),
     renda_bruto_mensal_conjuge: shapeNumberZero('Rendimento bruto', [true], 'conjuge'),
     renda_liquido_mensal_conjuge: shapeNumberZero('Rendimento liquido', [true], 'conjuge'),
   });
@@ -98,11 +90,11 @@ function Rendimento({ dados, onClose }) {
     () => ({
       conjuge: !!dados?.conjuge,
       nome_conjuge: dados?.nome_conjuge || '',
-      local_trabalho: dados?.local_trabalho || '',
+      entidade_patronal: dados?.entidade_patronal || '',
       situacao_laboral: dados?.situacao_laboral || null,
       renda_bruto_mensal: dados?.renda_bruto_mensal || '',
       renda_liquido_mensal: dados?.renda_liquido_mensal || '',
-      local_trabalho_conjuge: dados?.local_trabalho_conjuge || '',
+      entidade_patronal_conjuge: dados?.entidade_patronal_conjuge || '',
       situacao_laboral_conjuge: dados?.situacao_laboral_conjuge || null,
       renda_bruto_mensal_conjuge: dados?.renda_bruto_mensal_conjuge || '',
       renda_liquido_mensal_conjuge: dados?.renda_liquido_mensal_conjuge || '',
@@ -126,17 +118,8 @@ function Rendimento({ dados, onClose }) {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={3} justifyContent="center" sx={{ pt: 3 }}>
-        <GridItem sm={6} md={3}>
-          <RHFAutocompleteSmp name="situacao_laboral" label="Situação laboral" options={situacoesLaboral} />
-        </GridItem>
-        <GridItem sm={6} md={3} children={<RHFTextField name="local_trabalho" label="Local de trabalho" />} />
-        <GridItem sm={6} md={3}>
-          <RHFNumberField tipo="CVE" name="renda_bruto_mensal" label="Rendimento bruto" />
-        </GridItem>
-        <GridItem sm={6} md={3}>
-          <RHFNumberField tipo="CVE" name="renda_liquido_mensal" label="Rendimento liquido" />
-        </GridItem>
+      <Grid container spacing={2} justifyContent="center" sx={{ pt: 3 }}>
+        <SituacaoLaboral />
         <GridItem children={<RHFSwitch name="conjuge" label="Cônjuge" />} />
         {values?.conjuge && (
           <>
@@ -144,18 +127,7 @@ function Rendimento({ dados, onClose }) {
             <GridItem sm={3}>
               <RHFDatePicker name="data_nascimento_conjuge" label="Data de nascimento" disableFuture />
             </GridItem>
-            <GridItem sm={6} md={3}>
-              <RHFAutocompleteSmp label="Situação laboral" name="situacao_laboral_conjuge" options={situacoesLaboral} />
-            </GridItem>
-            <GridItem sm={6} md={3}>
-              <RHFTextField name="local_trabalho_conjuge" label="Local de trabalho" />
-            </GridItem>
-            <GridItem sm={6} md={3}>
-              <RHFNumberField tipo="CVE" name="renda_bruto_mensal_conjuge" label="Rendimento bruto" />
-            </GridItem>
-            <GridItem sm={6} md={3}>
-              <RHFNumberField tipo="CVE" name="renda_liquido_mensal_conjuge" label="Rendimento liquido" />
-            </GridItem>
+            <SituacaoLaboral prefixo="_conjuge" />
           </>
         )}
       </Grid>
@@ -167,7 +139,6 @@ function Rendimento({ dados, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Despesas({ dados }) {
-  const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
 
   const formSchema = Yup.object().shape({
@@ -216,23 +187,11 @@ function Despesas({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function RespExterna({ dados }) {
-  const dispatch = useDispatch();
+export function RespExternaProponente({ dados }) {
   const { enqueueSnackbar } = useSnackbar();
 
-  const shapeDivida = () =>
-    Yup.array(
-      Yup.object({
-        valor: Yup.number().positive().label('Capital inicial'),
-        saldo_divida: Yup.number().positive().label('Saldo em dívida'),
-        valor_prestacao: Yup.number().positive().label('Valor da prestação'),
-      })
-    );
-
   const formSchema = Yup.object().shape({ dividas_externas: shapeDivida(), avales_externas: shapeDivida() });
-  const defaultValues = useMemo(() => dados, [dados]);
-
-  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: dados });
   const { handleSubmit } = methods;
 
   const onSubmit = async (values) => {
@@ -254,66 +213,21 @@ function RespExterna({ dados }) {
   );
 }
 
-export function Dividas({ name }) {
-  const { control } = useFormContext();
-  const { fields, append, remove } = useFieldArray({ control, name });
-  const title =
-    (name === 'fiancas' && 'Avales/Fianças') ||
-    (name === 'dividas_externas' && 'Dívidas em outros bancos') ||
-    'Avales/Fianças em outros bancos';
-
-  return (
-    <Stack spacing={3}>
-      <Stack spacing={2} direction="row" justifyContent="space-between" alignItems="flex-end">
-        <Typography variant="subtitle1">{title}</Typography>
-        <Stack spacing={2} direction="row" alignItems="center" justifyContent="space-between">
-          <AddItem dados={{ small: true }} onClick={() => append(divida)} />
-        </Stack>
-      </Stack>
-
-      {fields.map((item, index) => (
-        <Stack key={item.id} alignItems="flex-end">
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ width: 1 }}>
-            <RHFNumberField tipo="CVE" label="Capital inicial" name={`${name}[${index}].valor`} />
-            <RHFNumberField tipo="CVE" label="Saldo em dívida" name={`${name}[${index}].saldo_divida`} />
-            <RHFNumberField tipo="CVE" label="Valor da prestação" name={`${name}[${index}].valor_prestacao`} />
-            <Stack direction="row" alignItems="center">
-              <DefaultAction onClick={() => remove(index)} label="ELIMINAR" small />
-            </Stack>
-          </Stack>
-        </Stack>
-      ))}
-    </Stack>
-  );
-}
-
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Proposta({ dados, credito, onClose }) {
-  const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
 
   const formSchema = Yup.object().shape({
-    montante: Yup.number().positive().label('Montante'),
     comissoes: Yup.string().required().label('Comissões'),
-    finalidade: Yup.string().required().label('Finalidade'),
-    taxa_juro: Yup.number().positive().label('Taxa de juro'),
     origem_taxa: Yup.mixed().required().label('Origem da taxa'),
-    taxa_precario: Yup.number().positive().label('Taxa do preçário'),
-    prazo_amortizacao: Yup.number().positive().label('Prazo de amortização'),
   });
 
   const defaultValues = useMemo(
     () => ({
-      taxa_juro: dados?.taxa_juro || credito?.taxa_juro,
-      finalidade: dados?.finalidade || credito?.finalidade || '',
-      modo_taxa_equivalente: dados?.modo_taxa_equivalente || false,
+      outros: dados?.outros || '',
       comissoes: dados?.comissoes || credito?.comissoes || 'Em vigor',
-      montante: dados?.montante || credito?.montante_solicitado || '',
-      taxa_precario: dados?.taxa_precario || credito?.taxa_precario || 11,
-      origem_taxa: dados?.origem_taxa || credito?.origem_taxa || 'Preçário',
-      prazo_utilizacao: dados?.prazo_utilizacao || credito?.prazo_utilizacao || '',
-      prazo_amortizacao: dados?.prazo_amortizacao || credito?.prazo_amortizacao || '',
+      origem_taxa: dados?.origem_taxa || credito?.origem_taxa || null,
     }),
     [dados, credito]
   );
@@ -321,9 +235,13 @@ function Proposta({ dados, credito, onClose }) {
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { handleSubmit } = methods;
 
+  const nomesGarantias = credito?.garantias
+    .map((g) => (g.subtipo_garantia ? `${g.tipo_garantia} - ${g.subtipo_garantia}` : g.tipo_garantia))
+    .join(', ');
+
   const onSubmit = async (values) => {
     try {
-      dispatch(updateFicha({ proposta: values }));
+      dispatch(updateFicha({ proposta: { ...values, nomesGarantias } }));
       onClose();
     } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
@@ -333,16 +251,6 @@ function Proposta({ dados, credito, onClose }) {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3} justifyContent="center" sx={{ pt: 3 }}>
-        <GridItem children={<RHFSwitch name="modo_taxa_equivalente" label="Taxa equivalente" />} />
-        <GridItem sm={6} md={4} children={<RHFNumberField tipo="CVE" name="montante" label="Montante" />} />
-        <GridItem sm={6} md={4}>
-          <RHFNumberField tipo="meses" name="prazo_amortizacao" label="Prazo amortização" />
-        </GridItem>
-        <GridItem sm={6} md={4}>
-          <RHFNumberField tipo="meses" name="prazo_utilizacao" label="Prazo utilização" />
-        </GridItem>
-        <GridItem sm={6} md={4} children={<RHFNumberField tipo="%" name="taxa_precario" label="Taxa do preçário" />} />
-        <GridItem sm={6} md={4} children={<RHFNumberField tipo="%" name="taxa_juro" label="Taxa de juro" />} />
         <GridItem sm={6} md={4}>
           <RHFAutocompleteSmp
             name="origem_taxa"
@@ -350,8 +258,8 @@ function Proposta({ dados, credito, onClose }) {
             options={['Negociada', 'Condições Especiais de Negociação', 'Preçário']}
           />
         </GridItem>
-        <GridItem children={<RHFTextField name="finalidade" label="Finalidade" />} />
         <GridItem children={<RHFTextField name="comissoes" label="Comissões" />} />
+        <GridItem children={<RHFTextField name="outros" label="Observação" />} />
       </Grid>
       <ButtonsStepper onClose={() => dispatch(backStep())} label="Guardar" />
     </FormProvider>
@@ -361,8 +269,6 @@ function Proposta({ dados, credito, onClose }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function FormParecer({ ficha, onClose }) {
-  const dispatch = useDispatch();
-
   const formSchema = Yup.object().shape({ parecer: Yup.string().required().label('Parecer') });
   const defaultValues = useMemo(() => ({ parecer: ficha?.parecer || textParecer(ficha) || '' }), [ficha]);
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
